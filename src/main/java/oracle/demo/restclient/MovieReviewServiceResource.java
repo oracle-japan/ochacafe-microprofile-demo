@@ -43,7 +43,7 @@ public class MovieReviewServiceResource implements MovieReviewService {
         final Movie m = movies.get(movieId);
         if(!Optional.ofNullable(m).isPresent()) throw new IllegalArgumentException("Movie doesn't exist: " + movieId);
         final Review r = m.addReview(review);
-        final String out = "You submitted a review for movie " + m.toString() + " as " + r.toString();
+        final String out = "You submitted a review for movie " + m.toString() + " as review " + r.toString();
         System.out.println(out);
         return out;
     }
