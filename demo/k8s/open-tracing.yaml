@@ -1,0 +1,240 @@
+# Pods - helidon x 4 + jaeger
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: helidon-demo-mp-0
+  labels:
+    app: helidon-demo-mp-0
+  namespace: demo
+spec:
+  containers:
+  - name: api-helidon-container
+    image: {{ remote-docker-repository }}/helidon-demo-mp:latest
+    imagePullPolicy: Always
+    ports:
+    - containerPort: 8080
+  imagePullSecrets:
+  - name: ocirsecret
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: helidon-demo-mp-1
+  labels:
+    app: helidon-demo-mp-1
+  namespace: demo
+spec:
+  dnsPolicy: ClusterFirst
+  containers:
+  - name: api-helidon-container
+  image: {{ remote-docker-repository }}/helidon-demo-mp:latest
+  imagePullPolicy: Always
+    ports:
+    - containerPort: 8080
+  imagePullSecrets:
+  - name: ocirsecret
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: helidon-demo-mp-2
+  labels:
+    app: helidon-demo-mp-2
+  namespace: demo
+spec:
+  dnsPolicy: ClusterFirst
+  containers:
+  - name: api-helidon-container
+  image: {{ remote-docker-repository }}/helidon-demo-mp:latest
+  imagePullPolicy: Always
+    ports:
+    - containerPort: 8080
+  imagePullSecrets:
+  - name: ocirsecret
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: helidon-demo-mp-3
+  labels:
+    app: helidon-demo-mp-3
+  namespace: demo
+spec:
+  dnsPolicy: ClusterFirst
+  containers:
+  - name: api-helidon-container
+  image: {{ remote-docker-repository }}/helidon-demo-mp:latest
+  imagePullPolicy: Always
+    ports:
+    - containerPort: 8080
+  imagePullSecrets:
+  - name: ocirsecret
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: jaeger
+  labels:
+    app: jaeger
+  namespace: demo
+spec:
+  dnsPolicy: ClusterFirst
+  containers:
+  - name: jaeger-container
+    image: jaegertracing/all-in-one:1.13
+    imagePullPolicy: IfNotPresent
+    env:
+    - name: COLLECTOR_ZIPKIN_HTTP_PORT
+      value: "9411"
+    ports:
+    - containerPort: 5775
+      protocol: UDP
+    - containerPort: 6831
+      protocol: UDP
+    - containerPort: 6832
+      protocol: UDP
+    - containerPort: 5778
+    - containerPort: 16686
+    - containerPort: 14268
+    - containerPort: 9411
+---
+# Services - in order to lookup pods
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: helidon-demo-mp-0
+  labels:
+    app: helidon-demo-mp-0
+  namespace: demo
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: helidon-demo-mp-0
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: helidon-demo-mp-1
+  labels:
+    app: helidon-demo-mp-1
+  namespace: demo
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: helidon-demo-mp-1
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: helidon-demo-mp-2
+  labels:
+    app: helidon-demo-mp-2
+  namespace: demo
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: helidon-demo-mp-2
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: helidon-demo-mp-3
+  labels:
+    app: helidon-demo-mp-3
+  namespace: demo
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: helidon-demo-mp-3
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: jaeger
+  labels:
+    app: jaeger
+  namespace: demo
+spec:
+  ports:
+  - name: udp5775
+    protocol: UDP
+    port: 5775
+    targetPort: 5775
+  - name: udp6831
+    protocol: UDP
+    port: 6831
+    targetPort: 6831
+  - name: udp6832
+    protocol: UDP
+    port: 6832
+    targetPort: 6832
+  - name: tcp5778
+    protocol: TCP
+    port: 5778
+    targetPort: 5778
+  - name: tcp16686
+    protocol: TCP
+    port: 16686
+    targetPort: 16686
+  - name: tcp14268
+    protocol: TCP
+    port: 14268
+    targetPort: 14268
+  - name: tcp9411
+    protocol: TCP
+    port: 9411
+    targetPort: 9411
+  selector:
+    app: jaeger
+---
+# NodePort - in order to access from outside
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: helidon-demo-mp-np
+  labels:
+    app: helidon-demo-mp
+  namespace: demo
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    nodePort: 30080
+  selector:
+    app: helidon-demo-mp-0
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: jaeger-np
+  labels:
+    app: jaeger
+  namespace: demo
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 16686
+    targetPort: 16686
+    nodePort: 30086
+  selector:
+    app: jaeger
+---
+

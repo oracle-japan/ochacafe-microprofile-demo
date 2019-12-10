@@ -1,0 +1,15 @@
+/.settings/
+/.classpath
+/.project
+/.metadata
+/.vscode
+
+.dockerignore
+/.gradle/
+/gradle.properties
+/gradle-app.setting
+
+/target
+/build
+sources
+

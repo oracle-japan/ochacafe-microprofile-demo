@@ -1,0 +1,24 @@
+[
+    {
+        "endpoint" : "http://helidon-demo-mp-1:8080/tracing/invoke",
+        "orders" : []
+    },
+    {
+      "endpoint" : "http://helidon-demo-mp-2:8080/tracing/invoke",
+        "orders" : [
+            {
+                "endpoint" : "http://helidon-demo-mp-3:8080/tracing/invoke",
+                "orders" : [
+                    {
+                        "endpoint" : "http://helidon-demo-mp-1:8080/tracing/invoke",
+                        "orders" : []
+                    }
+                ]
+            },
+            {
+                "endpoint" : "http://helidon-demo-mp-0:8080/tracing/invoke",
+                "orders" : []
+            }
+        ]
+    }
+]

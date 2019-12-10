@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: helidon-demo-mp-health
+  labels:
+    app: helidon-demo-mp-health
+  namespace: demo
+spec:
+  containers:
+  - name: api-helidon-container
+    image: {{ remote-docker-repository }}/helidon-demo-mp:latest
+    imagePullPolicy: Always
+    env:
+    - name: demo.healthcheck.time-to-fail
+      value: "30"
+    ports:
+    - containerPort: 8080
+    livenessProbe:
+      httpGet:
+        port: 8080
+        path: /health/live
+      failureThreshold: 2
+      periodSeconds: 10
+  imagePullSecrets:
+  - name: ocirsecret
+---
+# NodePort - in order to access from outside
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: helidon-demo-mp-health-np
+  labels:
+    app: helidon-demo-mp-health
+  namespace: demo
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    nodePort: 30888
+  selector:
+    app: helidon-demo-mp-health

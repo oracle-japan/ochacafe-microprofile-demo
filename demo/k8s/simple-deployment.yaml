@@ -1,0 +1,26 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: helidon-demo-mp-deployment
+  labels:
+    app: helidon-demo-mp
+  namespace: demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: helidon-demo-mp
+  template:
+    metadata:
+      labels:
+        app: helidon-demo-mp
+    spec:
+      containers:
+      - name: helidon-demo-mp-container
+      image: {{ remote-docker-repository }}/helidon-demo-mp:latest
+      imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+      imagePullSecrets:
+      - name: ocirsecret
+---
