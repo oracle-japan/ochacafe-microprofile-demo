@@ -1,5 +1,5 @@
 
-# OCHaCafe Season 2 - #4 Cloud Native時代のモダンJavaの世界
+# OCHaCafe - Cloud Native時代のモダンJavaの世界
 
 [Helidon](https://helidon.io/) を使って [Eclipse MicroProfile](https://microprofile.io/) の仕様を確認するデモ.
 
