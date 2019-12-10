@@ -9,54 +9,22 @@ server:
     context: "/web"
     welcome: "index.html"
 
-# security setting with IDCS
-# can work with oracle.demo.idcsResource
-security:
-  config.require-encryption: false
-  properties:
-    # This is a nice way to be able to override this with local properties or env-vars
-    idcs-uri: "{{ idcs-uri}}"
-    idcs-client-id: "{{ client-id }}"
-    idcs-client-secret: "{{ client-secret }}"
-    # Used as a base for redirects back to us
-    frontend-uri: "{{ frontend-uri }}"
-    proxy-host: ""
-  providers:
-  - abac:
-  - oidc:
-      client-id: "${ALIAS=security.properties.idcs-client-id}"
-      client-secret: "${ALIAS=security.properties.idcs-client-secret}"
-      identity-uri: "${ALIAS=security.properties.idcs-uri}"
-      audience: "{{ audience }}"
-      # A prefix used for custom scopes
-      proxy-host: "${ALIAS=security.properties.proxy-host}"
-      frontend-uri: "${ALIAS=security.properties.frontend-uri}"
-      # Retrieve roles
-      idcs-roles: true
-      # cookie control
-      # cookie-domain: ""
-      cookie-same-site: "Lax"
-  web-server:
-    paths:
-    - path: "/web[/{*}]"
-      authenticate: true
-
 # security settings - simple basic auth
 # can work with oracle.demo.SecurityResource
-#security:
-#    providers:
-#    - abac:
-#    - http-basic-auth:
-#        realm: "helidon"
-#        users:
-#        - login: "john"
-#          password: "password"
-#          roles: ["user", "admin"]
-#        - login: "mary"
-#          password: "password"
-#          roles: ["user"]
-#        - login: "ken"
-#          password: "password"
+security:
+    providers:
+    - abac:
+    - http-basic-auth:
+        realm: "helidon"
+        users:
+        - login: "john"
+          password: "password"
+          roles: ["user", "admin"]
+        - login: "mary"
+          password: "password"
+          roles: ["user"]
+        - login: "ken"
+          password: "password"
 
 # data source settings
 javax:
