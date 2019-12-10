@@ -2,6 +2,7 @@ package oracle.demo.security;
 
 import java.util.Base64;
 
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -17,7 +18,7 @@ import javax.ws.rs.core.Response;
 import io.helidon.config.Config;
 import io.helidon.security.Principal;
 import io.helidon.security.SecurityContext;
-import io.helidon.security.abac.role.RoleValidator;
+// import io.helidon.security.abac.role.RoleValidator;
 import io.helidon.security.abac.scope.ScopeValidator;
 import io.helidon.security.annotations.Authenticated;
 
@@ -93,6 +94,7 @@ public class IdcsResource {
     @Authenticated
     @ScopeValidator.Scope("first_scope")
     @ScopeValidator.Scope("second_scope")
+    @Produces(MediaType.TEXT_PLAIN)
     public String scopes(@Context SecurityContext context) {
         return dumpSecurityContext(context);
     }
@@ -104,6 +106,7 @@ public class IdcsResource {
     @Path("/third-scope")
     @Authenticated
     @ScopeValidator.Scope("third_scope")
+    @Produces(MediaType.TEXT_PLAIN)
     public String thirdScope(@Context SecurityContext context) {
         return dumpSecurityContext(context);
     }
@@ -112,10 +115,22 @@ public class IdcsResource {
      * test roles = IDCS groups
      */
     @GET
-    @Path("/roles")
+    @Path("/user-role")
     @Authenticated
-    @RoleValidator.Roles("my_admins")
-    public String role(@Context SecurityContext context) {
+    // this also works - @RoleValidator.Roles("user")
+    @RolesAllowed("user")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String roleA(@Context SecurityContext context) {
+        return dumpSecurityContext(context);
+    }
+
+    @GET
+    @Path("/admin-role")
+    @Authenticated
+    // this also works - @RoleValidator.Roles("admin")
+    @RolesAllowed("admin")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String roleB(@Context SecurityContext context) {
         return dumpSecurityContext(context);
     }
 
