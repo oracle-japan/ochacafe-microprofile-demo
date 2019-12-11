@@ -71,12 +71,6 @@
             <artifactId>helidon-tracing-zipkin</artifactId>
         </dependency -->
 
-        <!-- support idcs login -->
-        <dependency>
-            <groupId>io.helidon.microprofile</groupId>
-            <artifactId>helidon-microprofile-oidc</artifactId>
-        </dependency>
-
         <!-- support jpa,jta -->
         <dependency>
             <groupId>com.h2database</groupId>
