@@ -7,21 +7,31 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 /**
- * FaultTlerance demo tester
+ * FaultTolerance demo tester
  */
 public class FaultToleranceTester {
     public static void main(String[] args) {
-        final String serverUrl = (args.length > 1) ? args[1] : "http://localhost:8080/ft/circuit-breaker";
-        final int numCalls = Integer.parseInt(args[0]);
+        String endpoint = "http://localhost:8080/ft/circuit-breaker";
+        int numCalls = -1;
+
+        for(int i = 0 ; i < args.length ; i++){
+            if(args[i].equals("--endpoint")){
+                endpoint = args[++i];
+            }else{
+                numCalls = Integer.parseInt(args[i]);
+            }
+        }
+
         final AtomicInteger counter = new AtomicInteger();
+        final String serverUri = endpoint;
         for (int i = 0 ; i < numCalls ; i++) {
             new Thread(new Runnable() {
                 int count = counter.incrementAndGet();
                 public void run() {
                     try {
-                        System.out.println(count + ": Calling " + serverUrl);
+                        System.out.println(count + ": Calling " + serverUri);
                         Client client = ClientBuilder.newClient();
-                        Response response = client.target(serverUrl).request().get();
+                        Response response = client.target(serverUri).request().get();
                         System.out.println(count + ": Response code: " + response.getStatusInfo());
                     } catch (Exception e) {
                         System.out.println(count + ": Error: " + e.getMessage());
