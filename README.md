@@ -69,6 +69,9 @@ src/main
     └── WEB [静的コンテンツのフォルダー]
         └── index.html 
 demo
+├── ft [Fault Tolerance テスト用sh]
+│   ├── bulkhead-test.sh
+│   └── circuit-breaker-test.sh
 ├── k8s [kubernetesデプロイメント用マニフェスト]
 │   ├── liveness-check.yaml
 │   ├── open-tracing.yaml
