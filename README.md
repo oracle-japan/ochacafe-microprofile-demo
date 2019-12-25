@@ -142,6 +142,6 @@ $ docker push (remote docker repository path/)helidon-demo-mp
 <br/>
 
 ---
-_Copyright © 2019, Oracle and/or its affiliates. All rights reserved._
+_Copyright © 2019, Oracle and/or its affiliates. All rights reserved._  
 _This software includes the work that is distributed in the Apache License 2.0._
 
