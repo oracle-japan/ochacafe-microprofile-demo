@@ -268,12 +268,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <basePackages>
-                        <basePackage>oracle.demo.jpa</basePackage>
-                    </basePackages>
-                    <addClassesToPersistenceFile>false</addClassesToPersistenceFile>
-                </configuration>
             </plugin>
 
             <!-- making docker image using jib : mvn post-integration-test -->
