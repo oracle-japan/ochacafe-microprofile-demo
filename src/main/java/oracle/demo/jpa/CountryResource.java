@@ -3,6 +3,7 @@ package oracle.demo.jpa;
 import java.util.List;
 
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
@@ -17,6 +18,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.opentracing.Span;
+
 /**
  * JPA version of "Country", supports CRUD
  */
@@ -28,11 +31,24 @@ public class CountryResource {
     @PersistenceContext
     private EntityManager em;
 
+    @Inject
+    io.opentracing.Tracer tracer;
+
     @GET
     @Path("/")
     @Transactional
     public Country[] getCountries() throws Exception {
+
+        // Create new tracing Span for JPA and start
+        Span spanJpa = tracer.buildSpan("JPA")
+        .asChildOf(tracer.activeSpan())
+        .withTag("query", "select c from Country c")
+        .start();
+
         List<Country> countries = em.createQuery("select c from Country c", Country.class).getResultList();
+
+        spanJpa.finish(); // finish Span for JPA
+
         return countries.toArray(new Country[countries.size()]);
     }
 

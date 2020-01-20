@@ -1,7 +1,7 @@
 
-# OCHaCafe - Cloud Native時代のモダンJavaの世界
+# OCHaCafe Season 2 - #4 Cloud Native時代のモダンJavaの世界
 
-[Helidon](https://helidon.io/) を使って [Eclipse MicroProfile](https://microprofile.io/) の仕様を確認するデモ.
+[Helidon](https://helidon.io/) を使って [Eclipse MicroProfile](https://microprofile.io/) の仕様や拡張機能を確認するデモ.
 
 ## デモのソース
 
@@ -55,8 +55,22 @@ src/main
 │           │   ├── CountryResource.java
 │           │   ├── Greeting.java
 │           │   └── JPAExampleResource.java
+│           ├── grpc [拡張機能 gRPC]
+│           │   ├── javaobj [gRPC Javaシリアライゼーション版]
+│           │   │   ├── GreeterServiceImpl.java
+│           │   │   ├── GreeterService.java
+│           │   │   └── GrpcResource.java
+│           │   └── protobuf [gRPC protobuf版]
+│           │       ├── GreeterSimpleService.java
+│           │       ├── GreeterService.java
+│           │       ├── GrpcResource.java
+│           │       └── helloworld
+│           │           ├── GreeterGrpc.java
+│           │           └── Helloworld.java
 │           └── cowweb [おまけ]
 │               └── CowwebResource.java
+├── proto
+│   └── helloworld.proto [gRPC IDL定義]
 └── resources
     ├── application.yaml [Helidonで使う設定ファイル]
     ├── createtable.ddl [JPA拡張機能で使うH2用のDDL]
@@ -65,13 +79,12 @@ src/main
     ├── META-INF
     │   ├── beans.xml [CDIの設定ファイル]
     │   ├── microprofile-config.properties [MicroProfile設定ファイル]
-    │   └── persistence.xml [JPAの設定ファイル]
+    │   ├── persistence.xml [JPAの設定ファイル]
+    │   └── services
+    │       └── io.helidon.microprofile.grpc.server.spi.GrpcMpExtension [gRPC Extension設定ファイル]
     └── WEB [静的コンテンツのフォルダー]
         └── index.html 
 demo
-├── ft [Fault Tolerance テスト用sh]
-│   ├── bulkhead-test.sh
-│   └── circuit-breaker-test.sh
 ├── k8s [kubernetesデプロイメント用マニフェスト]
 │   ├── liveness-check.yaml
 │   ├── open-tracing.yaml
@@ -139,9 +152,58 @@ helidon-demo-mp                                   latest              1b4d2e82f6
 
 $ docker push (remote docker repository path/)helidon-demo-mp
 ```
-<br/>
+
+## gRPC 関連の補足
+
+protobuf ペイロードを使ったサーバー実装は、POJO + Annotaion を使った方法と、GrpcMpExtensionを使って従来型のサービス実装クラスをデプロイする方法の、2種類を提供しています。おすすめは POJO + Annotaion です。
+
+### POJO + Annotaion を使った方法（デフォルト 有効）
+
+```
+oracle.demo.grpc.protobuf.GreeterSimpleService
+```
+
+### GrpcMpExtensionを使って従来型のサービス実装クラスをデプロイする方法
+
+```
+oracle.demo.grpc.protobuf.GreeterService
+oracle.demo.grpc.protobuf.GrpcExtension
+META-INF/services/io.helidon.microprofile.grpc.server.spi.GrpcMpExtension
+```
+
+### 実装の切り替え方
+
+1. META-INF/services/io.helidon.microprofile.grpc.server.spi.GrpcMpExtension を編集する
+```
+# コメントアウトを外す
+oracle.demo.grpc.protobuf.GrpcExtension
+```
+
+2. oracle.demo.grpc.protobuf.GreeterSimpleService を編集する
+```
+// @RpcServiceアノテーションをコメントアウトする
+// @RpcService(name = "helloworld.Greeter")
+@ApplicationScoped
+public class GreeterSimpleService{
+
+    @Unary(name = "SayHello")
+    public HelloReply sayHello(HelloRequest req) {
+        System.out.println("gRPC GreeterSimpleService called - name: " + req.getName());
+        return HelloReply.newBuilder().setMessage("Hello " + req.getName()).build();
+    }
+}
+```
+
+### gRPC - protoファイルのコンパイルについて
+
+pom.xmlの通常ビルドフェーズとは独立してprotoファイルのコンパイルを行うプロファイルを定義しています。
+以下のコマンドを使って、まず最初にソースを生成して、srcディレクトリにコピーをします。詳細は、pom.xml の内容を確認して下さい。
+
+```
+mvn -P protoc generate-sources
+```
 
 ---
-_Copyright © 2019, Oracle and/or its affiliates. All rights reserved._  
-_This software includes the work that is distributed in the Apache License 2.0._
+_Copyright © 2019, Oracle and/or its affiliates. All rights reserved._
+
 

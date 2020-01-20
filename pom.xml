@@ -16,6 +16,70 @@
     <name>${project.artifactId}</name>
 
     <profiles>
+        <!-- generate protobuf classes => mvn -P protoc generate-sources -->
+        <profile>
+            <id>protoc</id>
+            <dependencies>
+                <dependency>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-protobuf</artifactId>
+                    <version>1.26.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-stub</artifactId>
+                    <version>1.26.0</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <!--  compile .proto -->
+                    <plugin>
+                        <groupId>org.xolstice.maven.plugins</groupId>
+                        <artifactId>protobuf-maven-plugin</artifactId>
+                        <version>0.6.1</version>
+                        <configuration>
+                            <protocArtifact>com.google.protobuf:protoc:3.11.0:exe:${os.detected.classifier}</protocArtifact>
+                            <pluginId>grpc-java</pluginId>
+                            <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.26.0:exe:${os.detected.classifier}</pluginArtifact>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>compile</goal>
+                                    <goal>compile-custom</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- copy generated sources -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>copy-template</id>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <target>
+                                        <echo message="copy protobuf generated files to src"/>
+                                        <copy todir="src/main/java" overwrite="no">
+                                            <fileset dir="target/generated-sources/protobuf/java"/>
+                                            <fileset dir="target/generated-sources/protobuf/grpc-java"/>
+                                        </copy>
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <!-- mvn -P could ... -->
         <profile>
             <id>cloud</id>
@@ -28,6 +92,7 @@
     <properties>
         <mainClass>oracle.demo.Main</mainClass>
         <docker.repo.prefix></docker.repo.prefix>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!--exec.mainClass>${mainClass}</exec.mainClass -->
     </properties>
 
@@ -55,6 +120,26 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- support gRPC-->
+        <dependency>
+            <groupId>io.helidon.microprofile.grpc</groupId>
+            <artifactId>helidon-microprofile-grpc-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.helidon.microprofile.grpc</groupId>
+            <artifactId>helidon-microprofile-grpc-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>1.26.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>1.26.0</version>
         </dependency>
 
         <!-- support tracing -->
@@ -121,6 +206,15 @@
     </dependencies>
 
     <build>
+        <!-- for gRPC -->
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.2</version>
+            </extension>
+        </extensions>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -174,6 +268,12 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <basePackages>
+                        <basePackage>oracle.demo.jpa</basePackage>
+                    </basePackages>
+                    <addClassesToPersistenceFile>false</addClassesToPersistenceFile>
+                </configuration>
             </plugin>
 
             <!-- making docker image using jib : mvn post-integration-test -->
@@ -257,5 +357,6 @@
             </plugin>
 
         </plugins>
+
     </build>
 </project>

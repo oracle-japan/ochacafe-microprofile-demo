@@ -9,6 +9,13 @@ server:
     context: "/web"
     welcome: "index.html"
 
+grpc:
+  port: 50051
+  channels:                
+    myserver:           
+      host: localhost      
+      port: 50051
+   
 # security settings - simple basic auth
 # can work with oracle.demo.SecurityResource
 security:

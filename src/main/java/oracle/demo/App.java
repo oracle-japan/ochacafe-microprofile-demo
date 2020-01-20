@@ -17,6 +17,7 @@ import oracle.demo.jpa.JPAExampleResource;
 import oracle.demo.metrics.MetricsResource;
 import oracle.demo.restclient.MovieReviewServiceResource;
 import oracle.demo.restclient.MovieReviewServiceRestClientResource;
+import oracle.demo.security.IdcsResource;
 import oracle.demo.security.SecurityResource;
 import oracle.demo.tracing.TracingResource;
 
@@ -43,7 +44,10 @@ public class App extends Application {
             MovieReviewServiceResource.class,
             MovieReviewServiceRestClientResource.class,
             SecurityResource.class,
-            JPAExampleResource.class
+            IdcsResource.class,
+            JPAExampleResource.class,
+            oracle.demo.grpc.javaobj.GrpcResource.class,
+            oracle.demo.grpc.protobuf.GrpcResource.class
         );
     }
 }
