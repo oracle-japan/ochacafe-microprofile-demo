@@ -203,7 +203,15 @@ pom.xmlの通常ビルドフェーズとは独立してprotoファイルのコ�
 mvn -P protoc generate-sources
 ```
 
+## 変更履歴
+
+|Date      | 内容 |
+|----------|--------------------------------------|
+|2019.12.10| 初版 |
+|2019.12.20| Helidon 1.4.1 ベースに更新 |
+|2020.01.20| gRPCのデモを追加 |
+
 ---
-_Copyright © 2019, Oracle and/or its affiliates. All rights reserved._
+_Copyright © 2019-2020, Oracle and/or its affiliates. All rights reserved._
 
 
