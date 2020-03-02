@@ -210,6 +210,7 @@ mvn -P protoc generate-sources
 |2019.12.10| 初版 |
 |2019.12.20| Helidon 1.4.1 ベースに更新 |
 |2020.01.20| gRPCのデモを追加 |
+|2020.03.02| Helidon 1.4.2 ベースに更新 |
 
 ---
 _Copyright © 2019-2020, Oracle and/or its affiliates. All rights reserved._
