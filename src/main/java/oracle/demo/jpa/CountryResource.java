@@ -2,11 +2,8 @@ package oracle.demo.jpa;
 
 import java.util.List;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -15,85 +12,54 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import io.opentracing.Span;
-
-/**
- * JPA version of "Country", supports CRUD
- */
-@Dependent
+@ApplicationScoped
 @Path("/jpa/country")
 @Produces(MediaType.APPLICATION_JSON)
 public class CountryResource {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Inject
-    io.opentracing.Tracer tracer;
+    CountryDAO dao;
 
     @GET
     @Path("/")
-    @Transactional
-    public Country[] getCountries() throws Exception {
-
-        // Create new tracing Span for JPA and start
-        Span spanJpa = tracer.buildSpan("JPA")
-        .asChildOf(tracer.activeSpan())
-        .withTag("query", "select c from Country c")
-        .start();
-
-        List<Country> countries = em.createQuery("select c from Country c", Country.class).getResultList();
-
-        spanJpa.finish(); // finish Span for JPA
-
+    public Country[] getCountries(@QueryParam("error") boolean error) throws Exception {
+        List<Country> countries = error ? dao.getCountriesWithError() : dao.getCountries();
         return countries.toArray(new Country[countries.size()]);
     }
 
+    @GET
+    @Path("/{countryId}")
+    public Country getCountry(@PathParam("countryId") int countryId) {
+        return dao.getCountry(countryId);
+    }
+
     @POST
     @Path("/")
-    @Transactional
     public Response insertCountries(Country[] countries) {
-        for(int i = 0 ; i < countries.length ; i++){
-            em.persist(countries[i]);
-        }
+        dao.insertCountries(countries);
         return Response.ok().build();
     }
 
-
-    @GET
-    @Path("/{countryId}")
-    @Transactional
-    public Country getCountry(@PathParam("countryId") int countryId) {
-        Country country = em.find(Country.class, countryId);
-        if(null == country) throw new oracle.demo.country.CountryResource.CountryNotFoundException();
-        return country;
-    }
-
     @POST
     @Path("/{countryId}")
-    @Transactional
     public void insertCountry(@PathParam("countryId") int countryId, @FormParam("name")String countryName) {
-        em.persist(new Country(countryId, countryName));
+        dao.insertCountry(countryId, countryName);
     }
 
     @PUT
     @Path("/{countryId}")
-    @Transactional
     public void updateCountry(@PathParam("countryId") int countryId, @FormParam("name") String countryName) {
-        Country country = em.find(Country.class, countryId);
-        country.countryName = countryName;
-        em.persist(country);
+        dao.updateCountry(countryId, countryName);
     }
 
     @DELETE
     @Path("/{countryId}")
-    @Transactional
     public void deleteCountry(@PathParam("countryId") int countryId) {
-        Country country = em.find(Country.class, countryId);
-        em.remove(country);
+        dao.deleteCountry(countryId);
     }
 
 }
