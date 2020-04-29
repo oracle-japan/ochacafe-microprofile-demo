@@ -76,12 +76,16 @@ public class MetricsResource{
     @GET @Path("/count-total")
     @Produces(MediaType.TEXT_PLAIN)
     public String total(){
-        org.eclipse.microprofile.metrics.Counter counter = metricRegistry.getCounters()
+        // this is the simplest way
+        // Long.toString(total.getCount());
+        
+        // This time, get the counter through the registry
+        Counter counter = metricRegistry.getCounters()
             .entrySet().stream().filter(e -> {
                 //System.out.println("Counter: " + e.getKey() + ", " + e.getValue());
                 return e.getKey().getName().equals("oracle.demo.metrics.MetricsResource.total") ? true : false;
             }).findFirst().get().getValue();
-        return "" + counter.getCount();
+        return Long.toString(counter.getCount());
     }   
 
 
