@@ -25,7 +25,7 @@ public class CountryDAO {
         System.setProperty("oracle.jdbc.fanEnabled", "false");
     }
 
-    @PersistenceContext(unitName = "CountryDS")
+    @PersistenceContext(unitName = "jpa_demo")
     private EntityManager em;
 
     @Trace @TraceConfig("JPA") @TraceTag(key = "JPQL", value = "select c from Country c")
