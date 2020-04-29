@@ -31,13 +31,16 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class MainTest {
-    private static Server server;
+class MainTest extends TestBase{
 
-    @BeforeAll
-    public static void startTheServer() throws Exception {
-        server = Main.startServer();
+    public MainTest(){
+        super();
     }
+
+    //@BeforeAll
+    //public static void startTheServer() throws Exception {
+    //    startUp();
+    //}
 
     @Test
     void testHelloWorld() {
@@ -84,13 +87,10 @@ class MainTest {
         Assertions.assertEquals(200, r.getStatus(), "GET health status code");
     }
 
-    @AfterAll
-    static void destroyClass() {
-        CDI<Object> current = CDI.current();
-        ((SeContainer) current).close();
-    }
+    //@AfterAll
+    //static void destroyClass() {
+    //    CDI<Object> current = CDI.current();
+    //    ((SeContainer) current).close();
+    //}
 
-    private String getConnectionString(String path) {
-        return "http://localhost:" + server.port() + path;
-    }
 }
