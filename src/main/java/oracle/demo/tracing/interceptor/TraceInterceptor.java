@@ -38,7 +38,7 @@ public class TraceInterceptor {
         TraceConfig traceConfig = method.getAnnotation(TraceConfig.class);
         if(null != traceConfig){
             String value = traceConfig.value();
-            System.out.println("TraceInfo value: " + value);
+            //System.out.println("TraceInfo value: " + value);
             if(null != value && 0 != value.length()){
                 spanName = value + ":" + spanName;
             }

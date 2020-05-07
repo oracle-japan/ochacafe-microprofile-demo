@@ -44,25 +44,23 @@ public class MyHealthCheck implements HealthCheck {
     public HealthCheckResponse call() {
 
         final RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-
         final String process = runtimeMXBean.getName();
         final long uptime = runtimeMXBean.getUptime();
 
         final long requestedTimeToFail = TimeToFail.get();
-        if(requestedTimeToFail != -1) timeToFail = (0 == requestedTimeToFail) ? 0 : (uptime + requestedTimeToFail * 1000) / 1000;
+        if(requestedTimeToFail != -1) timeToFail = (0 == requestedTimeToFail) ? 0 : requestedTimeToFail;
 
-        //return HealthCheckResponse.named("my-health-check").up().build();
+        //return HealthCheckResponse.named(name).up().build();
         logger.fine("process: " + process);
-        logger.fine("uptime: " + uptime);
-        logger.fine("time-to-fail: " + timeToFail);
+        logger.info(String.format("time-to=fail=%d, uptime=%d", uptime, timeToFail));
 
         return  HealthCheckResponse
             .named(name) // since Health 2.1 & MP 3.2
             .withData("process", process)
             .withData("uptime", uptime)
-            .withData("time-to-fail", timeToFail * 1000)
+            .withData("time-to-fail", timeToFail)
             //.up()
-            .state(0 == timeToFail ? true : uptime < timeToFail * 1000)
+            .state(0 == timeToFail ? true : uptime < timeToFail)
             .build();
     }
 

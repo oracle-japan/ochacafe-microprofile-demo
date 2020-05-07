@@ -106,10 +106,6 @@ mvn package
 ```
 java -jar target/helidon-demo-mp.jar
 ```
-若しくは
-```
-mvn exec:java
-```
 
 ## Docker イメージの作成
 
@@ -203,6 +199,30 @@ pom.xmlの通常ビルドフェーズとは独立してprotoファイルのコ�
 mvn -P protoc generate-sources
 ```
 
+## OpenTracing SPAN定義のためのアノテーション
+
+MicroProfileのOpenTracingの実装の多くはSPANの定義を暗黙的に行っているケースが多く、コーディングしなくてもそれなりのトレース情報が出力されるので便利なのですが、明示的にSPANを定義したい場合もあります。MicroProfileではAPIを使ってSPANの定義を行うことができますが、そうするとトレーシングのためのコードがビジネスロジックの中に紛れ込んでしまい、見通しが悪くなってしまいます。そこで、ここではSPANの定義処理をCDI Interceptorとして実装し、メソッドにアノテーションを付加することによって簡単にSPANを定義する（また逆に定義を削除する）ことを可能にしています。
+
+実装はoracle.demo.tracing.interceptor パッケージにあります。使用例はoracle.demo.jpa.CountryDAOを見て下さい。
+
+```java
+@Trace @TraceConfig("JPA") 
+@TraceTag(key = "JPQL", value = "select c from Countries c")
+@TraceTag(key = "comment", value = "An error is expected by the wrong jpql statement.")
+public List<Country> getCountriesWithError(){
+    List<Country> countries = em.createQuery("select c from Countries c", Country.class).getResultList();
+    return countries;
+}
+```
+
+3つのアノテーションが利用可能です。
+
+| annotation   | 説明 |
+|--------------|------|
+| @Trace       | 必須 ; SPANを定義するInterceptorを示す
+| @TraceConfig | オプション、value = 接頭辞 ; SPANの名前を (接頭辞:)メソッド名 とする |
+| @TraceTag    | オプション、key = キー, value = 値 ; SPAN内に定義するTagを追加する、複数使用可 |
+
 ## 変更履歴
 
 |Date      | 内容 |
@@ -211,6 +231,7 @@ mvn -P protoc generate-sources
 |2019.12.20| Helidon 1.4.1 ベースに更新 |
 |2020.01.20| gRPCのデモを追加 |
 |2020.03.02| Helidon 1.4.2 ベースに更新 |
+|2020.05.08| Helidon 1.4.4 ベースに更新、tracing用アノテーションを追加、testクラス追加 |
 
 ---
 _Copyright © 2019-2020, Oracle and/or its affiliates. All rights reserved._

@@ -16,6 +16,7 @@
 
 package oracle.demo.metrics;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -26,8 +27,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.metrics.Counter;
+import org.eclipse.microprofile.metrics.MetricFilter;
+import org.eclipse.microprofile.metrics.MetricID;
+import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.annotation.Metered;
 import org.eclipse.microprofile.metrics.annotation.Metric;
+import org.eclipse.microprofile.metrics.annotation.RegistryType;
 
 /**
  * implement application scope metrics
@@ -40,29 +45,49 @@ public class MetricsResource{
     
     @Inject
     @Metric(name="total")
-    Counter total;
+    private Counter total;
+
+    @Inject
+    @RegistryType(type=MetricRegistry.Type.APPLICATION)
+    private MetricRegistry metricRegistry;
 
     private synchronized void countup(){
         total.inc();
     }
 
     @Metered
-    @GET @Path("/blue")
+    @GET @Path("/apple")
     @Produces(MediaType.TEXT_PLAIN)
-    public String blue(){
-        logger.info("!!! BLUE");
+    public String apple(){
+        logger.info("!!! APPLE");
         countup();
-        return "BLUE";
+        return "APPLE";
     }   
 
     @Metered
-    @GET @Path("/green")
+    @GET @Path("/orange")
     @Produces(MediaType.TEXT_PLAIN)
-    public String green(){
-        logger.info("!!! GREEN");
+    public String orange(){
+        logger.info("!!! ORANGE");
         countup();
-        return "GREEN";
+        return "ORANGE";
+    }
+
+    @GET @Path("/count-total")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String total(){
+        // this is the simplest way
+        // Long.toString(total.getCount());
+        
+        // This time, get the counter through the registry
+        Counter counter = metricRegistry.getCounters()
+            .entrySet().stream().filter(e -> {
+                //System.out.println("Counter: " + e.getKey() + ", " + e.getValue());
+                return e.getKey().getName().equals("oracle.demo.metrics.MetricsResource.total") ? true : false;
+            }).findFirst().get().getValue();
+        return Long.toString(counter.getCount());
     }   
+
 
 }
 
