@@ -49,7 +49,13 @@ src/main
 │           │   ├── IdcsResource.java
 │           │   └── SecurityResource.java
 │           ├── tracing [トレーシング]
-│           │   └── TracingResource.java
+│           │   ├── TracingResource.java
+│           │   └── interceptor [SPAN定義 Interceptor & アノテーション]
+│           │       ├── TraceConfig.java
+│           │       ├── TraceInterceptor.java
+│           │       ├── Trace.java
+│           │       ├── TraceTagHolder.java
+│           │       └── TraceTag.java
 │           ├── jpa [拡張機能 JPA/JTA]
 │           │   ├── Country.java
 │           │   ├── CountryResource.java
@@ -120,7 +126,7 @@ mvn post-integration-test # 便宜上post-integration-testにアサインして�
 ### リモート用のタグを付与する場合
 
 pom.xmlを以下のように設定し、
-```
+```xml
     <profiles>
         <!-- mvn -P could ... -->
         <profile>
@@ -176,7 +182,7 @@ oracle.demo.grpc.protobuf.GrpcExtension
 ```
 
 2. oracle.demo.grpc.protobuf.GreeterSimpleService を編集する
-```
+```java
 // @RpcServiceアノテーションをコメントアウトする
 // @RpcService(name = "helloworld.Greeter")
 @ApplicationScoped
