@@ -51,7 +51,6 @@ src/main
 │           ├── tracing [トレーシング]
 │           │   ├── TracingResource.java
 │           │   └── interceptor [SPAN定義 Interceptor & アノテーション]
-│           │       ├── TraceConfig.java
 │           │       ├── TraceInterceptor.java
 │           │       ├── Trace.java
 │           │       ├── TraceTagHolder.java
@@ -212,7 +211,7 @@ MicroProfileのOpenTracingの実装の多くはSPANの定義を暗黙的に行�
 実装はoracle.demo.tracing.interceptor パッケージにあります。使用例はoracle.demo.jpa.CountryDAOを見て下さい。
 
 ```java
-@Trace @TraceConfig("JPA") 
+@Trace("JPA") 
 @TraceTag(key = "JPQL", value = "select c from Countries c")
 @TraceTag(key = "comment", value = "An error is expected by the wrong jpql statement.")
 public List<Country> getCountriesWithError(){
@@ -221,13 +220,19 @@ public List<Country> getCountriesWithError(){
 }
 ```
 
-3つのアノテーションが利用可能です。
+2つのアノテーションが利用可能です。
 
 | annotation   | 説明 |
 |--------------|------|
-| @Trace       | 必須 ; SPANを定義するInterceptorを示す
-| @TraceConfig | オプション、value = 接頭辞 ; SPANの名前を (接頭辞:)メソッド名 とする |
+| @Trace       | 必須 ; SPANを定義するInterceptorを示す |
 | @TraceTag    | オプション、key = キー, value = 値 ; SPAN内に定義するTagを追加する、複数使用可 |
+
+@Trace の パラメータ
+| parameter  | 説明 |
+|------------|------|
+| value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
+| stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
+
 
 ## 変更履歴
 
@@ -238,6 +243,7 @@ public List<Country> getCountriesWithError(){
 |2020.01.20| gRPCのデモを追加 |
 |2020.03.02| Helidon 1.4.2 ベースに更新 |
 |2020.05.08| Helidon 1.4.4 ベースに更新、tracing用アノテーションを追加、testクラス追加 |
+|2020.05.13| OpenTracing用のInterceptorの仕様変更（@TraceConfigを廃止） |
 
 ---
 _Copyright © 2019-2020, Oracle and/or its affiliates. All rights reserved._

@@ -9,7 +9,6 @@ import javax.transaction.Transactional;
 
 import oracle.demo.country.CountryNotFoundException;
 import oracle.demo.tracing.interceptor.Trace;
-import oracle.demo.tracing.interceptor.TraceConfig;
 import oracle.demo.tracing.interceptor.TraceTag;
 
 
@@ -28,14 +27,14 @@ public class CountryDAO {
     @PersistenceContext(unitName = "jpa_demo")
     private EntityManager em;
 
-    @Trace @TraceConfig("JPA") @TraceTag(key = "JPQL", value = "select c from Country c")
+    @Trace("JPA") @TraceTag(key = "JPQL", value = "select c from Country c")
     public List<Country> getCountries(){
         List<Country> countries = em.createQuery("select c from Country c", Country.class).getResultList();
         return countries;
     }
 
     // will intentionally cause an error
-    @Trace @TraceConfig("JPA") 
+    @Trace("JPA") 
     @TraceTag(key = "JPQL", value = "select c from Countries c")
     @TraceTag(key = "comment", value = "An error is expected by the wrong jpql statement.")
     public List<Country> getCountriesWithError(){
@@ -43,7 +42,7 @@ public class CountryDAO {
         return countries;
     }
 
-    @Trace @TraceConfig(value = "JPA", stackTrace = true)
+    @Trace(value = "JPA", stackTrace = true)
     public Country getCountry(int countryId) {
         Country country = em.find(Country.class, countryId);
         if(null == country) 
@@ -51,7 +50,7 @@ public class CountryDAO {
         return country;
     }
 
-    @Trace @TraceConfig("JPA")
+    @Trace("JPA")
     @Transactional
     public void insertCountries(Country[] countries) {
         for(int i = 0 ; i < countries.length ; i++){
@@ -59,13 +58,13 @@ public class CountryDAO {
         }
     }
 
-    @Trace @TraceConfig("JPA")
+    @Trace("JPA")
     @Transactional
     public void insertCountry(int countryId, String countryName) {
         em.persist(new Country(countryId, countryName));
     }
 
-    @Trace @TraceConfig("JPA")
+    @Trace("JPA")
     @Transactional
     public void updateCountry(int countryId, String countryName) {
         Country country = em.find(Country.class, countryId);
@@ -75,7 +74,7 @@ public class CountryDAO {
         em.persist(country);
     }
 
-    @Trace @TraceConfig("JPA")
+    @Trace("JPA")
     @Transactional
     public void deleteCountry(int countryId) {
         Country country = em.find(Country.class, countryId);

@@ -35,15 +35,13 @@ public class TraceInterceptor {
         boolean stackTrace = false;
 
         // Check TraceConfig
-        TraceConfig traceConfig = method.getAnnotation(TraceConfig.class);
-        if(null != traceConfig){
-            String value = traceConfig.value();
-            //System.out.println("TraceInfo value: " + value);
-            if(null != value && 0 != value.length()){
-                spanName = value + ":" + spanName;
-            }
-            stackTrace = traceConfig.stackTrace();
+        final Trace trace = method.getAnnotation(Trace.class);
+        final String value = trace.value();
+        //System.out.println("TraceInfo value: " + value);
+        if(null != value && 0 != value.length()){
+            spanName = value + ":" + spanName;
         }
+        stackTrace = trace.stackTrace();
 
         // check TraceTag
         final Map<String, String> tagMap = new HashMap<>();
@@ -51,16 +49,16 @@ public class TraceInterceptor {
         if(null != tags){
             for(TraceTag tag : tags){
                 final String key = tag.key();
-                final String value = tag.value();
+                final String val = tag.value();
                 if(null == key) throw new IllegalArgumentException("TraceTag key is null.");
-                if(null == value) throw new IllegalArgumentException("TraceTag value is null.");
-                tagMap.put(key, value);
+                if(null == val) throw new IllegalArgumentException("TraceTag value is null.");
+                tagMap.put(key, val);
             }
         }
 
         final Span span = tracer.buildSpan(spanName)
         .asChildOf(tracer.activeSpan()).start();
-        tagMap.forEach((key,value) -> span.setTag(key, value));
+        tagMap.forEach((key,val) -> span.setTag(key, val));
 
         Object result = null;
         try{
