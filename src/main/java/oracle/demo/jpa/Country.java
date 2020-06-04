@@ -12,7 +12,8 @@ import javax.persistence.Table;
 @Table(name = "COUNTRY") 
 public class Country {
 
-    @Column(name = "COUNTRY_ID") @Id 
+    @Id 
+    @Column(name = "COUNTRY_ID")
     public int countryId;
 
     @Column(name = "COUNTRY_NAME") 

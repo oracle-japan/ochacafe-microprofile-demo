@@ -16,7 +16,7 @@ import javax.ws.rs.Produces;
 @Path("jpa/example")
 public class JPAExampleResource {
 
-    @PersistenceContext
+    @PersistenceContext(unitName = "jpa_demo")
     private EntityManager em;
 
     @GET

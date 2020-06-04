@@ -43,3 +43,14 @@ javax:
                     url: jdbc:h2:mem:greeting;INIT=RUNSCRIPT FROM 'classpath:createtable.ddl' 
                     user: sa
                     password: ""
+            AtpDataSource: # example config for Autonomous Transaction Processing
+                dataSourceClassName: oracle.jdbc.pool.OracleDataSource
+                dataSource:
+                    url: jdbc:oracle:thin:@abc_high?TNS_ADMIN=/tnsdir
+                    user: admin
+                    password: Welcome1
+            MySQLDataSource: # example config for MySQL database
+                driverClassName: com.mysql.jdbc.Driver
+                jdbcUrl: jdbc:mysql://localhost:3306/demo
+                username: oracle
+                password: mysql
