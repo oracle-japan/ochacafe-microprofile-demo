@@ -11,14 +11,14 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.helidon.microprofile.grpc.client.GrpcChannel;
-import io.helidon.microprofile.grpc.client.GrpcServiceProxy;
+import io.helidon.microprofile.grpc.client.GrpcProxy;
 
 @Path("/grpc-javaobj")
 @ApplicationScoped
 public class GrpcResource {
 
     @Inject 
-    @GrpcServiceProxy
+    @GrpcProxy
     @GrpcChannel(name = "myserver") // defined in application.yaml
     private GreeterService greeterService;
 

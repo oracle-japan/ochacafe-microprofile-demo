@@ -6,11 +6,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.ext.Provider;
 
 /**
  * server implementation of MovieReviewService interface 
  */
 @ApplicationScoped
+@Provider // let helidon know this is a JAX-RS resource
 public class MovieReviewServiceResource implements MovieReviewService {
 
     private final ConcurrentHashMap<String, Movie> movies = new ConcurrentHashMap<String, Movie>();

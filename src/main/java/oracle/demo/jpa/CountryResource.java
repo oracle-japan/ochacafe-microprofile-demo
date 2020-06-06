@@ -16,6 +16,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+/**
+ * JPA version of "Country", supports CRUD
+ * insert Opentracing span
+ */
 @ApplicationScoped
 @Path("/jpa/country")
 @Produces(MediaType.APPLICATION_JSON)

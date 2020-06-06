@@ -7,7 +7,8 @@ public class TestBase {
 
     private static void startUp(){
         if(null == server){
-            server = Main.startServer();
+            server = Server.builder().build();
+            server.start();
             System.out.println("Server started - " + server.host() + ":" + server.port());
         }
     }

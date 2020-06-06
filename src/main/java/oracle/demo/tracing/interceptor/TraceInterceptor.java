@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -20,6 +21,8 @@ import io.opentracing.Span;
 @Priority(Interceptor.Priority.APPLICATION)
 @Trace
 public class TraceInterceptor {
+
+    private final Logger logger = Logger.getLogger(TraceInterceptor.class.getName());
 
     @Inject
     io.opentracing.Tracer tracer;
@@ -37,7 +40,7 @@ public class TraceInterceptor {
         // Check TraceConfig
         final Trace trace = method.getAnnotation(Trace.class);
         final String value = trace.value();
-        //System.out.println("TraceInfo value: " + value);
+        logger.fine("Trace prefix: " + value);
         if(null != value && 0 != value.length()){
             spanName = value + ":" + spanName;
         }
@@ -48,17 +51,17 @@ public class TraceInterceptor {
         TraceTag[] tags = method.getAnnotationsByType(TraceTag.class);
         if(null != tags){
             for(TraceTag tag : tags){
-                final String key = tag.key();
-                final String val = tag.value();
-                if(null == key) throw new IllegalArgumentException("TraceTag key is null.");
-                if(null == val) throw new IllegalArgumentException("TraceTag value is null.");
-                tagMap.put(key, val);
+                final String k = tag.key();
+                final String v = tag.value();
+                if(null == k) throw new IllegalArgumentException("TraceTag key is null.");
+                if(null == v) throw new IllegalArgumentException("TraceTag value is null.");
+                tagMap.put(k, v);
             }
         }
 
         final Span span = tracer.buildSpan(spanName)
         .asChildOf(tracer.activeSpan()).start();
-        tagMap.forEach((key,val) -> span.setTag(key, val));
+        tagMap.forEach((k,v) -> span.setTag(k, v));
 
         Object result = null;
         try{

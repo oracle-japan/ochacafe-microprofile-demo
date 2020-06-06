@@ -43,7 +43,7 @@ javax:
                     url: jdbc:h2:mem:greeting;INIT=RUNSCRIPT FROM 'classpath:createtable.ddl' 
                     user: sa
                     password: ""
-            AtpDataSource: # example config for Autonomous Transaction Processing
+            ATPDataSource: # example config for Autonomous Transaction Processing
                 dataSourceClassName: oracle.jdbc.pool.OracleDataSource
                 dataSource:
                     url: jdbc:oracle:thin:@abc_high?TNS_ADMIN=/tnsdir

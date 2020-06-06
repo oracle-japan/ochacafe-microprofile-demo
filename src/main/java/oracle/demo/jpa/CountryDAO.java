@@ -11,11 +11,6 @@ import oracle.demo.country.CountryNotFoundException;
 import oracle.demo.tracing.interceptor.Trace;
 import oracle.demo.tracing.interceptor.TraceTag;
 
-
-/**
- * JPA with transaction control
- * Support OpenTracing Span with annotaions - @trace @TraceConfig @TraceTag
- */
 @Dependent
 public class CountryDAO {
 
@@ -24,7 +19,7 @@ public class CountryDAO {
         System.setProperty("oracle.jdbc.fanEnabled", "false");
     }
 
-    @PersistenceContext(unitName = "jpa_country")
+    @PersistenceContext(unitName = "CountryDS")
     private EntityManager em;
 
     @Trace("JPA") @TraceTag(key = "JPQL", value = "select c from Country c")
