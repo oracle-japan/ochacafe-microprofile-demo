@@ -3,6 +3,8 @@
 
 For [OCHaCafe 2 - #4 Cloud Native時代のモダンJavaの世界](https://ochacafe.connpass.com/event/155389/)
 
+Helidon 2.x (Java 11) です。Helidon 1.x系 (Java 8) は "helidon-1.x" ブランチでメンテナンスしています・
+
 ## デモのソース
 
 ```text
@@ -182,8 +184,8 @@ oracle.demo.grpc.protobuf.GrpcExtension
 
 2. oracle.demo.grpc.protobuf.GreeterSimpleService を編集する
 ```java
-// @RpcServiceアノテーションをコメントアウトする
-// @RpcService(name = "helloworld.Greeter")
+// @Grpc アノテーションをコメントアウトする
+// @Grpc(name = "helloworld.Greeter")
 @ApplicationScoped
 public class GreeterSimpleService{
 
