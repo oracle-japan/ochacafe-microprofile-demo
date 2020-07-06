@@ -19,7 +19,6 @@ public class GrpcResource {
 
     @Inject 
     @GrpcProxy
-    @GrpcChannel(name = "myserver") // defined in application.yaml
     private GreeterService greeterService;
 
     @GET
