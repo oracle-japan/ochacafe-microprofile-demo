@@ -1,7 +1,12 @@
+<a href="https://github.com/oracle-japan/ochacafe-microprofile-demo/tags">
+    <img src="https://img.shields.io/github/v/tag/oracle-japan/ochacafe-microprofile-demo" alt="latest version">
+</a>
 
 # [Helidon](https://helidon.io/) を使って [Eclipse MicroProfile](https://microprofile.io/) の仕様や拡張機能を確認するデモ
 
 For [OCHaCafe 2 - #4 Cloud Native時代のモダンJavaの世界](https://ochacafe.connpass.com/event/155389/)
+
+Helidon 2.x (Java 11) にアップデートしました。Helidon 1.x系 (Java 8) は "helidon-1.x" ブランチでメンテナンスしています.
 
 ## デモのソース
 
@@ -114,7 +119,8 @@ java -jar target/helidon-demo-mp.jar
 
 ## Docker イメージの作成
 
-Dockerfileを使わずに、[Jib](https://github.com/GoogleContainerTools/jib) を使ってMavenから直接イメージをビルドします.
+Dockerfileを使わずに、[Jib](https://github.com/GoogleContainerTools/jib) を使ってMavenから直接イメージをビルドします.  
+ルートディレクトリにあるDockerfileを使ってもイメージの作成は可能です.
 
 ### 通常（ローカル）のタグを付与する場合
 
@@ -146,9 +152,9 @@ mvn -P cloud post-integration-test
 ```
 $ docker images
 REPOSITORY                                        TAG                 IMAGE ID            CREATED             SIZE
-helidon-demo-mp                                   1.0-SNAPSHOT        1b4d2e82f64a        49 years ago        125MB
+helidon-demo-mp                                   2.0-SNAPSHOT        1b4d2e82f64a        49 years ago        125MB
 helidon-demo-mp                                   latest              1b4d2e82f64a        49 years ago        125MB
-(remote docker repository path/)helidon-demo-mp   1.0-SNAPSHOT        116de0207be6        49 years ago        125MB
+(remote docker repository path/)helidon-demo-mp   2.0-SNAPSHOT        116de0207be6        49 years ago        125MB
 (remote docker repository path/)helidon-demo-mp   latest              116de0207be6        49 years ago        125MB
 
 $ docker push (remote docker repository path/)helidon-demo-mp
@@ -182,8 +188,8 @@ oracle.demo.grpc.protobuf.GrpcExtension
 
 2. oracle.demo.grpc.protobuf.GreeterSimpleService を編集する
 ```java
-// @RpcServiceアノテーションをコメントアウトする
-// @RpcService(name = "helloworld.Greeter")
+// @Grpc アノテーションをコメントアウトする
+// @Grpc(name = "helloworld.Greeter")
 @ApplicationScoped
 public class GreeterSimpleService{
 
@@ -244,6 +250,7 @@ public List<Country> getCountriesWithError(){
 |2020.03.02| Helidon 1.4.2 ベースに更新 |
 |2020.05.08| Helidon 1.4.4 ベースに更新、tracing用アノテーションを追加、testクラス追加 |
 |2020.05.13| OpenTracing用のInterceptorの仕様変更（@TraceConfigを廃止） |
+|2020.07.06| Helidon 2.0.1 ベースに更新 (Java 11必須) |
 
 ---
 _Copyright © 2019-2020, Oracle and/or its affiliates. All rights reserved._
