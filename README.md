@@ -212,9 +212,10 @@ mvn -P protoc generate-sources
 
 ## OpenTracing SPAN定義のためのアノテーション
 
-MicroProfileのOpenTracingの実装の多くはSPANの定義を暗黙的に行っているケースが多く、コーディングしなくてもそれなりのトレース情報が出力されるので便利なのですが、明示的にSPANを定義したい場合もあります。MicroProfileではAPIを使ってSPANの定義を行うことができますが、そうするとトレーシングのためのコードがビジネスロジックの中に紛れ込んでしまい、見通しが悪くなってしまいます。そこで、ここではSPANの定義処理をCDI Interceptorとして実装し、メソッドにアノテーションを付加することによって簡単にSPANを定義する（また逆に定義を削除する）ことを可能にしています。
+MicroProfileのOpenTracingの実装の多くはSPANの定義を暗黙的に行っているケースが多く、コーディングしなくてもそれなりのトレース情報が出力されるので便利です。また、明示的にSPANを定義したい場合は@Tracedアノテーション(org.eclipse.microprofile.opentracing.Traced)を使って、メソッドにトレース出力をつけることができます。しかしながら、標準機能では必ずしも欲しい情報を出力してくれるとは限りません。そこで、ここではSPANの定義処理をCDI Interceptorとして実装して、Trace出力の内容をアノテーションである程度コントロールできるようにしてみました。
 
-実装はoracle.demo.tracing.interceptor パッケージにあります。使用例はoracle.demo.jpa.CountryDAOを見て下さい。
+実装はoracle.demo.tracing.interceptor パッケージにあります。使用例はoracle.demo.jpa.CountryDAOを見て下さい。  
+`/jpa/country?error=true` をGETすると以下のメソッドが呼ばれます。
 
 ```java
 @Trace("JPA") 
@@ -226,7 +227,7 @@ public List<Country> getCountriesWithError(){
 }
 ```
 
-2つのアノテーションが利用可能です。
+2つのアノテーションが利用可能です(oracle.demo.tracing.interceptorパッケージ)。
 
 | annotation   | 説明 |
 |--------------|------|

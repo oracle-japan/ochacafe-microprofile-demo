@@ -7,6 +7,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
+import org.eclipse.microprofile.opentracing.Traced;
+
 import oracle.demo.country.CountryNotFoundException;
 import oracle.demo.tracing.interceptor.Trace;
 import oracle.demo.tracing.interceptor.TraceTag;
@@ -22,17 +24,18 @@ public class CountryDAO {
     @PersistenceContext(unitName = "CountryDS")
     private EntityManager em;
 
-    @Trace("JPA") @TraceTag(key = "JPQL", value = "select c from Country c")
+    // This is a standard MicroProfile annotation
+    @Traced
     public List<Country> getCountries(){
         List<Country> countries = em.createQuery("select c from Country c", Country.class).getResultList();
         return countries;
     }
 
-    // will intentionally cause an error
+    // This is my original annotations for tracing
     @Trace("JPA") 
     @TraceTag(key = "JPQL", value = "select c from Countries c")
     @TraceTag(key = "comment", value = "An error is expected by the wrong jpql statement.")
-    public List<Country> getCountriesWithError(){
+    public List<Country> getCountriesWithError(){ // will intentionally cause an error
         List<Country> countries = em.createQuery("select c from Countries c", Country.class).getResultList();
         return countries;
     }
