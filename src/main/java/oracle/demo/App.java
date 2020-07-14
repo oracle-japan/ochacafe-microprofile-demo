@@ -8,7 +8,7 @@ import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
 
 /**
- * Simple Application that produces a greeting message.
+ * It works without Application indeed, but intentionally kept here in order to add an OpenAPI annotation.
  */
 @ApplicationScoped
 @ApplicationPath("/")
