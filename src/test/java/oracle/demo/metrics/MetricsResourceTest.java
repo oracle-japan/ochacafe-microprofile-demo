@@ -1,30 +1,29 @@
 package oracle.demo.metrics;
 
+import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-
-import oracle.demo.TestBase;
+import javax.ws.rs.client.WebTarget;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class MetricsResourceTest extends TestBase{
+import io.helidon.microprofile.tests.junit5.HelidonTest;
 
-    private final Client client = ClientBuilder.newClient();
+@HelidonTest
+public class MetricsResourceTest{
 
-    public MetricsResourceTest(){
-        super();
-    }
+    @Inject private WebTarget webTarget;
 
     @Test
     public void testMetrics(){
-        client.target(getConnectionString("/mpmetrics/apple")).request().get();
-        client.target(getConnectionString("/mpmetrics/apple")).request().get();
-        client.target(getConnectionString("/mpmetrics/orange")).request().get();
-        client.target(getConnectionString("/mpmetrics/orange")).request().get();
-        client.target(getConnectionString("/mpmetrics/orange")).request().get();
+        webTarget.path("/mpmetrics/apple").request().get();
+        webTarget.path("/mpmetrics/apple").request().get();
+        webTarget.path("/mpmetrics/orange").request().get();
+        webTarget.path("/mpmetrics/orange").request().get();
+        webTarget.path("/mpmetrics/orange").request().get();
 
-        String total = client.target(getConnectionString("/mpmetrics/count-total"))
+        String total = webTarget.path("/mpmetrics/count-total")
             .request().get(String.class);
 
         Assertions.assertEquals(5l, Long.parseLong(total)); 

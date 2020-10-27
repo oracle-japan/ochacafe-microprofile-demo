@@ -4,22 +4,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
-
-import oracle.demo.TestBase;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class FaultToleranceResourceTest extends TestBase{
+import io.helidon.microprofile.tests.junit5.HelidonTest;
 
-    private final Client client = ClientBuilder.newClient();
+@HelidonTest
+public class FaultToleranceResourceTest{
 
-    public FaultToleranceResourceTest(){
-        super();
-    }
+    @Inject private WebTarget webTarget;
 
     @Test
     public void testBulkhead(){
@@ -28,16 +27,14 @@ class FaultToleranceResourceTest extends TestBase{
         ExecutorService service = Executors.newFixedThreadPool(numCalls);
         for(int i = 0 ; i < numCalls ; i++){
             service.submit(() -> {
-                final Client client = ClientBuilder.newClient();
-                client.target(getConnectionString("/ft/bulkhead")).request().get();
-                client.close();
+                webTarget.path("/ft/bulkhead").request().get();
             });
         }
 
         try{
             Thread.sleep(1000); // wait 1 sec to kick the 4th request
         }catch(InterruptedException e){}    
-        Response response = client.target(getConnectionString("/ft/bulkhead")).request().get();
+        Response response = webTarget.path("/ft/bulkhead").request().get();
         Assertions.assertEquals(500, response.getStatus());
 
         service.shutdown();
@@ -53,22 +50,20 @@ class FaultToleranceResourceTest extends TestBase{
         ExecutorService service = Executors.newFixedThreadPool(numCalls);
         for(int i = 0 ; i < numCalls ; i++){
             service.submit(() -> {
-                final Client client = ClientBuilder.newClient();
-                client.target(getConnectionString("/ft/circuit-breaker")).request().get();
-                client.close();
+                webTarget.path("/ft/circuit-breaker").request().get();
             });
         }
 
         try{
             Thread.sleep(2000); // wait 2 secs to turn to open
         }catch(InterruptedException e){}    
-        Response response = client.target(getConnectionString("/ft/circuit-breaker")).request().get();
+        Response response = webTarget.path("/ft/circuit-breaker").request().get();
         Assertions.assertEquals(500, response.getStatus());
 
         try{
             Thread.sleep(10 * 1000); // wait 10 secs to turn to half-open
         }catch(InterruptedException e){}    
-        response = client.target(getConnectionString("/ft/circuit-breaker")).request().get();
+        response = webTarget.path("/ft/circuit-breaker").request().get();
         Assertions.assertEquals(200, response.getStatus());
 
         service.shutdown();

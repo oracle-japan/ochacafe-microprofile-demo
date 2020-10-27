@@ -1,28 +1,28 @@
 package oracle.demo.restclient;
 
+import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-
-import oracle.demo.TestBase;
+import javax.ws.rs.client.WebTarget;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class MovieReviewServiceRestClientResourceTest extends TestBase{
+import io.helidon.microprofile.tests.junit5.HelidonTest;
 
-    private final Client client = ClientBuilder.newClient();
+@HelidonTest
+public class MovieReviewServiceRestClientResourceTest{
 
-    public MovieReviewServiceRestClientResourceTest(){
-        super();
-    }
+    @Inject private WebTarget webTarget;
+
+    @Inject MovieReviewServiceResource movieService;
 
     @Test
     public void testReviews(){
 
         // getReview
-        String result = client
-                .target(getConnectionString("/restclient/1/submit-review?star=5&comment=great!"))
+        String result = webTarget.path("/restclient/1/submit-review?star=5&comment=great!")
                 .request()
                 .get(String.class);
 
@@ -31,8 +31,7 @@ class MovieReviewServiceRestClientResourceTest extends TestBase{
             result);
 
         // submitReview
-        JsonArray jsonArray = client
-                .target(getConnectionString("/restclient/1/reviews"))
+        JsonArray jsonArray = webTarget.path("/restclient/1/reviews")
                 .request()
                 .get(JsonArray.class);
         

@@ -16,76 +16,62 @@
 
 package oracle.demo;
 
+import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class MainTest extends TestBase{
+import io.helidon.microprofile.tests.junit5.HelidonTest;
 
-    public MainTest(){
-        super();
-    }
+@HelidonTest
+public class MainTest{
 
-    //@BeforeAll
-    //public static void startTheServer() throws Exception {
-    //    startUp();
-    //}
+    @Inject private WebTarget webTarget;
 
     @Test
     void testHelloWorld() {
 
         Client client = ClientBuilder.newClient();
 
-        JsonObject jsonObject = client
-                .target(getConnectionString("/greet"))
+        JsonObject jsonObject = webTarget.path("/greet")
                 .request()
                 .get(JsonObject.class);
         Assertions.assertEquals("Hello World!", jsonObject.getString("message"),
                 "default message");
 
-        jsonObject = client
-                .target(getConnectionString("/greet/Joe"))
+        jsonObject = webTarget.path("/greet/Joe")
                 .request()
                 .get(JsonObject.class);
         Assertions.assertEquals("Hello Joe!", jsonObject.getString("message"),
                 "hello Joe message");
 
-        Response r = client
-                .target(getConnectionString("/greet/greeting"))
+        Response r = webTarget.path("/greet/greeting")
                 .request()
                 .put(Entity.entity("{\"greeting\" : \"Hola\"}", MediaType.APPLICATION_JSON));
         Assertions.assertEquals(204, r.getStatus(), "PUT status code");
 
-        jsonObject = client
-                .target(getConnectionString("/greet/Jose"))
+        jsonObject = webTarget.path("/greet/Jose")
                 .request()
                 .get(JsonObject.class);
         Assertions.assertEquals("Hola Jose!", jsonObject.getString("message"),
                 "hola Jose message");
 
-        r = client
-                .target(getConnectionString("/metrics"))
+        r = webTarget.path("/metrics")
                 .request()
                 .get();
         Assertions.assertEquals(200, r.getStatus(), "GET metrics status code");
 
-        r = client
-                .target(getConnectionString("/health"))
+        r = webTarget.path("/health")
                 .request()
                 .get();
         Assertions.assertEquals(200, r.getStatus(), "GET health status code");
     }
-
-    //@AfterAll
-    //static void destroyClass() {
-    //    CDI<Object> current = CDI.current();
-    //    ((SeContainer) current).close();
-    //}
 
 }

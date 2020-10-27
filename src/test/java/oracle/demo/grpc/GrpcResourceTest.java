@@ -1,30 +1,27 @@
 package oracle.demo.grpc;
 
+import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-
-import oracle.demo.TestBase;
+import javax.ws.rs.client.WebTarget;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class GrpcResourceTest extends TestBase{
+import io.helidon.microprofile.tests.junit5.HelidonTest;
 
-    private final Client client = ClientBuilder.newClient();
+@HelidonTest
+public class GrpcResourceTest{
 
-    public GrpcResourceTest(){
-        super();
-    }
+    @Inject private WebTarget webTarget;
 
     @Test
     public void testGrpcJavaobj(){
-        String result = client
-                .target(getConnectionString("/grpc-javaobj/client"))
+        String result = webTarget.path("/grpc-javaobj/client")
                 .request()
                 .get(String.class);
         Assertions.assertEquals("Hello world", result);
-        result = client
-                .target(getConnectionString("/grpc-javaobj/client?name=Tom"))
+        result = webTarget.path("/grpc-javaobj/client?name=Tom")
                 .request()
                 .get(String.class);
                 Assertions.assertEquals("Hello Tom", result);
@@ -32,13 +29,11 @@ class GrpcResourceTest extends TestBase{
 
     @Test
     public void testGrpcProtobuf(){
-        String result = client
-                .target(getConnectionString("/grpc-protobuf/client"))
+        String result = webTarget.path("/grpc-protobuf/client")
                 .request()
                 .get(String.class);
         Assertions.assertEquals("Hello world", result);
-        result = client
-                .target(getConnectionString("/grpc-protobuf/client?name=Tom"))
+        result = webTarget.path("/grpc-protobuf/client?name=Tom")
                 .request()
                 .get(String.class);
                 Assertions.assertEquals("Hello Tom", result);
