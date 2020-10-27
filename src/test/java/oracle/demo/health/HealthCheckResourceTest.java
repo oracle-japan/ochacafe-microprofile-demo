@@ -18,7 +18,7 @@ public class HealthCheckResourceTest{
 
     @Test
     public void testHealthCheck(){
-        webTarget.path("/mphealth?timeToFail=2").request().get();
+        webTarget.path("/mphealth").queryParam("timeToFail", 2).request().get();
 
         Response response = webTarget.path("/health").request().get();
         //System.out.println(response.readEntity(String.class));
@@ -31,7 +31,7 @@ public class HealthCheckResourceTest{
         //System.out.println(response.readEntity(String.class));
         Assertions.assertEquals(503, response.getStatus()); 
 
-        webTarget.path("/mphealth?timeToFail=0").request().get();
+        webTarget.path("/mphealth").queryParam("timeToFail", 0).request().get();
         response = webTarget.path("/health").request().get();
         //System.out.println(response.readEntity(String.class));
         Assertions.assertEquals(200, response.getStatus()); 

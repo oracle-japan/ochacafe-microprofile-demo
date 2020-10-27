@@ -21,7 +21,8 @@ public class GrpcResourceTest{
                 .request()
                 .get(String.class);
         Assertions.assertEquals("Hello world", result);
-        result = webTarget.path("/grpc-javaobj/client?name=Tom")
+        result = webTarget.path("/grpc-javaobj/client")
+                .queryParam("name", "Tom")
                 .request()
                 .get(String.class);
                 Assertions.assertEquals("Hello Tom", result);
@@ -33,7 +34,8 @@ public class GrpcResourceTest{
                 .request()
                 .get(String.class);
         Assertions.assertEquals("Hello world", result);
-        result = webTarget.path("/grpc-protobuf/client?name=Tom")
+        result = webTarget.path("/grpc-protobuf/client")
+                .queryParam("name", "Tom")
                 .request()
                 .get(String.class);
                 Assertions.assertEquals("Hello Tom", result);

@@ -16,13 +16,13 @@ public class MovieReviewServiceRestClientResourceTest{
 
     @Inject private WebTarget webTarget;
 
-    @Inject MovieReviewServiceResource movieService;
-
     @Test
     public void testReviews(){
 
         // getReview
-        String result = webTarget.path("/restclient/1/submit-review?star=5&comment=great!")
+        String result = webTarget.path("/restclient/1/submit-review")
+                .queryParam("star", 5)
+                .queryParam("comment", "great!")
                 .request()
                 .get(String.class);
 
