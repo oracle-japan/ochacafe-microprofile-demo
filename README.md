@@ -1,6 +1,4 @@
-<a href="https://github.com/oracle-japan/ochacafe-microprofile-demo/tags">
-    <img src="https://img.shields.io/github/v/tag/oracle-japan/ochacafe-microprofile-demo" alt="latest version">
-</a>
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/oracle-japan/ochacafe-microprofile-demo)
 
 # [Helidon](https://helidon.io/) を使って [Eclipse MicroProfile](https://microprofile.io/) の仕様や拡張機能を確認するデモ
 
