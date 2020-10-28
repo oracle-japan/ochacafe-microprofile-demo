@@ -2,8 +2,6 @@ package oracle.demo.restclient;
 
 import javax.inject.Inject;
 import javax.json.JsonArray;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
 import org.junit.jupiter.api.Assertions;

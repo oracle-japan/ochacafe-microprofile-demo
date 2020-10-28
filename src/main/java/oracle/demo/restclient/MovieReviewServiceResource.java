@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Path;
 import javax.ws.rs.ext.Provider;
 
 /**

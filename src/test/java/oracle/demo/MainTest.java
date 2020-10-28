@@ -18,8 +18,6 @@ package oracle.demo;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -37,8 +35,6 @@ public class MainTest{
 
     @Test
     void testHelloWorld() {
-
-        Client client = ClientBuilder.newClient();
 
         JsonObject jsonObject = webTarget.path("/greet")
                 .request()
