@@ -126,6 +126,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- support Reactive Messaging / Kafka Connector -->
+        <dependency>
+            <groupId>io.helidon.microprofile.messaging</groupId>
+            <artifactId>helidon-microprofile-messaging</artifactId>
+        </dependency>
+
         <!-- support gRPC-->
         <dependency>
             <groupId>io.helidon.microprofile.grpc</groupId>

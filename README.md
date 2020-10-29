@@ -58,6 +58,8 @@ src/main
 │           │       ├── Trace.java
 │           │       ├── TraceTagHolder.java
 │           │       └── TraceTag.java
+│           ├── reactive [Reactive Messaging]
+│           │   └── ReactiveResource.java
 │           ├── jpa [拡張機能 JPA/JTA]
 │           │   ├── Country.java
 │           │   ├── CountryResource.java
@@ -238,18 +240,6 @@ public List<Country> getCountriesWithError(){
 | value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
 | stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
 
-
-## 変更履歴
-
-|Date      | 内容 |
-|----------|--------------------------------------|
-|2019.12.10| 初版 |
-|2019.12.20| Helidon 1.4.1 ベースに更新 |
-|2020.01.20| gRPCのデモを追加 |
-|2020.03.02| Helidon 1.4.2 ベースに更新 |
-|2020.05.08| Helidon 1.4.4 ベースに更新、tracing用アノテーションを追加、testクラス追加 |
-|2020.05.13| OpenTracing用のInterceptorの仕様変更（@TraceConfigを廃止） |
-|2020.07.06| Helidon 2.0.1 ベースに更新 (Java 11必須) |
 
 ---
 _Copyright © 2019-2020, Oracle and/or its affiliates. All rights reserved._
