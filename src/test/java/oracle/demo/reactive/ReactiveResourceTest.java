@@ -55,6 +55,14 @@ public class ReactiveResourceTest{
         response = webTarget.path("/country/86").request().get();
         Assertions.assertEquals(404, response.getStatus());
 
+        // error update - CountryNotFoundException: Couldn't find country, id=86
+        response = webTarget.path("/reactive/country/86").request().put(Entity.form(form));
+        Assertions.assertEquals(204, response.getStatus()); 
+        delay(1000);
+        response = webTarget.path("/country/86").request().get();
+        Assertions.assertEquals(404, response.getStatus());
+
+
     }
 
     private void delay(long ms){
