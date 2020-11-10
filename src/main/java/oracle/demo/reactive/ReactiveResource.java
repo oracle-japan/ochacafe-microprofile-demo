@@ -46,14 +46,14 @@ public class ReactiveResource {
 
     @Inject private CountryDAO dao;
 
-    private enum Operation {INSERT, UPDATE, DELETE}
+    public enum Operation {INSERT, UPDATE, DELETE}
 
-    private class DaoEvent{
+    public class DaoEvent{
         public UUID uuid;
-        public Operation op;
+        public Operation operation;
         public Country[] countries;
         public DaoEvent(Operation op, Country[] countries){
-            this.op = op;
+            this.operation = op;
             this.countries = countries;
             this.uuid = UUID.randomUUID();
         }
@@ -67,7 +67,7 @@ public class ReactiveResource {
     @Incoming("country-dao")
     public void consume(DaoEvent event) {
         try{
-            switch(event.op){
+            switch(event.operation){
                 case INSERT:
                     dao.insertCountries(event.countries);
                     break;
@@ -78,9 +78,9 @@ public class ReactiveResource {
                     Arrays.stream(event.countries).forEach(c -> dao.deleteCountry(c.countryId));
                     break;
             }
-            logger.info(String.format("Execution complete - id: %s, type: %s", event.uuid, event.op));
+            logger.info(String.format("Complete: %s", jsonb.toJson(event)));
         }catch(Exception e){
-            logger.log(Level.WARNING, String.format("Execution error - id: %s, type: %s, error: %s", event.uuid, event.op, e.getMessage()), e);
+            logger.log(Level.WARNING, String.format("Error[%s]: %s", e.getMessage(), jsonb.toJson(event)), e);
         }
     }
 
@@ -91,20 +91,25 @@ public class ReactiveResource {
     }
 
     @PUT
+    @Path("/")
+    public void updateCountry(Country[] countries) {
+        submit(new DaoEvent(Operation.UPDATE, countries));
+    }
+
+    @PUT
     @Path("/{countryId}")
-    public void updateCountry(@PathParam("countryId") int countryId, @FormParam("name") String countryName) {
+    public void updateCountryById(@PathParam("countryId") int countryId, @FormParam("name") String countryName) {
         submit(new DaoEvent(Operation.UPDATE, new Country[]{new Country(countryId, countryName)}));
     }
 
     @DELETE
     @Path("/{countryId}")
-    public void deleteCountry(@PathParam("countryId") int countryId) {
+    public void deleteCountryById(@PathParam("countryId") int countryId) {
         submit(new DaoEvent(Operation.DELETE, new Country[]{new Country(countryId, null)}));
     }
 
     private void submit(DaoEvent event){
-        // record an event first
-        logger.info(String.format("Event record - id: %s, type: %s, data: %s", event.uuid, event.op, jsonb.toJson(event.countries)));
+        logger.info(String.format("Event: %s", jsonb.toJson(event))); // record an event first
         publisher.submit(event); // then submit an event
     }
 

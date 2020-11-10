@@ -39,6 +39,14 @@ public class ReactiveResourceTest{
         Assertions.assertEquals(86, jsonObject.getInt("countryId"));
         Assertions.assertEquals("China", jsonObject.getString("countryName"));
 
+        countries = new Country[]{ new Country(61, "Australia") };
+        response = webTarget.path("/reactive/country").request().post(Entity.entity(countries, MediaType.APPLICATION_JSON));
+        Assertions.assertEquals(204, response.getStatus());
+        delay(1000);
+        jsonObject = webTarget.path("/jpa/country/61").request().get(JsonObject.class);
+        Assertions.assertEquals(61, jsonObject.getInt("countryId"));
+        Assertions.assertEquals("Australia", jsonObject.getString("countryName"));
+
         // update
         Form form = new Form().param("name", "People’s Republic of China");
         response = webTarget.path("/reactive/country/86").request().put(Entity.form(form));
@@ -48,11 +56,25 @@ public class ReactiveResourceTest{
         Assertions.assertEquals(86, jsonObject.getInt("countryId"));
         Assertions.assertEquals("People’s Republic of China", jsonObject.getString("countryName"));
 
+        countries = new Country[]{ new Country(61, "Commonwealth of Australia") };
+        response = webTarget.path("/reactive/country").request().put(Entity.entity(countries, MediaType.APPLICATION_JSON));
+        Assertions.assertEquals(204, response.getStatus());
+        delay(1000);
+        jsonObject = webTarget.path("/jpa/country/61").request().get(JsonObject.class);
+        Assertions.assertEquals(61, jsonObject.getInt("countryId"));
+        Assertions.assertEquals("Commonwealth of Australia", jsonObject.getString("countryName"));
+
         // delete
         response = webTarget.path("/reactive/country/86").request().delete();
         Assertions.assertEquals(204, response.getStatus());
         delay(1000);
         response = webTarget.path("/country/86").request().get();
+        Assertions.assertEquals(404, response.getStatus());
+
+        response = webTarget.path("/reactive/country/61").request().delete();
+        Assertions.assertEquals(204, response.getStatus());
+        delay(1000);
+        response = webTarget.path("/country/61").request().get();
         Assertions.assertEquals(404, response.getStatus());
 
         // error update - CountryNotFoundException: Couldn't find country, id=86
