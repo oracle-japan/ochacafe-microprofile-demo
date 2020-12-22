@@ -60,6 +60,9 @@ src/main
 │           │       └── TraceTag.java
 │           ├── reactive [Reactive Messaging]
 │           │   └── ReactiveResource.java
+│           ├── graphql [GraphQL]
+│           │   ├── Country.java
+│           │   └── CountryGraphQLApi.java
 │           ├── jpa [拡張機能 JPA/JTA]
 │           │   ├── Country.java
 │           │   ├── CountryResource.java
@@ -240,6 +243,57 @@ public List<Country> getCountriesWithError(){
 | value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
 | stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
 
+## GraphQL
+
+スキーマは以下のURLで取得できます。  
+http://localhost:8080/graphql/schema.graphql
+
+
+```
+type Country {
+  countryId: Int!
+  countryName: String
+}
+
+type Mutation {
+  deleteCountry(countryId: Int!): Int!
+  insertCountries(countries: [CountryInput]): [Country]
+  insertCountry(country: CountryInput): Country
+  updateCountry(countryId: Int!, countryName: String): Country
+}
+
+type Query {
+  countries: [Country]
+  country(countryId: Int!): Country
+}
+
+input CountryInput {
+  countryId: Int!
+  countryName: String
+}
+```
+
+curlでテストする場合は、以下を参考にして下さい。
+
+```
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "query { countries{ countryId countryName } }" }'
+
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "query { country(countryId:1){ countryName } }" }'
+
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "mutation { insertCountry(country:{countryId:86,countryName:\"China\"}){ countryId countryName } }" }'
+
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "mutation { insertCountries(countries:[{countryId:82,countryName:\"Korea\"},{countryId:91,countryName:\"India\"}]){ countryId countryName } }" }'
+
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "mutation { updateCountry(countryId:1,countryName:\"United States\"){ countryId countryName } }" }'
+
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "mutation { deleteCountry(countryId:86) }" }'
+```
 
 ---
 _Copyright © 2019-2020, Oracle and/or its affiliates. All rights reserved._
