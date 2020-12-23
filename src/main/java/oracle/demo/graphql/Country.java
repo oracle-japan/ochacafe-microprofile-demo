@@ -1,7 +1,11 @@
 package oracle.demo.graphql;
 
+import org.eclipse.microprofile.graphql.NonNull;
+
 public class Country {
+
     private int countryId;
+    @NonNull
     private String countryName;
 
     public Country(){}
