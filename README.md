@@ -252,7 +252,7 @@ http://localhost:8080/graphql/schema.graphql
 ```
 type Country {
   countryId: Int!
-  countryName: String
+  countryName: String!
 }
 
 type Mutation {
@@ -269,7 +269,7 @@ type Query {
 
 input CountryInput {
   countryId: Int!
-  countryName: String
+  countryName: String!
 }
 ```
 
@@ -277,19 +277,19 @@ curlでテストする場合は、以下を参考にして下さい。
 
 ```
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
-  -d '{ "query" : "query { countries{ countryId countryName } }" }'
+  -d '{ "query" : "query { countries { countryId countryName } }" }'
 
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
-  -d '{ "query" : "query { country(countryId:1){ countryName } }" }'
+  -d '{ "query" : "query { country(countryId: 1) { countryName } }" }'
 
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
-  -d '{ "query" : "mutation { insertCountry(country:{countryId:86,countryName:\"China\"}){ countryId countryName } }" }'
+  -d '{ "query" : "mutation { insertCountry(country: {countryId:86,countryName:\"China\"}) { countryId countryName } }" }'
 
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
-  -d '{ "query" : "mutation { insertCountries(countries:[{countryId:82,countryName:\"Korea\"},{countryId:91,countryName:\"India\"}]){ countryId countryName } }" }'
+  -d '{ "query" : "mutation { insertCountries(countries:[{countryId:82,countryName:\"Korea\"},{countryId:91,countryName:\"India\"}]) { countryId countryName } }" }'
 
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
-  -d '{ "query" : "mutation { updateCountry(countryId:1,countryName:\"United States\"){ countryId countryName } }" }'
+  -d '{ "query" : "mutation { updateCountry(countryId:1,countryName:\"United States\") { countryId countryName } }" }'
 
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
   -d '{ "query" : "mutation { deleteCountry(countryId:86) }" }'
