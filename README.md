@@ -4,8 +4,6 @@
 
 For [OCHaCafe 2 - #4 Cloud Native時代のモダンJavaの世界](https://ochacafe.connpass.com/event/155389/)
 
-Helidon 2.x (Java 11) にアップデートしました。Helidon 1.x系 (Java 8) は "helidon-1.x" ブランチでメンテナンスしています.
-
 ## デモのソース
 
 ```text
@@ -245,6 +243,7 @@ public List<Country> getCountriesWithError(){
 
 ## GraphQL
 
+JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをGraphQL仕様にしたものを追加しました。  
 スキーマは以下のURLで取得できます。  
 http://localhost:8080/graphql/schema.graphql
 
@@ -273,7 +272,8 @@ input CountryInput {
 }
 ```
 
-curlでテストする場合は、以下を参考にして下さい。
+curlでテストする場合は、以下を参考にして下さい。  
+同様の操作は、GrapghQLのテストケース(CountryGraphQLApiTest.java)でも行っていますので、そちらも参考にしてください。
 
 ```
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
@@ -283,16 +283,16 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
   -d '{ "query" : "query { country(countryId: 1) { countryName } }" }'
 
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
-  -d '{ "query" : "mutation { insertCountry(country: {countryId:86,countryName:\"China\"}) { countryId countryName } }" }'
+  -d '{ "query" : "mutation { insertCountry (country:{countryId:86,countryName:\"China\"}) { countryId countryName } }" }'
 
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
-  -d '{ "query" : "mutation { insertCountries(countries:[{countryId:82,countryName:\"Korea\"},{countryId:91,countryName:\"India\"}]) { countryId countryName } }" }'
+  -d '{ "query" : "mutation { insertCountries (countries:[{countryId:82,countryName:\"Korea\"},{countryId:91,countryName:\"India\"}]) { countryId countryName } }" }'
 
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
-  -d '{ "query" : "mutation { updateCountry(countryId:1,countryName:\"United States\") { countryId countryName } }" }'
+  -d '{ "query" : "mutation { updateCountry (countryId:1,countryName:\"United States\") { countryId countryName } }" }'
 
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
-  -d '{ "query" : "mutation { deleteCountry(countryId:86) }" }'
+  -d '{ "query" : "mutation { deleteCountry (countryId:86) }" }'
 ```
 
 ---
