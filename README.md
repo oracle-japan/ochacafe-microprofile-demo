@@ -2,9 +2,7 @@
 
 # [Helidon](https://helidon.io/) を使って [Eclipse MicroProfile](https://microprofile.io/) の仕様や拡張機能を確認するデモ
 
-For [OCHaCafe 2 - #4 Cloud Native時代のモダンJavaの世界](https://ochacafe.connpass.com/event/155389/)
-
-Helidon 2.x (Java 11) にアップデートしました。Helidon 1.x系 (Java 8) は "helidon-1.x" ブランチでメンテナンスしています.
+[OCHaCafe 2 - #4 Cloud Native時代のモダンJavaの世界](https://ochacafe.connpass.com/event/155389/) のために作成したデモですが、随時実装を追加しています。
 
 ## デモのソース
 
@@ -60,6 +58,9 @@ src/main
 │           │       └── TraceTag.java
 │           ├── reactive [Reactive Messaging]
 │           │   └── ReactiveResource.java
+│           ├── graphql [GraphQL]
+│           │   ├── Country.java
+│           │   └── CountryGraphQLApi.java
 │           ├── jpa [拡張機能 JPA/JTA]
 │           │   ├── Country.java
 │           │   ├── CountryResource.java
@@ -235,11 +236,72 @@ public List<Country> getCountriesWithError(){
 | @TraceTag    | オプション、key = キー, value = 値 ; SPAN内に定義するTagを追加する、複数使用可 |
 
 @Trace の パラメータ
+
 | parameter  | 説明 |
 |------------|------|
 | value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
 | stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
 
+## GraphQL
+
+JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをMicroProfile GraphQL仕様にしたものを追加しました。  
+スキーマは以下のURLで取得できます。  
+http://localhost:8080/graphql/schema.graphql
+
+
+```
+type Country {
+  countryId: Int!
+  countryName: String!
+}
+
+type Mutation {
+  deleteCountry(countryId: Int!): Int!
+  insertCountries(countries: [CountryInput]): [Country]
+  insertCountry(country: CountryInput): Country
+  updateCountry(countryId: Int!, countryName: String): Country
+}
+
+type Query {
+  countries: [Country]
+  country(countryId: Int!): Country
+}
+
+input CountryInput {
+  countryId: Int!
+  countryName: String!
+}
+```
+
+curlでテストする場合は、以下を参考にして下さい。  
+同様の操作は、GrapghQLのテストケース(CountryGraphQLApiTest.java)でも行っていますので、そちらも参考にしてください。
+
+```
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "query { countries { countryId countryName } }" }'
+
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "query { country(countryId: 1) { countryName } }" }'
+
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "mutation { insertCountry (country:{countryId:86,countryName:\"China\"}) { countryId countryName } }" }'
+
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "mutation { insertCountries (countries:[{countryId:82,countryName:\"Korea\"},{countryId:91,countryName:\"India\"}]) { countryId countryName } }" }'
+
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "mutation { updateCountry (countryId:1,countryName:\"United States\") { countryId countryName } }" }'
+
+curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
+  -d '{ "query" : "mutation { deleteCountry (countryId:86) }" }'
+```
+
+結果、JDBC/JPAを使ったデータベースへのアクセスは、以下のバリエーションを実装しています。
++ REST経由の同期参照＆更新処理
++ REST経由 MicroProfile Reactive Messaging を使った非同期更新(Event Sourcing)処理
++ MicroProfile GraphQL を使った 同期 Query & Mutation 処理 
+
+![データベースへのアクセス・パターン](doc/images/microprofile-demo-crud.png)
 
 ---
 _Copyright © 2019-2020, Oracle and/or its affiliates. All rights reserved._

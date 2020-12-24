@@ -72,10 +72,10 @@ public class ReactiveResource {
                     dao.insertCountries(event.countries);
                     break;
                 case UPDATE:
-                    Arrays.stream(event.countries).forEach(c -> dao.updateCountry(c.countryId, c.countryName));
+                    Arrays.stream(event.countries).forEach(c -> dao.updateCountry(c.getCountryId(), c.getCountryName()));
                     break;
                 case DELETE:
-                    Arrays.stream(event.countries).forEach(c -> dao.deleteCountry(c.countryId));
+                    Arrays.stream(event.countries).forEach(c -> dao.deleteCountry(c.getCountryId()));
                     break;
             }
             logger.info(String.format("Complete: %s", jsonb.toJson(event)));

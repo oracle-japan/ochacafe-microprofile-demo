@@ -1,11 +1,13 @@
 package oracle.demo.jpa;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.enterprise.context.Dependent;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import javax.xml.namespace.QName;
 
 import org.eclipse.microprofile.opentracing.Traced;
 
@@ -51,9 +53,13 @@ public class CountryDAO {
     @Trace("JPA")
     @Transactional
     public void insertCountries(Country[] countries) {
-        for(int i = 0 ; i < countries.length ; i++){
-            em.persist(countries[i]);
-        }
+        Arrays.stream(countries).forEach(em::persist);
+    }
+
+    @Trace("JPA")
+    @Transactional
+    public void insertCountries(List<Country> countries) {
+        countries.stream().forEach(em::persist);
     }
 
     @Trace("JPA")
@@ -68,7 +74,7 @@ public class CountryDAO {
         Country country = em.find(Country.class, countryId);
         if(null == country) 
             throw new CountryNotFoundException(String.format("Couldn't find country, id=%d", countryId));
-        country.countryName = countryName;
+        country.setCountryName(countryName);
         em.persist(country);
     }
 

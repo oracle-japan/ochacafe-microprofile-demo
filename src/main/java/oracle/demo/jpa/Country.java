@@ -13,10 +13,10 @@ import javax.persistence.Table;
 public class Country {
 
     @Column(name = "COUNTRY_ID") @Id 
-    public int countryId;
+    private int countryId;
 
     @Column(name = "COUNTRY_NAME") 
-    public String countryName;
+    private String countryName;
 
     public Country(){}
 
@@ -24,5 +24,21 @@ public class Country {
         this.countryId = countryId;
         this.countryName = countryName;
     }
+
+	public int getCountryId() {
+		return countryId;
+	}
+
+	public void setCountryId(int countryId) {
+		this.countryId = countryId;
+	}
+
+	public String getCountryName() {
+		return countryName;
+	}
+
+	public void setCountryName(String countryName) {
+		this.countryName = countryName;
+	}
 
 }
