@@ -2,7 +2,7 @@
 
 # [Helidon](https://helidon.io/) を使って [Eclipse MicroProfile](https://microprofile.io/) の仕様や拡張機能を確認するデモ
 
-For [OCHaCafe 2 - #4 Cloud Native時代のモダンJavaの世界](https://ochacafe.connpass.com/event/155389/)
+[OCHaCafe 2 - #4 Cloud Native時代のモダンJavaの世界](https://ochacafe.connpass.com/event/155389/) のために作成したデモですが、随時実装を追加しています。
 
 ## デモのソース
 
@@ -236,6 +236,7 @@ public List<Country> getCountriesWithError(){
 | @TraceTag    | オプション、key = キー, value = 値 ; SPAN内に定義するTagを追加する、複数使用可 |
 
 @Trace の パラメータ
+
 | parameter  | 説明 |
 |------------|------|
 | value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
@@ -243,7 +244,7 @@ public List<Country> getCountriesWithError(){
 
 ## GraphQL
 
-JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをGraphQL仕様にしたものを追加しました。  
+JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをMicroProfile GraphQL仕様にしたものを追加しました。  
 スキーマは以下のURLで取得できます。  
 http://localhost:8080/graphql/schema.graphql
 
@@ -294,6 +295,13 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
   -d '{ "query" : "mutation { deleteCountry (countryId:86) }" }'
 ```
+
+結果、JDBC/JPAを使ったデータベースへのアクセスは、以下のバリエーションを実装しています。
++ REST経由の同期参照＆更新処理
++ REST経由 MicroProfile Reactive Messaging を使った非同期更新(Event Sourcing)処理
++ MicroProfile GraphQL を使った 同期 Query & Mutation 処理 
+
+![データベースへのアクセス・パターン](doc/images/microprofile-demo-crud.png)
 
 ---
 _Copyright © 2019-2020, Oracle and/or its affiliates. All rights reserved._
