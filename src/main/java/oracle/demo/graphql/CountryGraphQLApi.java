@@ -11,6 +11,7 @@ import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Name;
 import org.eclipse.microprofile.graphql.Query;
 
+import oracle.demo.jpa.Country;
 import oracle.demo.jpa.CountryDAO;
 
 /**
@@ -25,10 +26,7 @@ public class CountryGraphQLApi {
 
     @Query
     public List<Country> getCountries() {
-        final List<oracle.demo.jpa.Country> daoCountries = dao.getCountries();
-        final List<Country> countries = new ArrayList<>();
-        daoCountries.stream().forEach(c -> countries.add(new Country(c.getCountryId(), c.getCountryName())));
-        return countries;
+        return dao.getCountries();
     }
 
     @Query
@@ -45,9 +43,7 @@ public class CountryGraphQLApi {
 
     @Mutation
     public List<Country> insertCountries(@Name("countries") List<Country> countries) {
-        final List<oracle.demo.jpa.Country> daoCountries = new ArrayList<>();
-        countries.stream().forEach(c -> daoCountries.add(new oracle.demo.jpa.Country(c.getCountryId(), c.getCountryName())));
-        dao.insertCountries(daoCountries);
+        dao.insertCountries(countries);
         return countries;
     }
 
