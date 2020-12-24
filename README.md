@@ -245,11 +245,10 @@ public List<Country> getCountriesWithError(){
 ## GraphQL
 
 JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをMicroProfile GraphQL仕様にしたものを追加しました。  
-スキーマは以下のURLで取得できます。  
-http://localhost:8080/graphql/schema.graphql
+スキーマは `/graphql/schema.graphql` から取得できます。
 
 
-```
+```text
 type Country {
   countryId: Int!
   countryName: String!
@@ -276,22 +275,28 @@ input CountryInput {
 curlでテストする場合は、以下を参考にして下さい。  
 同様の操作は、GrapghQLのテストケース(CountryGraphQLApiTest.java)でも行っていますので、そちらも参考にしてください。
 
-```
+```bash
+# query: countries: [Country]
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
   -d '{ "query" : "query { countries { countryId countryName } }" }'
 
+# query: country(countryId: Int!): Country
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
   -d '{ "query" : "query { country(countryId: 1) { countryName } }" }'
 
+# mutation: insertCountry(country: CountryInput): Country
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
   -d '{ "query" : "mutation { insertCountry (country:{countryId:86,countryName:\"China\"}) { countryId countryName } }" }'
 
+# mutation: insertCountries(countries: [CountryInput]): [Country]
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
   -d '{ "query" : "mutation { insertCountries (countries:[{countryId:82,countryName:\"Korea\"},{countryId:91,countryName:\"India\"}]) { countryId countryName } }" }'
 
+# mutation: updateCountry(countryId: Int!, countryName: String): Country
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
   -d '{ "query" : "mutation { updateCountry (countryId:1,countryName:\"United States\") { countryId countryName } }" }'
 
+# mutation: deleteCountry(countryId: Int!): Int!
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
   -d '{ "query" : "mutation { deleteCountry (countryId:86) }" }'
 ```
@@ -299,7 +304,7 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 結果、JDBC/JPAを使ったデータベースへのアクセスは、以下のバリエーションを実装しています。
 + REST経由の同期参照＆更新処理
 + REST経由 MicroProfile Reactive Messaging を使った非同期更新(Event Sourcing)処理
-+ MicroProfile GraphQL を使った 同期 Query & Mutation 処理 
++ MicroProfile GraphQL を使った Query & Mutation 処理 
 
 ![データベースへのアクセス・パターン](doc/images/microprofile-demo-crud.png)
 
