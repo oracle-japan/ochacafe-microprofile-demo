@@ -1,6 +1,5 @@
 package oracle.demo.graphql;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;

@@ -7,7 +7,6 @@ import javax.enterprise.context.Dependent;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
-import javax.xml.namespace.QName;
 
 import org.eclipse.microprofile.opentracing.Traced;
 

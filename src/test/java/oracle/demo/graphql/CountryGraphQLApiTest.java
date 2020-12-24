@@ -1,8 +1,6 @@
 package oracle.demo.graphql;
 
 
-import java.util.Objects;
-
 import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;

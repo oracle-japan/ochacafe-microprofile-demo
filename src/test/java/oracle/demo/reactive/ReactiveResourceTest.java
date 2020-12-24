@@ -3,7 +3,6 @@ package oracle.demo.reactive;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
