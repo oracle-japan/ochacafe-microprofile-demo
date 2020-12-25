@@ -21,7 +21,7 @@ public class FaultToleranceResource {
     private final Logger logger = Logger.getLogger(FaultToleranceResource.class.getName());
 
     private void log(String message){
-        String thread = Thread.currentThread().getName();
+        final String thread = Thread.currentThread().getName();
         logger.info("[" + thread +"]" + message);
     }
 

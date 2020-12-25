@@ -25,8 +25,12 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class CountryResource {
 
+    private final CountryDAO dao;
+
     @Inject
-    CountryDAO dao;
+    public CountryResource(CountryDAO dao){
+        this.dao = dao;
+    }
 
     @GET
     @Path("/")

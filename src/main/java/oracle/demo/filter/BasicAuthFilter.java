@@ -33,22 +33,22 @@ public class BasicAuthFilter implements ContainerRequestFilter {
 
         // Authorization: Basic dGVzdDoxMjPCow== (username:password)
         
-        String authHeader = context.getHeaderString(AUTHORIZATION);
+        final String authHeader = context.getHeaderString(AUTHORIZATION);
         System.out.println(">> auth header: " + authHeader);
         if (null == authHeader || 0 == authHeader.length()) {
             throw new NotAuthorizedException(AUTH_ERROR);
         }
 
-        String[] headerElements = authHeader.split("\\s");
+        final String[] headerElements = authHeader.split("\\s");
         if(2 != headerElements.length 
                 || !headerElements[0].equalsIgnoreCase(AUTH_BASIC)) {
             throw new NotAuthorizedException(AUTH_ERROR);
         }
         
-        String decoded = new String(Base64.getDecoder().decode(headerElements[1]));
+        final String decoded = new String(Base64.getDecoder().decode(headerElements[1]));
         // System.out.println(">> decoded: " + decoded);
 
-        String[] userpw = decoded.split(":");
+        final String[] userpw = decoded.split(":");
         if(2 != userpw.length || null == userpw[0] || null == userpw[1] 
                 || !userpw[0].equals(AUTH_USERNAME) || !userpw[1].equals(AUTH_PASSWORD)) {
             throw new NotAuthorizedException(AUTH_ERROR);

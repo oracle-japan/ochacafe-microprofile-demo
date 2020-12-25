@@ -25,7 +25,7 @@ public class MovieReviewServiceResource implements MovieReviewService {
 
     @Override
     public Set<Movie> getAllMovies() {
-        HashSet<Movie> set = new HashSet<Movie>();
+        final HashSet<Movie> set = new HashSet<Movie>();
         movies.values().forEach(m -> set.add(m));
         return set;
     }

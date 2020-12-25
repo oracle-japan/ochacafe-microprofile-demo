@@ -77,7 +77,7 @@ public class MetricsResource{
         // Long.toString(total.getCount());
         
         // This time, get the counter through the registry
-        Counter counter = metricRegistry.getCounters()
+        final Counter counter = metricRegistry.getCounters()
             .entrySet().stream().filter(e -> {
                 //System.out.println("Counter: " + e.getKey() + ", " + e.getValue());
                 return e.getKey().getName().equals("oracle.demo.metrics.MetricsResource.total") ? true : false;

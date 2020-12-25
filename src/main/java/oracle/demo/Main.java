@@ -18,7 +18,7 @@ public final class Main {
      */
     public static void main(final String[] args) {
 
-        Server server = Server.builder().build();
+        final Server server = Server.builder().build();
         server.start();
         System.out.println(String.format("Server started: http://%s:%d", server.host(), server.port()));
     }

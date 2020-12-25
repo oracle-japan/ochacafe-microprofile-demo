@@ -53,7 +53,7 @@ public class Movie {
     }
 
     public Set<Review> getReviews(){
-        HashSet<Review> set = new HashSet<Review>();
+        final HashSet<Review> set = new HashSet<Review>();
         reviews.values().forEach(r -> set.add(r));
         return set;
     }

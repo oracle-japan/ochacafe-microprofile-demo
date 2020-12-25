@@ -20,8 +20,12 @@ import oracle.demo.jpa.CountryDAO;
 @ApplicationScoped
 public class CountryGraphQLApi {
 
+    private final CountryDAO dao;
+
     @Inject
-    CountryDAO dao;
+    public CountryGraphQLApi(CountryDAO dao){
+        this.dao = dao;
+    }
 
     @Query
     public List<Country> getCountries() {
@@ -30,7 +34,7 @@ public class CountryGraphQLApi {
 
     @Query
     public Country getCountry(@Name("countryId") int countryId) {
-        oracle.demo.jpa.Country c = dao.getCountry(countryId);
+        final oracle.demo.jpa.Country c = dao.getCountry(countryId);
         return new Country(c.getCountryId(), c.getCountryName());
     }
 

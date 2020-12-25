@@ -69,7 +69,7 @@ public class TraceInterceptor {
             span.setTag("error", false).finish(); 
         }catch(Exception e){
             if(stackTrace){
-                StringWriter sw = new StringWriter();
+                final StringWriter sw = new StringWriter();
                 try(PrintWriter pw = new PrintWriter(sw)){
                     e.printStackTrace(pw);
                 }

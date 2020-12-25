@@ -32,8 +32,8 @@ public class MovieReviewServiceRestClientResource {
     public Set<Review> getReviews(@PathParam("movieId") String movieId) throws URISyntaxException {
         System.out.println(uriInfo.getRequestUri());
         
-        URI apiUri = uriInfo.getBaseUri();
-        MovieReviewService reviewSvc = RestClientBuilder.newBuilder()
+        final URI apiUri = uriInfo.getBaseUri();
+        final MovieReviewService reviewSvc = RestClientBuilder.newBuilder()
             .baseUri(apiUri)
             .build(MovieReviewService.class);
         return reviewSvc.getAllReviews(movieId);
@@ -50,11 +50,11 @@ public class MovieReviewServiceRestClientResource {
 
         System.out.println(uriInfo.getRequestUri());
         
-        URI apiUri = uriInfo.getBaseUri();
-        MovieReviewService reviewSvc = RestClientBuilder.newBuilder()
+        final URI apiUri = uriInfo.getBaseUri();
+        final MovieReviewService reviewSvc = RestClientBuilder.newBuilder()
             .baseUri(apiUri)
             .build(MovieReviewService.class);
-        Review review = new Review(star , comment);
+        final Review review = new Review(star , comment);
         return reviewSvc.submitReview(movieId, review);
     }
 

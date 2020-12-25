@@ -49,14 +49,32 @@ public class ReactiveResource {
     public enum Operation {INSERT, UPDATE, DELETE}
 
     public class DaoEvent{
-        public UUID uuid;
-        public Operation operation;
-        public Country[] countries;
+        private UUID uuid;
+        private Operation operation;
+        private Country[] countries;
         public DaoEvent(Operation op, Country[] countries){
             this.operation = op;
             this.countries = countries;
             this.uuid = UUID.randomUUID();
         }
+		public UUID getUuid() {
+			return uuid;
+		}
+		public void setUuid(UUID uuid) {
+			this.uuid = uuid;
+		}
+		public Operation getOperation() {
+			return operation;
+		}
+		public void setOperation(Operation operation) {
+			this.operation = operation;
+		}
+		public Country[] getCountries() {
+			return countries;
+		}
+		public void setCountries(Country[] countries) {
+			this.countries = countries;
+		}
     }
 
     @Outgoing("country-dao")
@@ -67,15 +85,15 @@ public class ReactiveResource {
     @Incoming("country-dao")
     public void consume(DaoEvent event) {
         try{
-            switch(event.operation){
+            switch(event.getOperation()){
                 case INSERT:
-                    dao.insertCountries(event.countries);
+                    dao.insertCountries(event.getCountries());
                     break;
                 case UPDATE:
-                    Arrays.stream(event.countries).forEach(c -> dao.updateCountry(c.getCountryId(), c.getCountryName()));
+                    Arrays.stream(event.getCountries()).forEach(c -> dao.updateCountry(c.getCountryId(), c.getCountryName()));
                     break;
                 case DELETE:
-                    Arrays.stream(event.countries).forEach(c -> dao.deleteCountry(c.getCountryId()));
+                    Arrays.stream(event.getCountries()).forEach(c -> dao.deleteCountry(c.getCountryId()));
                     break;
             }
             logger.info(String.format("Complete: %s", jsonb.toJson(event)));

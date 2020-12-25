@@ -28,7 +28,7 @@ public class CountryDAO {
     // This is a standard MicroProfile annotation
     @Traced
     public List<Country> getCountries(){
-        List<Country> countries = em.createQuery("select c from Country c", Country.class).getResultList();
+        final List<Country> countries = em.createQuery("select c from Country c", Country.class).getResultList();
         return countries;
     }
 
@@ -37,13 +37,13 @@ public class CountryDAO {
     @TraceTag(key = "JPQL", value = "select c from Countries c")
     @TraceTag(key = "comment", value = "An error is expected by the wrong jpql statement.")
     public List<Country> getCountriesWithError(){ // will intentionally cause an error
-        List<Country> countries = em.createQuery("select c from Countries c", Country.class).getResultList();
+        final List<Country> countries = em.createQuery("select c from Countries c", Country.class).getResultList();
         return countries;
     }
 
     @Trace(value = "JPA", stackTrace = true)
     public Country getCountry(int countryId) {
-        Country country = em.find(Country.class, countryId);
+        final Country country = em.find(Country.class, countryId);
         if(null == country) 
             throw new CountryNotFoundException(String.format("Couldn't find country, id=%d", countryId));
         return country;
@@ -70,7 +70,7 @@ public class CountryDAO {
     @Trace("JPA")
     @Transactional
     public void updateCountry(int countryId, String countryName) {
-        Country country = em.find(Country.class, countryId);
+        final Country country = em.find(Country.class, countryId);
         if(null == country) 
             throw new CountryNotFoundException(String.format("Couldn't find country, id=%d", countryId));
         country.setCountryName(countryName);
@@ -80,7 +80,7 @@ public class CountryDAO {
     @Trace("JPA")
     @Transactional
     public void deleteCountry(int countryId) {
-        Country country = em.find(Country.class, countryId);
+        final Country country = em.find(Country.class, countryId);
         if(null == country) 
             throw new CountryNotFoundException(String.format("Couldn't find country, id=%d", countryId));
         em.remove(country);

@@ -26,7 +26,7 @@ public class EchoResource{
     @Produces(MediaType.APPLICATION_JSON)
     public Response echo(Message message, @Context UriInfo uriInfo) {
 
-        JsonObject json = Json.createObjectBuilder()
+        final JsonObject json = Json.createObjectBuilder()
         .add("url", uriInfo.getRequestUri().toASCIIString())
         .add("text", message.text)
         .add("reply", reply)

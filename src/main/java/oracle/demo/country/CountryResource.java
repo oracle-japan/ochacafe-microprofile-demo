@@ -27,7 +27,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 @Produces(MediaType.APPLICATION_JSON)
 public class CountryResource {
 
-    private CountryService countryService = new CountryService();
+    private final CountryService countryService = new CountryService();
 
     public CountryResource() {
     }

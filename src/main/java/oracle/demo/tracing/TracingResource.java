@@ -40,7 +40,7 @@ public class TracingResource{
             Client client = ClientBuilder.newClient();
             try{
                 logger.info("Invoking endpoint: " + order.endpoint);
-                Response response = client.target(order.endpoint)
+                final Response response = client.target(order.endpoint)
                             .request()
                             // .property(TRACER_PROPERTY_NAME, tracer) // you can comment out this line
                             // .property(CURRENT_SPAN_CONTEXT_PROPERTY_NAME, spanContext) // you can comment out this line

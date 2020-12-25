@@ -108,20 +108,20 @@ public class GreetResource {
     public Response updateGreeting(JsonObject jsonObject) {
 
         if (!jsonObject.containsKey("greeting")) {
-            JsonObject entity = JSON.createObjectBuilder()
+            final JsonObject entity = JSON.createObjectBuilder()
                     .add("error", "No greeting provided")
                     .build();
             return Response.status(Response.Status.BAD_REQUEST).entity(entity).build();
         }
 
-        String newGreeting = jsonObject.getString("greeting");
+        final String newGreeting = jsonObject.getString("greeting");
 
         greetingProvider.setMessage(newGreeting);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     private JsonObject createResponse(String who) {
-        String msg = String.format("%s %s!", greetingProvider.getMessage(), who);
+        final String msg = String.format("%s %s!", greetingProvider.getMessage(), who);
 
         return JSON.createObjectBuilder()
                 .add("message", msg)

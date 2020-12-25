@@ -34,7 +34,7 @@ public class IdcsResource {
     private final String cookieDomain;
 
     public IdcsResource(){
-        Config config = Config.create();
+        final Config config = Config.create();
         cookieName = config.get("security.providers.oidc.cookie-name").asString().orElse("JSESSIONID");
         cookiePath = config.get("security.providers.oidc.cookie-path").asString().orElse("/");
         cookieDomain = config.get("security.providers.oidc.cookie-domain").asString().orElse(null);
@@ -47,15 +47,15 @@ public class IdcsResource {
     public String login(@Context SecurityContext context, @Context ContainerRequestContext request) {
 
         // dump SecurityContext
-        String ctx = dumpSecurityContext(context);
-        StringBuilder sb = new StringBuilder(ctx);
+        final String ctx = dumpSecurityContext(context);
+        final StringBuilder sb = new StringBuilder(ctx);
 
-        String token = getToken(request); // Access Token (NOT a ID Token)
+        final String token = getToken(request); // Access Token (NOT a ID Token)
         System.out.println(token);
-        String[] tokenParts = token.split("\\.");
-        Base64.Decoder decoder = Base64.getDecoder();
-        String jwtHeader = new String(decoder.decode(tokenParts[0]));
-        String jwtPayload = new String(decoder.decode(tokenParts[1]));
+        final String[] tokenParts = token.split("\\.");
+        final Base64.Decoder decoder = Base64.getDecoder();
+        final String jwtHeader = new String(decoder.decode(tokenParts[0]));
+        final String jwtPayload = new String(decoder.decode(tokenParts[1]));
 
         // dump Cookie (= Access Token)
         sb.append(String.format("cookie.jwt.header=%s\n", jwtHeader));
@@ -78,7 +78,7 @@ public class IdcsResource {
     @Path("/logout")
     @Authenticated
     public Response logout(){
-        NewCookie newCookie = new NewCookie(cookieName, "", cookiePath, cookieDomain, "invalidated", 0, false);
+        final NewCookie newCookie = new NewCookie(cookieName, "", cookiePath, cookieDomain, "invalidated", 0, false);
         return Response
             .ok("Logged out.", MediaType.TEXT_PLAIN)
             .cookie(newCookie)
@@ -138,7 +138,7 @@ public class IdcsResource {
     ///////////////
 
     private String getToken(ContainerRequestContext request){
-        Cookie cookie = request.getCookies().get(cookieName);
+        final Cookie cookie = request.getCookies().get(cookieName);
         return cookie.getValue();
     }
 

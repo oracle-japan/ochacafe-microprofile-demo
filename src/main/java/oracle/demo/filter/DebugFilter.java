@@ -22,8 +22,8 @@ public class DebugFilter implements ContainerRequestFilter {
             System.out.println(String.format("%s: %s", k, v.toString()));
         });
         
-        UriInfo uriInfo = context.getUriInfo();
-        uriInfo.getRequestUri();
+        final UriInfo uriInfo = context.getUriInfo();
+        System.out.println("RequestUri: " + uriInfo.getRequestUri());
     }
     
 }
