@@ -108,13 +108,16 @@ demo
 
 ## ビルド方法
 
-```
+```bash
+# at first, generate java source files for gRPC by compiling proto file
+mvn -P protoc generate-sources
+# then create jar
 mvn package
 ```
 
 ## アプリケーションの起動
 
-```
+```bash
 java -jar target/helidon-demo-mp.jar
 ```
 
@@ -125,7 +128,7 @@ Dockerfileを使わずに、[Jib](https://github.com/GoogleContainerTools/jib) �
 
 ### 通常（ローカル）のタグを付与する場合
 
-```
+```bash
 mvn post-integration-test # 便宜上post-integration-testにアサインしているだけ
 ```
 
@@ -145,12 +148,13 @@ pom.xmlを以下のように設定し、
 ```
 以下を実行します.
 
-```
+```bash
 mvn -P cloud post-integration-test
 ```
 
 ローカルリポジトリに作成されたイメージをリポートリポジトリにpushします.
-```
+
+```bash
 $ docker images
 REPOSITORY                                        TAG                 IMAGE ID            CREATED             SIZE
 helidon-demo-mp                                   2.0-SNAPSHOT        1b4d2e82f64a        49 years ago        125MB
@@ -167,13 +171,13 @@ protobuf ペイロードを使ったサーバー実装は、POJO + Annotaion を
 
 ### POJO + Annotaion を使った方法（デフォルト 有効）
 
-```
+```text
 oracle.demo.grpc.protobuf.GreeterSimpleService
 ```
 
 ### GrpcMpExtensionを使って従来型のサービス実装クラスをデプロイする方法
 
-```
+```text
 oracle.demo.grpc.protobuf.GreeterService
 oracle.demo.grpc.protobuf.GrpcExtension
 META-INF/services/io.helidon.microprofile.grpc.server.spi.GrpcMpExtension
@@ -182,7 +186,7 @@ META-INF/services/io.helidon.microprofile.grpc.server.spi.GrpcMpExtension
 ### 実装の切り替え方
 
 1. META-INF/services/io.helidon.microprofile.grpc.server.spi.GrpcMpExtension を編集する
-```
+```text
 # コメントアウトを外す
 oracle.demo.grpc.protobuf.GrpcExtension
 ```
@@ -207,7 +211,7 @@ public class GreeterSimpleService{
 pom.xmlの通常ビルドフェーズとは独立してprotoファイルのコンパイルを行うプロファイルを定義しています。
 以下のコマンドを使って、まず最初にソースを生成して、srcディレクトリにコピーをします。詳細は、pom.xml の内容を確認して下さい。
 
-```
+```bash
 mvn -P protoc generate-sources
 ```
 
