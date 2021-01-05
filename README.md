@@ -316,3 +316,36 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 _Copyright © 2019-2020, Oracle and/or its affiliates. All rights reserved._
 
 
+## JMS Connector
+
+Maven ローカルリポジトリ
+
+```bash
+# insert
+curl -X POST -H "Content-Type: application/json" -d '[{"countryId":86,"countryName":"China"}]' http://localhost:8080/reactive/country
+curl http://localhost:8080/jpa/country/86 # {"countryId":86,"countryName":"China"}
+
+# update
+curl -X PUT -H "Content-Type: application/x-www-form-urlencoded" http://localhost:8080/reactive/country/86 -d "name=People's Republic of China"
+curl http://localhost:8080/jpa/country/86 # {"countryId":86,"countryName":"People's Republic of China"}
+
+# delete
+curl -X DELETE http://localhost:8080/reactive/country/86
+curl -v http://localhost:8080/jpa/country/86 # 404 Not Found
+```
+
+```bash
+# insert
+curl -X POST -H "Content-Type: application/json" -d '[{"countryId":86,"countryName":"China"}]' http://localhost:8080/reactive/jms/country
+curl http://localhost:8080/jpa/country/86 # {"countryId":86,"countryName":"China"}
+
+# update
+curl -X PUT -H "Content-Type: application/x-www-form-urlencoded" http://localhost:8080/reactive/jms/country/86 -d "name=People's Republic of China"
+curl http://localhost:8080/jpa/country/86 # {"countryId":86,"countryName":"People's Republic of China"}
+
+# delete
+curl -X DELETE http://localhost:8080/reactive/jms/country/86
+curl -v http://localhost:8080/jpa/country/86 # 404 Not Found
+```
+
+

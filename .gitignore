@@ -4,6 +4,8 @@
 /.metadata
 /.vscode
 
+/m2repo
+
 .dockerignore
 /.gradle/
 /gradle.properties
