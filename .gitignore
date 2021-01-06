@@ -5,7 +5,6 @@
 /.vscode
 
 /m2repo
-/demo/weblogic
 
 .dockerignore
 /.gradle/

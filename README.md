@@ -372,6 +372,27 @@ mp.messaging:
             provider.url: t3://localhost:7001 # 確認
 ```
 
+#### （参考）テスト用の WebLogic Server Docker インスタンスの作成 
+
+JMS Connector のテストに使うための設定済み WebLogic Server インスタンスを Docker コンテナで実行するためのスクリプトを用意しています。
+
+0. (必要に応じて) Oracle コンテナ・レジストリへのログイン  
+事前に `docker login container-registry.oracle.com` を済ませておいて下さい。
+
+1. demo/weblogic/start-weblogic.sh の実行  
+WebLogic Server の公式コンテナ・イメージを取得して起動します。  
+ `docker logs`を確認してサーバーが起動するまで待機して下さい。`<Server state changed to RUNNING.>` が表示されたらOKです。
+
+```
+$ docker logs --tail 3 wls1411
+<Jan 6, 2021, 3:29:24,496 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000331> <Started the WebLogic Server Administration Server "AdminServer" for domain "base_domain" running in development mode.> 
+<Jan 6, 2021, 3:29:24,611 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000360> <The server started in RUNNING mode.> 
+<Jan 6, 2021, 3:29:24,651 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000365> <Server state changed to RUNNING.> 
+```
+
+2. demo/weblogic/config-jms.sh の実行  
+WebLogic Server Deploy Tooling を使ってJMSリソースを追加し、サーバーを再起動します。
+
 
 ## MicroProfile GraphQL (oracle.demo.graphql パッケージ)
 

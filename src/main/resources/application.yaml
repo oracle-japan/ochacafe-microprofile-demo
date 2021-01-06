@@ -71,7 +71,7 @@ mp.messaging:
   connector:
     helidon-jms:
       user: weblogic
-      password: Welcome1
+      password: OCHaCafe6834
       jndi:
         jms-factory: weblogic.jms.ConnectionFactory
         env-properties:
