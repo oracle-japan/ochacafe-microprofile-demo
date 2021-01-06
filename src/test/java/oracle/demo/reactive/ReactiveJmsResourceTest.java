@@ -16,12 +16,12 @@ import org.junit.jupiter.api.Test;
 import io.helidon.microprofile.tests.junit5.HelidonTest;
 import oracle.demo.jpa.Country;
 
-@HelidonTest
-public class ReactiveResourceTest{
+//@HelidonTest
+public class ReactiveJmsResourceTest{
 
     @Inject private WebTarget webTarget;
 
-    @Test
+    //@Test
     public void testCRUDCountry(){
         
         // warm-up
@@ -31,7 +31,7 @@ public class ReactiveResourceTest{
 
         // insert
         Country[] countries = new Country[]{ new Country(86, "China") };
-        Response response = webTarget.path("/reactive/country").request().post(Entity.entity(countries, MediaType.APPLICATION_JSON));
+        Response response = webTarget.path("/reactive/jms/country").request().post(Entity.entity(countries, MediaType.APPLICATION_JSON));
         Assertions.assertEquals(204, response.getStatus());
         delay(1000);
         jsonObject = webTarget.path("/jpa/country/86").request().get(JsonObject.class);
@@ -39,7 +39,7 @@ public class ReactiveResourceTest{
         Assertions.assertEquals("China", jsonObject.getString("countryName"));
 
         countries = new Country[]{ new Country(61, "Australia") };
-        response = webTarget.path("/reactive/country").request().post(Entity.entity(countries, MediaType.APPLICATION_JSON));
+        response = webTarget.path("/reactive/jms/country").request().post(Entity.entity(countries, MediaType.APPLICATION_JSON));
         Assertions.assertEquals(204, response.getStatus());
         delay(1000);
         jsonObject = webTarget.path("/jpa/country/61").request().get(JsonObject.class);
@@ -48,7 +48,7 @@ public class ReactiveResourceTest{
 
         // update
         Form form = new Form().param("name", "People's Republic of China");
-        response = webTarget.path("/reactive/country/86").request().put(Entity.form(form));
+        response = webTarget.path("/reactive/jms/country/86").request().put(Entity.form(form));
         Assertions.assertEquals(204, response.getStatus());
         delay(1000);
         jsonObject = webTarget.path("/jpa/country/86").request().get(JsonObject.class);
@@ -56,7 +56,7 @@ public class ReactiveResourceTest{
         Assertions.assertEquals("People's Republic of China", jsonObject.getString("countryName"));
 
         countries = new Country[]{ new Country(61, "Commonwealth of Australia") };
-        response = webTarget.path("/reactive/country").request().put(Entity.entity(countries, MediaType.APPLICATION_JSON));
+        response = webTarget.path("/reactive/jms/country").request().put(Entity.entity(countries, MediaType.APPLICATION_JSON));
         Assertions.assertEquals(204, response.getStatus());
         delay(1000);
         jsonObject = webTarget.path("/jpa/country/61").request().get(JsonObject.class);
@@ -64,20 +64,20 @@ public class ReactiveResourceTest{
         Assertions.assertEquals("Commonwealth of Australia", jsonObject.getString("countryName"));
 
         // delete
-        response = webTarget.path("/reactive/country/86").request().delete();
+        response = webTarget.path("/reactive/jms/country/86").request().delete();
         Assertions.assertEquals(204, response.getStatus());
         delay(1000);
         response = webTarget.path("/country/86").request().get();
         Assertions.assertEquals(404, response.getStatus());
 
-        response = webTarget.path("/reactive/country/61").request().delete();
+        response = webTarget.path("/reactive/jms/country/61").request().delete();
         Assertions.assertEquals(204, response.getStatus());
         delay(1000);
         response = webTarget.path("/country/61").request().get();
         Assertions.assertEquals(404, response.getStatus());
 
         // error update - CountryNotFoundException: Couldn't find country, id=86
-        response = webTarget.path("/reactive/country/86").request().put(Entity.form(form));
+        response = webTarget.path("/reactive/jms/country/86").request().put(Entity.form(form));
         Assertions.assertEquals(204, response.getStatus()); 
         delay(1000);
         response = webTarget.path("/country/86").request().get();

@@ -1,0 +1,14 @@
+resources:
+    JMSServer:
+        'JMSServer-0':
+            Target: AdminServer
+    JMSSystemResource:
+        'SystemModule-0':
+            Target: AdminServer
+            SubDeployment:
+                'Subdeproyment-0':
+                    Target: 'JMSServer-0'
+            JmsResource:
+                Queue:
+                    'Queue-0':
+                        SubDeploymentName: 'Subdeproyment-0'

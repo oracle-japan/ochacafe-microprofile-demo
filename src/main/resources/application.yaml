@@ -54,3 +54,27 @@ javax:
                 jdbcUrl: jdbc:mysql://localhost:3306/demo
                 username: oracle
                 password: mysql
+
+# Reactive Messaging
+mp.messaging:
+
+  incoming.from-jms:
+    connector: helidon-jms
+    destination: ./SystemModule-0!Queue-0
+    type: queue
+
+  outgoing.to-jms:
+    connector: helidon-jms
+    destination: ./SystemModule-0!Queue-0
+    type: queue
+
+  connector:
+    helidon-jms:
+      user: weblogic
+      password: OCHaCafe6834
+      jndi:
+        jms-factory: weblogic.jms.ConnectionFactory
+        env-properties:
+          java.naming:
+            factory.initial: weblogic.jndi.WLInitialContextFactory
+            provider.url: t3://localhost:7001

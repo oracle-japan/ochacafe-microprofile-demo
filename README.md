@@ -56,8 +56,9 @@ src/main
 │           │       ├── Trace.java
 │           │       ├── TraceTagHolder.java
 │           │       └── TraceTag.java
-│           ├── reactive [Reactive Messaging]
-│           │   └── ReactiveResource.java
+│           ├── reactive [Reactive Messaging & Connecter]
+│           │   ├── ReactiveResource.java
+│           │   └── ReactiveJmsResource.java
 │           ├── graphql [GraphQL]
 │           │   ├── Country.java
 │           │   └── CountryGraphQLApi.java
@@ -165,7 +166,7 @@ helidon-demo-mp                                   latest              1b4d2e82f6
 $ docker push (remote docker repository path/)helidon-demo-mp
 ```
 
-## gRPC 関連の補足
+## gRPC 関連の補足 (oracle.demo.grpc パッケージ)
 
 protobuf ペイロードを使ったサーバー実装は、POJO + Annotaion を使った方法と、GrpcMpExtensionを使って従来型のサービス実装クラスをデプロイする方法の、2種類を提供しています。おすすめは POJO + Annotaion です。
 
@@ -215,7 +216,7 @@ pom.xmlの通常ビルドフェーズとは独立してprotoファイルのコ�
 mvn -P protoc generate-sources
 ```
 
-## OpenTracing SPAN定義のためのアノテーション
+## OpenTracing SPAN定義のためのアノテーション (oracle.demo.tracing.interceptor パッケージ)
 
 MicroProfileのOpenTracingの実装の多くはSPANの定義を暗黙的に行っているケースが多く、コーディングしなくてもそれなりのトレース情報が出力されるので便利です。また、明示的にSPANを定義したい場合は@Tracedアノテーション(org.eclipse.microprofile.opentracing.Traced)を使って、メソッドにトレース出力をつけることができます。しかしながら、標準機能では必ずしも欲しい情報を出力してくれるとは限りません。そこで、ここではSPANの定義処理をCDI Interceptorとして実装して、Trace出力の内容をアノテーションである程度コントロールできるようにしてみました。
 
@@ -232,7 +233,7 @@ public List<Country> getCountriesWithError(){
 }
 ```
 
-2つのアノテーションが利用可能です(oracle.demo.tracing.interceptorパッケージ)。
+2つのアノテーションが利用可能です。
 
 | annotation   | 説明 |
 |--------------|------|
@@ -246,7 +247,154 @@ public List<Country> getCountriesWithError(){
 | value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
 | stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
 
-## GraphQL
+## MicroProfile Reactive Messaging (oracle.demo.reactive パッケージ)
+
+JPA/JDBC経由でデータベースにアクセスするデモ(oracle.demo.jpaパッケージ)のバリエーションとして、MicroProfile Reactive Messaging を使ったデータベースの非同期更新(Event Sourcing)処理を実装しています。RESTでリクエストを受け付けた後、非同期更新イベントを発行します。
+
+```bash
+# insert
+curl -X POST -H "Content-Type: application/json" http://localhost:8080/reactive/country \
+   -d '[{"countryId":86,"countryName":"China"}]'
+curl http://localhost:8080/jpa/country/86 # {"countryId":86,"countryName":"China"}
+
+# update
+curl -X PUT -H "Content-Type: application/x-www-form-urlencoded" http://localhost:8080/reactive/country/86 \
+  -d "name=People's Republic of China"
+curl http://localhost:8080/jpa/country/86 # {"countryId":86,"countryName":"People's Republic of China"}
+
+# delete
+curl -X DELETE http://localhost:8080/reactive/country/86
+curl -v http://localhost:8080/jpa/country/86 # 404 Not Found
+```
+
+### JMS Connector
+
+更に、Helidonが提供している JMS Connectorを使って WebLogic Server の JMSキューを経由したデータベースの非同期更新(Event Sourcing)処理を実装しています。このデモの実行にはWebLogic Serverのクライアント・ライブラリが必要なので、デフォルトで無効にしています。
+
+```bash
+# insert
+curl -X POST -H "Content-Type: application/json" http://localhost:8080/reactive/jms/country \
+   -d '[{"countryId":61,"countryName":"Australia"}]'
+curl http://localhost:8080/jpa/country/61 # {"countryId":61,"countryName":"Australia"}
+
+# update
+curl -X PUT -H "Content-Type: application/x-www-form-urlencoded" http://localhost:8080/reactive/jms/country/61 \
+  -d "name=Commonwealth of Australia"
+curl http://localhost:8080/jpa/country/61 # {"countryId":61,"countryName":"Commonwealth of Australia"}
+
+# delete
+curl -X DELETE http://localhost:8080/reactive/jms/country/61
+curl -v http://localhost:8080/jpa/country/61 # 404 Not Found
+```
+
+### JMS Connector デモを有効化するには
+
+1. WebLogic Server をインストールし、JMSリソースを構成する  
+適当なキューを定義して下さい
+
+2. Mavenのローカル・リポジトリを作成して、WebLogic Serverのクライアント・ライブラリをデプロイする  
+`create-local-repo.sh` を編集してWL_HOMEを正しいパスに設定し、このシェルを実行してください。`m2repo`フォルダにjarファイルがデプロイされます。
+
+```bash
+WL_HOME=${HOME}/opt/wls1411
+WL_T3CLIENT_JAR=${WL_HOME}/wlserver/server/lib/wlthint3client.jar
+
+mkdir -p m2repo
+
+mvn deploy:deploy-file \
+ -Dfile=$WL_T3CLIENT_JAR \
+ -Durl=file:./m2repo \
+ -DgroupId=oracle.weblogic \
+ -DartifactId=wlthint3client \
+ -Dversion=14.1.1.0.0 \
+ -Dpackaging=jar \
+ -DgeneratePom=true
+```
+3. pom.xml 及び Javaソースのコメントアウトを外す
+ - pom.xml
+```text
+        <!-- WebLogic thin t3 client for 14.1.1 -->
+        <!--
+        <dependency>
+            <groupId>oracle.weblogic</groupId>
+            <artifactId>wlthint3client</artifactId>
+            <version>14.1.1.0.0</version>
+        </dependency>
+        -->
+```
+ - src/main/java/oracle/demo/reactive/ReactiveJmsResource.java
+```java
+    //@Outgoing("to-jms")
+    public Publisher<Message<String>> preparePublisher() {
+        return ReactiveStreams.fromPublisher(FlowAdapters.toPublisher(publisher)).buildRs();
+    }
+
+    //@Incoming("from-jms")
+    @Acknowledgment(Acknowledgment.Strategy.MANUAL)
+    public CompletionStage<?> consume(Message<String> message) {
+```
+
+ - src/test/java/oracle/demo/reactive/ReactiveJmsResourceTest.java
+```java
+//@HelidonTest
+public class ReactiveJmsResourceTest{
+
+    @Inject private WebTarget webTarget;
+
+    //@Test
+    public void testCRUDCountry(){
+```
+4. src/main/resources/application.yaml を編集して、WebLogic Serverの接続設定を行う
+
+```yaml
+# Reactive Messaging
+mp.messaging:
+
+  incoming.from-jms:
+    connector: helidon-jms
+    destination: ./SystemModule-0!Queue-0 # 確認
+    type: queue
+
+  outgoing.to-jms:
+    connector: helidon-jms
+    destination: ./SystemModule-0!Queue-0 # 確認
+    type: queue
+
+  connector:
+    helidon-jms:
+      user: weblogic # 確認
+      password: Ochacafe00 # 確認
+      jndi:
+        jms-factory: weblogic.jms.ConnectionFactory
+        env-properties:
+          java.naming:
+            factory.initial: weblogic.jndi.WLInitialContextFactory
+            provider.url: t3://localhost:7001 # 確認
+```
+
+#### （参考）テスト用の WebLogic Server Docker インスタンスの作成 
+
+JMS Connector のテストに使うための設定済み WebLogic Server インスタンスを Docker コンテナで実行するためのスクリプトを用意しています。
+
+0. (必要に応じて) Oracle コンテナ・レジストリへのログイン  
+事前に `docker login container-registry.oracle.com` を済ませておいて下さい。
+
+1. demo/weblogic/start-weblogic.sh の実行  
+WebLogic Server の公式コンテナ・イメージを取得して起動します。  
+ `docker logs`を確認してサーバーが起動するまで待機して下さい。`<Server state changed to RUNNING.>` が表示されたらOKです。
+
+```
+$ docker logs --tail 3 wls1411
+<Jan 6, 2021, 3:29:24,496 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000331> <Started the WebLogic Server Administration Server "AdminServer" for domain "base_domain" running in development mode.> 
+<Jan 6, 2021, 3:29:24,611 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000360> <The server started in RUNNING mode.> 
+<Jan 6, 2021, 3:29:24,651 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000365> <Server state changed to RUNNING.> 
+```
+
+2. demo/weblogic/config-jms.sh の実行  
+WebLogic Server Deploy Tooling を使ってJMSリソースを追加し、サーバーを再起動します。
+
+
+## MicroProfile GraphQL (oracle.demo.graphql パッケージ)
 
 JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをMicroProfile GraphQL仕様にしたものを追加しました。  
 スキーマは `/graphql/schema.graphql` から取得できます。
@@ -313,6 +461,8 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 ![データベースへのアクセス・パターン](doc/images/microprofile-demo-crud.png)
 
 ---
-_Copyright © 2019-2020, Oracle and/or its affiliates. All rights reserved._
+_Copyright © 2019-2021, Oracle and/or its affiliates. All rights reserved._
+
+
 
 

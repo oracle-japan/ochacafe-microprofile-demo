@@ -1,5 +1,7 @@
 package oracle.demo.jpa;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -10,7 +12,9 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "COUNTRY") 
-public class Country {
+public class Country implements Serializable{
+
+	private static final long serialVersionUID = 1L;
 
     @Column(name = "COUNTRY_ID") @Id 
     private int countryId;
