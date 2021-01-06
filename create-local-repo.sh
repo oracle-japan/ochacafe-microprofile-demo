@@ -1,6 +1,7 @@
 #!/bin/bash
 
-WL_T3CLIENT_JAR=${HOME}/opt/wls1411/wlserver/server/lib/wlthint3client.jar
+WL_HOME=${HOME}/opt/wls1411
+WL_T3CLIENT_JAR=${WL_HOME}/wlserver/server/lib/wlthint3client.jar
 
 #WL_CLIENT_JAR=${HOME}/opt/wls12214/wlserver/server/lib/wlclient.jar
 #WL_JMSCLIENT_JAR=${HOME}/opt/wls12214/wlserver/server/lib/wljmsclient.jar

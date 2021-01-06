@@ -52,12 +52,12 @@ public class ReactiveJmsResource {
 
     @Inject private CountryDAO dao;
 
-    @Outgoing("to-jms")
+    //@Outgoing("to-jms")
     public Publisher<Message<String>> preparePublisher() {
         return ReactiveStreams.fromPublisher(FlowAdapters.toPublisher(publisher)).buildRs();
     }
 
-    @Incoming("from-jms")
+    //@Incoming("from-jms")
     @Acknowledgment(Acknowledgment.Strategy.MANUAL)
     public CompletionStage<?> consume(Message<String> message) {
         final DaoEvent event = jsonb.fromJson(message.getPayload(), DaoEvent.class);

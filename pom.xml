@@ -136,19 +136,15 @@
         <dependency>
             <groupId>io.helidon.messaging.jms</groupId>
             <artifactId>helidon-messaging-jms</artifactId>
-            <exclusions>
-                <exclusion>
-                  <groupId>javax.jms</groupId>
-                  <artifactId>javax.jms-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- WebLogic thin t3 client for 14.1.1 -->
+        <!--
         <dependency>
             <groupId>oracle.weblogic</groupId>
             <artifactId>wlthint3client</artifactId>
             <version>14.1.1.0.0</version>
         </dependency>
+        -->
 
         <!-- support gRPC-->
         <dependency>

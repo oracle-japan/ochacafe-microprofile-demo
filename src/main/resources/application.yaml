@@ -74,7 +74,6 @@ mp.messaging:
       password: Welcome1
       jndi:
         jms-factory: weblogic.jms.ConnectionFactory
-        #jms-factory: javax.jms.QueueConnectionFactory
         env-properties:
           java.naming:
             factory.initial: weblogic.jndi.WLInitialContextFactory

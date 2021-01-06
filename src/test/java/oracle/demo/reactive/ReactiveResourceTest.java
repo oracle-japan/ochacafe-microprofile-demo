@@ -53,7 +53,7 @@ public class ReactiveResourceTest{
         delay(1000);
         jsonObject = webTarget.path("/jpa/country/86").request().get(JsonObject.class);
         Assertions.assertEquals(86, jsonObject.getInt("countryId"));
-        Assertions.assertEquals("People’s Republic of China", jsonObject.getString("countryName"));
+        Assertions.assertEquals("People's Republic of China", jsonObject.getString("countryName"));
 
         countries = new Country[]{ new Country(61, "Commonwealth of Australia") };
         response = webTarget.path("/reactive/country").request().put(Entity.entity(countries, MediaType.APPLICATION_JSON));
