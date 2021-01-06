@@ -292,8 +292,10 @@ curl -v http://localhost:8080/jpa/country/61 # 404 Not Found
 1. WebLogic Server をインストールし、JMSリソースを構成する  
 適当なキューを定義して下さい
 
-2. Mavenのローカル・リポジトリを作成して、WebLogic Serverのクライアント・ライブラリをデプロイする  
-`create-local-repo.sh` を編集してWL_HOMEを正しいパスに設定し、このシェルを実行してください。`m2repo`フォルダにjarファイルがデプロイされます。
+2. Mavenのローカル・リポジトリを作成して、WebLogic Serverのクライアント・ライブラリ(wlthint3client.jar)をデプロイする  
+クライアント・ライブラリはパブリックMavenリポジトリからは入手できませんので、ローカル・リポジトリをマニュアルで作成します。
+`create-local-repo.sh` を編集してこのシェルを実行してください。`m2repo`フォルダにjarファイルがデプロイされます。  
+wlthint3client.jar は後述するWebLogic Serverのコンテナ・イメージから入手するのが簡単かもしれません。
 
 ```bash
 WL_HOME=${HOME}/opt/wls1411
@@ -393,6 +395,11 @@ $ docker logs --tail 3 wls1411
 2. demo/weblogic/config-jms.sh の実行  
 WebLogic Server Deploy Tooling を使ってJMSリソースを追加し、サーバーを再起動します。
 
+尚、デモの実行に必要な wlthint3client.jar は、以下のようにコンテナから取得することが可能です。
+
+```bash
+docker cp wls1411:/u01/oracle/wlserver/server/lib/wlthint3client.jar wlthint3client.jar
+```
 
 ## MicroProfile GraphQL (oracle.demo.graphql パッケージ)
 
