@@ -56,17 +56,20 @@ src/main
 │           │       ├── Trace.java
 │           │       ├── TraceTagHolder.java
 │           │       └── TraceTag.java
-│           ├── reactive [Reactive Messaging & Connecter]
-│           │   ├── ReactiveResource.java
-│           │   └── ReactiveJmsResource.java
+│           ├── reactive [Reactive Messaging & Connecter]
+│           │   ├── DaoEvent.java
+│           │   ├── ExecutorServiceHelper.java
+│           │   ├── ReactiveJmsResource.java
+│           │   └── ReactiveResource.java
 │           ├── graphql [GraphQL]
 │           │   ├── Country.java
 │           │   └── CountryGraphQLApi.java
-│           ├── jpa [拡張機能 JPA/JTA]
-│           │   ├── Country.java
-│           │   ├── CountryResource.java
-│           │   ├── Greeting.java
-│           │   └── JPAExampleResource.java
+│           ├── jpa [拡張機能 JPA/JTA]
+│           │   ├── CountryDAO.java
+│           │   ├── Country.java
+│           │   ├── CountryResource.java
+│           │   ├── Greeting.java
+│           │   └── JPAExampleResource.java
 │           ├── grpc [拡張機能 gRPC]
 │           │   ├── javaobj [gRPC Javaシリアライゼーション版]
 │           │   │   ├── GreeterServiceImpl.java
@@ -84,7 +87,7 @@ src/main
 ├── proto
 │   └── helloworld.proto [gRPC IDL定義]
 └── resources
-    ├── application.yaml [Helidonで使う設定ファイル]
+    ├── application.yaml [Helidonの設定ファイル microprofile-config.properties 相当として利用可能]
     ├── createtable.ddl [JPA拡張機能で使うH2用のDDL]
     ├── jbossts-properties.xml [JTAの設定ファイル]
     ├── logging.properties [ログ設定ファイル]
@@ -102,9 +105,14 @@ demo
 │   ├── open-tracing.yaml
 │   ├── simple-deployment.yaml
 │   └── simple-service.yaml
-└── tracing [トレーシングデモ]
-    ├── request.json
-    └── tracing-demo.sh
+├── tracing [トレーシングデモ]
+│   ├── request.json
+│   └── tracing-demo.sh
+└── weblogic [WebLogic Server コンテナ作成・設定]
+    ├── config-jms.sh
+    ├── config-jms.yaml
+    ├── domain.properties
+    └── start-weblogic.sh
 ```
 
 ## ビルド方法
@@ -122,7 +130,7 @@ mvn package
 java -jar target/helidon-demo-mp.jar
 ```
 
-## Docker イメージの作成
+## ■ Docker イメージの作成
 
 Dockerfileを使わずに、[Jib](https://github.com/GoogleContainerTools/jib) を使ってMavenから直接イメージをビルドします.  
 ルートディレクトリにあるDockerfileを使ってもイメージの作成は可能です.
@@ -166,7 +174,51 @@ helidon-demo-mp                                   latest              1b4d2e82f6
 $ docker push (remote docker repository path/)helidon-demo-mp
 ```
 
-## gRPC 関連の補足 (oracle.demo.grpc パッケージ)
+## ■ MicroProfile Health デモ (oracle.demo.health パッケージ)
+
+`/health/live` (Liveness)、`/health/ready` (Readiness) 及び `/health` (複合パターン) のエンドポイントを使ってヘルスチェックができます。 
+
+```json
+{
+    "outcome": "UP",
+    "status": "UP",
+    "checks": [
+        {
+            "name": "my-health-check-liveness",
+            "state": "UP",
+            "status": "UP",
+            "data": {
+                "time-to-fail": 0,
+                "uptime": 29071
+            }
+        },
+        {
+            "name": "my-health-check-readiness",
+            "state": "UP",
+            "status": "UP"
+        }
+    ]
+}
+```
+
+このデモでは、タイムアウト値を設定することによって、サーバーの起動時間が一定の値を超えるとLivenessをDOWNにすることができます。  
+タイムアウト値(デフォルト= 0 [タイムアウトしない])は、2種類の方法で設定できます。
+
+1. microprofile-config.properties (or application.yaml) で設定する
+
+```text
+# Health
+#demo.healthcheck.liveness.name=_my-health-check
+demo.healthcheck.time-to-fail=30 # in second, default: 0
+```
+
+2. RESTで設定する
+
+```
+$ curl localhost:8080/myhealth?timeToFail=30
+```
+
+## ■ gRPC 関連の補足 (oracle.demo.grpc パッケージ)
 
 protobuf ペイロードを使ったサーバー実装は、POJO + Annotaion を使った方法と、GrpcMpExtensionを使って従来型のサービス実装クラスをデプロイする方法の、2種類を提供しています。おすすめは POJO + Annotaion です。
 
@@ -216,7 +268,7 @@ pom.xmlの通常ビルドフェーズとは独立してprotoファイルのコ�
 mvn -P protoc generate-sources
 ```
 
-## OpenTracing SPAN定義のためのアノテーション (oracle.demo.tracing.interceptor パッケージ)
+## ■ OpenTracing SPAN定義のためのアノテーション (oracle.demo.tracing.interceptor パッケージ)
 
 MicroProfileのOpenTracingの実装の多くはSPANの定義を暗黙的に行っているケースが多く、コーディングしなくてもそれなりのトレース情報が出力されるので便利です。また、明示的にSPANを定義したい場合は@Tracedアノテーション(org.eclipse.microprofile.opentracing.Traced)を使って、メソッドにトレース出力をつけることができます。しかしながら、標準機能では必ずしも欲しい情報を出力してくれるとは限りません。そこで、ここではSPANの定義処理をCDI Interceptorとして実装して、Trace出力の内容をアノテーションである程度コントロールできるようにしてみました。
 
@@ -247,7 +299,7 @@ public List<Country> getCountriesWithError(){
 | value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
 | stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
 
-## MicroProfile Reactive Messaging (oracle.demo.reactive パッケージ)
+## ■ MicroProfile Reactive Messaging (oracle.demo.reactive パッケージ)
 
 JPA/JDBC経由でデータベースにアクセスするデモ(oracle.demo.jpaパッケージ)のバリエーションとして、MicroProfile Reactive Messaging を使ったデータベースの非同期更新(Event Sourcing)処理を実装しています。RESTでリクエストを受け付けた後、非同期更新イベントを発行します。
 
@@ -299,7 +351,7 @@ wlthint3client.jar は後述するWebLogic Serverのコンテナ・イメージ�
 
 ```bash
 WL_HOME=${HOME}/opt/wls1411
-WL_T3CLIENT_JAR=${WL_HOME}/wlserver/server/lib/wlthint3client.jar
+WL_T3CLIENT_JAR=${WL_HOME}/wlserver/server/lib/wlthint3client.jar # これを正しいパスに
 
 mkdir -p m2repo
 
@@ -314,7 +366,7 @@ mvn deploy:deploy-file \
 ```
 3. pom.xml 及び Javaソースのコメントアウトを外す
  - pom.xml
-```text
+```xml
         <!-- WebLogic thin t3 client for 14.1.1 -->
         <!--
         <dependency>
@@ -374,7 +426,7 @@ mp.messaging:
             provider.url: t3://localhost:7001 # 確認
 ```
 
-#### （参考）テスト用の WebLogic Server Docker インスタンスの作成 
+### テスト用の WebLogic Server Docker インスタンスの作成 
 
 JMS Connector のテストに使うための設定済み WebLogic Server インスタンスを Docker コンテナで実行するためのスクリプトを用意しています。
 
@@ -401,7 +453,7 @@ WebLogic Server Deploy Tooling を使ってJMSリソースを追加し、サー�
 docker cp wls1411:/u01/oracle/wlserver/server/lib/wlthint3client.jar wlthint3client.jar
 ```
 
-## MicroProfile GraphQL (oracle.demo.graphql パッケージ)
+## ■ MicroProfile GraphQL (oracle.demo.graphql パッケージ)
 
 JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをMicroProfile GraphQL仕様にしたものを追加しました。  
 スキーマは `/graphql/schema.graphql` から取得できます。
@@ -466,6 +518,36 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 + MicroProfile GraphQL を使った Query & Mutation 処理 
 
 ![データベースへのアクセス・パターン](doc/images/microprofile-demo-crud.png)
+
+## ■ （おまけ）Cowsay (oracle.demo.cowweb パッケージ)
+
+https://github.com/ricksbrown/cowsay
+
+```
+$ curl localhost:8080/cowsay/say
+ ______
+< Moo! >
+ ------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+$ curl "localhost:8080/cowsay/think?message=Hello&cowfile=moose"
+ _______
+( Hello )
+ -------
+  o
+   o   \_\_    _/_/
+    o      \__/
+           (oo)\_______
+           (__)\       )\/\
+               ||----w |
+               ||     ||
+
+```
+エンジョイ！
 
 ---
 _Copyright © 2019-2021, Oracle and/or its affiliates. All rights reserved._
