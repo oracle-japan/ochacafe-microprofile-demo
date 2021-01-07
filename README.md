@@ -35,9 +35,9 @@ src/main
 │           │   ├── FaultToleranceResource.java
 │           │   └── FaultToleranceTester.java
 │           ├── health [ヘルスチェック]
+│           │   ├── HealthCheckHelper.java
 │           │   ├── HealthCheckResource.java
-│           │   ├── MyHealthCheck.java
-│           │   └── TimeToFail.java
+│           │   └── MyHealthCheck.java
 │           ├── metrics [メトリクス]
 │           │   └── MetricsResource.java
 │           ├── restclient [RESTクライアント]
