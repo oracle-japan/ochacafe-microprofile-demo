@@ -12,7 +12,7 @@ import javax.ws.rs.core.MediaType;
 /**
  * REST endpoint to change timeToFail value
  */
-@Path("/mphealth")
+@Path("/myhealth")
 @ApplicationScoped
 public class HealthCheckResource {
 
@@ -26,7 +26,7 @@ public class HealthCheckResource {
         if(timeToFail < 0){
             throw new IllegalArgumentException("timeToFail must be zero or positive.");
         }
-        TimeToFail.set(timeToFail);
+        HealthCheckHelper.set(timeToFail);
         return Long.toString(timeToFail);
     }
 

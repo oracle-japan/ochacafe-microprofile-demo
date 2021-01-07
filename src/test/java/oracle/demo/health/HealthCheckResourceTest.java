@@ -1,40 +1,67 @@
 package oracle.demo.health;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
+import javax.json.JsonValue;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import io.helidon.microprofile.tests.junit5.AddConfig;
 import io.helidon.microprofile.tests.junit5.HelidonTest;
 
 @HelidonTest
+@AddConfig(key = "demo.healthcheck.time-to-fail", value = "30") // seconds, need to keep enough time to start-up
 public class HealthCheckResourceTest{
 
     @Inject private WebTarget webTarget;
 
     @Test
     public void testHealthCheck(){
-        webTarget.path("/mphealth").queryParam("timeToFail", 2).request().get();
 
-        Response response = webTarget.path("/health").request().get();
-        //System.out.println(response.readEntity(String.class));
-        Assertions.assertEquals(200, response.getStatus()); 
+        // check initial status
+        Response response = webTarget.path("/health/live").request().get();
+        check(response, 200, "UP");
 
-        try{
-            Thread.sleep(3 * 1000); // more than 2000msec
-        }catch(InterruptedException ie){}
-        response = webTarget.path("/health").request().get();
-        //System.out.println(response.readEntity(String.class));
-        Assertions.assertEquals(503, response.getStatus()); 
+        // wait for timeout
+        System.out.println("Waiting for timeout...");
+        long uptime = HealthCheckHelper.getUptime();
+        sleep((30 * 1000L - uptime) / 1000 + 1L);
+        response = webTarget.path("/health/live").request().get();
+        check(response, 503, "DOWN");
 
-        webTarget.path("/mphealth").queryParam("timeToFail", 0).request().get();
-        response = webTarget.path("/health").request().get();
-        //System.out.println(response.readEntity(String.class));
-        Assertions.assertEquals(200, response.getStatus()); 
+        // reset timeout to 2 seconds
+        webTarget.path("/myhealth").queryParam("timeToFail", 2).request().get();
+        response = webTarget.path("/health/live").request().get();
+        check(response, 200, "UP");
+
+        // wait for timeout
+        System.out.println("Waiting for timeout...");
+        sleep(3);
+        response = webTarget.path("/health/live").request().get();
+        check(response, 503, "DOWN");
+
+        // reset timeout
+        webTarget.path("/myhealth").queryParam("timeToFail", 0).request().get();
+        response = webTarget.path("/health/live").request().get();
+        check(response, 200, "UP");
     }
 
+    public void check(Response response, int status, String updown){
+        JsonValue json = response.readEntity(JsonValue.class);
+        System.out.println(json.toString());
+        Assertions.assertEquals(status, response.getStatus()); 
+        Assertions.assertEquals(updown, json.asJsonObject().getString("status")); 
+    }
+
+    private void sleep(long sec){
+        try{
+            TimeUnit.SECONDS.sleep(sec);
+        }catch(Exception e){}
+    }
 
 
 }
