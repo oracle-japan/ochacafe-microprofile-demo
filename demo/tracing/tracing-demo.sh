@@ -21,10 +21,10 @@ start() {
   --network helidon-demo-nw \
   jaegertracing/all-in-one:1.13
   
-  docker run --rm -d --name helidon-demo-mp-0 --hostname helidon-demo-mp-0 --network helidon-demo-nw -p 8080:8080 helidon-demo-mp
-  docker run --rm -d --name helidon-demo-mp-1 --hostname helidon-demo-mp-1 --network helidon-demo-nw helidon-demo-mp
-  docker run --rm -d --name helidon-demo-mp-2 --hostname helidon-demo-mp-2 --network helidon-demo-nw helidon-demo-mp
-  docker run --rm -d --name helidon-demo-mp-3 --hostname helidon-demo-mp-3 --network helidon-demo-nw helidon-demo-mp
+  docker run --rm -d --name helidon-demo-mp-0 --hostname helidon-demo-mp-0 --network helidon-demo-nw -e tracing.service=helidon-demo-mp-0 -p 8080:8080 helidon-demo-mp
+  docker run --rm -d --name helidon-demo-mp-1 --hostname helidon-demo-mp-1 --network helidon-demo-nw -e tracing.service=helidon-demo-mp-1 helidon-demo-mp
+  docker run --rm -d --name helidon-demo-mp-2 --hostname helidon-demo-mp-2 --network helidon-demo-nw -e tracing.service=helidon-demo-mp-2 helidon-demo-mp
+  docker run --rm -d --name helidon-demo-mp-3 --hostname helidon-demo-mp-3 --network helidon-demo-nw -e tracing.service=helidon-demo-mp-3 helidon-demo-mp
 }
 
 stop() {

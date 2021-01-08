@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: helidon-demo-mp-container
-      image: {{ remote-docker-repository }}/helidon-demo-mp:latest
+      image: ${REMOTE_REPO_PATH}/helidon-demo-mp:latest
       imagePullPolicy: Always
         ports:
         - containerPort: 8080

@@ -5,7 +5,7 @@ metadata:
   labels:
     app: helidon-demo-mp
   annotations:
-    service.beta.kubernetes.io/oci-load-balancer-shape: 400Mbps # or 400Mbps
+    service.beta.kubernetes.io/oci-load-balancer-shape: 100Mbps # 100Mbps, 400Mbps, 8000Mbps
   namespace: demo
 spec:
   type: LoadBalancer

@@ -10,12 +10,15 @@ metadata:
 spec:
   containers:
   - name: api-helidon-container
-    image: {{ remote-docker-repository }}/helidon-demo-mp:latest
+    image: ${REMOTE_REPO_PATH}/helidon-demo-mp:latest
     imagePullPolicy: Always
+    env:
+    - name: tracing.service
+      value: helidon-demo-mp-0
     ports:
     - containerPort: 8080
   imagePullSecrets:
-  - name: ocirsecret
+  - name: docker-registry-secret
 ---
 apiVersion: v1
 kind: Pod
@@ -28,12 +31,15 @@ spec:
   dnsPolicy: ClusterFirst
   containers:
   - name: api-helidon-container
-  image: {{ remote-docker-repository }}/helidon-demo-mp:latest
-  imagePullPolicy: Always
+    image: ${REMOTE_REPO_PATH}/helidon-demo-mp:latest
+    imagePullPolicy: Always
+    env:
+    - name: tracing.service
+      value: helidon-demo-mp-1
     ports:
     - containerPort: 8080
   imagePullSecrets:
-  - name: ocirsecret
+  - name: docker-registry-secret
 ---
 apiVersion: v1
 kind: Pod
@@ -46,12 +52,15 @@ spec:
   dnsPolicy: ClusterFirst
   containers:
   - name: api-helidon-container
-  image: {{ remote-docker-repository }}/helidon-demo-mp:latest
-  imagePullPolicy: Always
+    image: ${REMOTE_REPO_PATH}/helidon-demo-mp:latest
+    imagePullPolicy: Always
+    env:
+    - name: tracing.service
+      value: helidon-demo-mp-2
     ports:
     - containerPort: 8080
   imagePullSecrets:
-  - name: ocirsecret
+  - name: docker-registry-secret
 ---
 apiVersion: v1
 kind: Pod
@@ -64,12 +73,15 @@ spec:
   dnsPolicy: ClusterFirst
   containers:
   - name: api-helidon-container
-  image: {{ remote-docker-repository }}/helidon-demo-mp:latest
-  imagePullPolicy: Always
+    image: ${REMOTE_REPO_PATH}/helidon-demo-mp:latest
+    imagePullPolicy: Always
+    env:
+    - name: tracing.service
+      value: helidon-demo-mp-3
     ports:
     - containerPort: 8080
   imagePullSecrets:
-  - name: ocirsecret
+  - name: docker-registry-secret
 ---
 apiVersion: v1
 kind: Pod
