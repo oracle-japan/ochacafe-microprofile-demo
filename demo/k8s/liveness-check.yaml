@@ -8,7 +8,7 @@ metadata:
 spec:
   containers:
   - name: api-helidon-container
-    image: {{ remote-docker-repository }}/helidon-demo-mp:latest
+    image: ${REMOTE_REPO_PATH}/helidon-demo-mp:latest
     imagePullPolicy: Always
     env:
     - name: demo.healthcheck.time-to-fail
@@ -22,7 +22,7 @@ spec:
       failureThreshold: 2
       periodSeconds: 10
   imagePullSecrets:
-  - name: ocirsecret
+  - name: docker-registry-secret
 ---
 # NodePort - in order to access from outside
 ---

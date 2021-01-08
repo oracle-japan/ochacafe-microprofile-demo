@@ -18,6 +18,8 @@
     <properties>
         <mainClass>oracle.demo.Main</mainClass>
         <docker.repo.prefix></docker.repo.prefix>
+        <!-- prefix for remote repository ending with /-->
+        <docker.repo.remote.prefix>${REMOTE_REPO_PATH}/</docker.repo.remote.prefix>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <grpc.version>1.30.2</grpc.version>
     </properties>
@@ -87,11 +89,11 @@
             </build>
         </profile>
 
-        <!-- mvn -P could ... -->
+        <!-- mvn -P remote-repo-prefix ... -->
         <profile>
-            <id>cloud</id>
+            <id>remote-repo-prefix</id>
             <properties>
-                <docker.repo.prefix>{{ remote docker repository path }}</docker.repo.prefix>
+                <docker.repo.prefix>${docker.repo.remote.prefix}</docker.repo.prefix>
             </properties>
         </profile>
     </profiles>

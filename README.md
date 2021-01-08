@@ -138,27 +138,18 @@ Dockerfileを使わずに、[Jib](https://github.com/GoogleContainerTools/jib) �
 ### 通常（ローカル）のタグを付与する場合
 
 ```bash
-mvn post-integration-test # 便宜上post-integration-testにアサインしているだけ
+mvn post-integration-test -DskipTests=true # 便宜上post-integration-testにアサインしているだけ
 ```
 
 ### リモート用のタグを付与する場合
 
-pom.xmlを以下のように設定し、
-```xml
-    <profiles>
-        <!-- mvn -P could ... -->
-        <profile>
-            <id>cloud</id>
-            <properties>
-                <docker.repo.prefix>(remote docker repository path/)</docker.repo.prefix>
-            </properties>
-        </profile>
-    </profiles>
-```
-以下を実行します.
+環境変数 REMOTE_REPO_PATH を設定した後、Mavenのプロファイルを指定して実行します。
 
 ```bash
-mvn -P cloud post-integration-test
+# export environment variable as appropriate
+export REMOTE_REPO_PATH=iad.ocir.io/some-tenant/some-additional-path
+
+mvn -P remote-repo-prefix post-integration-test -DskipTests=true
 ```
 
 ローカルリポジトリに作成されたイメージをリポートリポジトリにpushします.
@@ -218,18 +209,200 @@ demo.healthcheck.time-to-fail=30 # in second, default: 0
 $ curl localhost:8080/myhealth?timeToFail=30
 ```
 
-## ■ gRPC 関連の補足 (oracle.demo.grpc パッケージ)
+### Kubernetes で Health Check を試してみる
 
-protobuf ペイロードを使ったサーバー実装は、POJO + Annotaion を使った方法と、GrpcMpExtensionを使って従来型のサービス実装クラスをデプロイする方法の、2種類を提供しています。おすすめは POJO + Annotaion です。
+KubernetesはPodの正常性をチェックし、一定の条件を満たすとPodを再起動する機能があります。
 
-### POJO + Annotaion を使った方法（デフォルト 有効）
+```yaml
+    livenessProbe:
+      httpGet:
+        port: 8080
+        path: /health/live
+      failureThreshold: 2
+      periodSeconds: 10
+```
 
+demo/k8s/liveness-check.yaml は環境変数 `demo.healthcheck.time-to-fail` を 30に設定するので、Podが起動して30秒経過すると、`/health/live` のステータスは 503 (DOWN)となります。
+
+```bash
+kubectl create namespace demo
+
+# export environment variable as appropriate
+export REMOTE_REPO_PATH=iad.ocir.io/some-tenant/some-additional-path
+
+# (オプション)プライベートリポジトリの場合は、`docker-registry-secret` という secret を作成して下さい
+kubectl create secret docker-registry docker-registry-secret -n demo \
+ --docker-server=iad.ocir.io \
+ --docker-username='some-tenant/some-username' \
+ --docker-password='access-token-or-something' \
+ --docker-email='some-mail-address'
+
+# replace "${REMOTE_REPO_PATH}/helidon-demo-mp:latest" in liveness-check.yaml and apply
+envsubst < demo/k8s/liveness-check.yaml | kubectl apply -f -
+```
+
+ここで Pod の状態を定期的に確認すると、再起動されていることが分かります。 
+
+```bash
+$ kubectl get pod -n demo
+NAME                     READY   STATUS    RESTARTS   AGE
+helidon-demo-mp-health   1/1     Running   0          24s
+
+$ kubectl get pod -n demo
+NAME                     READY   STATUS    RESTARTS   AGE
+helidon-demo-mp-health   1/1     Running   1          81s
+
+$ kubectl get pod -n demo
+NAME                     READY   STATUS    RESTARTS   AGE
+helidon-demo-mp-health   1/1     Running   2          114s
+```
+```
+$ kubectl describe pod helidon-demo-mp-health -n demo
+(中略...)
+Events:
+  Type     Reason     Age                    From                 Message
+  ----     ------     ----                   ----                 -------
+  Normal   Started    9m13s (x3 over 10m)   kubelet, 10.0.10.11  Started container api-helidon-container
+  Warning  Unhealthy  9m4s (x3 over 10m)    kubelet, 10.0.10.11  Liveness probe failed: Get http://10.244.0.131:8080/health/live: dial tcp 10.244.0.131:8080: connect: connection refused
+  Normal   Killing    8m24s (x3 over 10m)   kubelet, 10.0.10.11  Container api-helidon-container failed liveness probe, will be restarted
+  Warning  Unhealthy  5m54s (x12 over 10m)  kubelet, 10.0.10.11  Liveness probe failed: HTTP probe failed with statuscode: 503
+```
+
+## ■ Open Tracing デモ (oracle.demo.tracing パッケージ)
+
+Kubernetes に デモのPodを4つと、jaegerのPodをデプロイします。
+
+```
+# replace "${REMOTE_REPO_PATH}/helidon-demo-mp:latest" in open-tracing.yaml and apply
+envsubst < demo/k8s/open-tracing.yaml | kubectl apply -f -
+```
+
+次のような状態になっているはずです。
+
+```
+$ kubectl get all -n demo
+NAME                    READY   STATUS    RESTARTS   AGE
+pod/helidon-demo-mp-0   1/1     Running   0          5m37s
+pod/helidon-demo-mp-1   1/1     Running   0          25s
+pod/helidon-demo-mp-2   1/1     Running   0          24s
+pod/helidon-demo-mp-3   1/1     Running   0          24s
+pod/jaeger              1/1     Running   0          24s
+
+NAME                         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                                            AGE
+service/helidon-demo-mp-0    ClusterIP   10.96.108.118   <none>        8080/TCP                                                           23s
+service/helidon-demo-mp-1    ClusterIP   10.96.50.135    <none>        8080/TCP                                                           23s
+service/helidon-demo-mp-2    ClusterIP   10.96.98.247    <none>        8080/TCP                                                           23s
+service/helidon-demo-mp-3    ClusterIP   10.96.85.112    <none>        8080/TCP                                                           23s
+service/helidon-demo-mp-np   NodePort    10.96.49.26     <none>        8080:30080/TCP                                                     23s
+service/jaeger               ClusterIP   10.96.42.231    <none>        5775/UDP,6831/UDP,6832/UDP,5778/TCP,16686/TCP,14268/TCP,9411/TCP   23s
+service/jaeger-np            NodePort    10.96.147.52    <none>        16686:30086/TCP                                                    23s
+```
+
+ポート 30080 はHelidon、ポート 30086 はJaegerのUIとなっています。必要に応じて KubernetesのNodeにsshポートフォーワードして、ローカルからアクセスできるようにして下さい。  
+ここで、リクエストをポストしてみます。
+
+```
+cat demo/tracing/request.json | curl -v -X POST -H "Content-Type:application/json" localhost:30080/tracing/invoke -d @-
+```
+
+そうすると [Jaegerでトレーシングされている様子](doc/images/jaeger-tracing.png) が分かります。
+
+### ローカル Docker 環境で試す
+
+以下のコマンドで同様のデモが可能です。ポートは 8080 (Helidon) と 16686 (Jaeger) になります。
+```
+$ demo/tracing/tracing-demo.sh [start | stop]
+```
+
+## ■ OpenTracing SPAN定義のためのアノテーション (oracle.demo.tracing.interceptor パッケージ)
+
+MicroProfileのOpenTracingの実装の多くはSPANの定義を暗黙的に行っているケースが多く、コーディングしなくてもそれなりのトレース情報が出力されるので便利です。また、明示的にSPANを定義したい場合は@Tracedアノテーション(org.eclipse.microprofile.opentracing.Traced)を使って、メソッドにトレース出力をつけることができます。しかしながら、標準機能では必ずしも欲しい情報を出力してくれるとは限りません。そこで、ここではSPANの定義処理をCDI Interceptorとして実装して、Trace出力の内容をアノテーションである程度コントロールできるようにしてみました。
+
+実装はoracle.demo.tracing.interceptor パッケージにあります。使用例はoracle.demo.jpa.CountryDAOを見て下さい。  
+`/jpa/country?error=true` をGETすると以下のメソッドが呼ばれます。
+
+```text
+$ curl localhost:8080/jpa/country?error=true
+```
+
+```java
+@Trace("JPA") 
+@TraceTag(key = "JPQL", value = "select c from Countries c")
+@TraceTag(key = "comment", value = "An error is expected by the wrong jpql statement.")
+public List<Country> getCountriesWithError(){
+    List<Country> countries = em.createQuery("select c from Countries c", Country.class).getResultList();
+    return countries;
+}
+```
+
+[Jaegerのトレーシング](doc/images/jaeger-tracing-custom.png)  でも付加情報が追加されていることが分かります。  
+
+* アノテーション  
+2つのアノテーションが利用可能です。
+
+| annotation   | 説明 |
+|--------------|------|
+| @Trace       | 必須 ; SPANを定義するInterceptorを示す |
+| @TraceTag    | オプション、key = キー, value = 値 ; SPAN内に定義するTagを追加する、複数使用可 |
+
+@Trace の パラメータ
+
+| parameter  | 説明 |
+|------------|------|
+| value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
+| stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
+
+## ■ gRPC デモ (oracle.demo.grpc パッケージ)
+
+gRPCで転送するデータのフォーマットはprotobuが一般的ですが、仕様上は任意のものが利用可能です。HelidonはgRPCを簡単にプロトタイプできるように、Javaシリアライゼーションを使った実装方法も提供しています。このデモにおいても、**protobufを用いた方法** (oracle.demo.grpc.protobuf パッケージ) と **Javaシリアライゼーションを用いた方法** (oracle.demo.grpc.javaobj パッケージ) の2種類を提供しています。
+
+```bash
+# どちらも REST -> gRPC Client -> gRPC Server と呼び出される
+
+$ curl localhost:8080/grpc-protobuf/client # protobuf版
+Hello world
+
+$ curl localhost:8080/grpc-javaobj/client?name=OCHaCafe # Javaシリアライゼーション版
+Hello OCHaCafe
+```
+
+### protobuf版 (oracle.demo.grpc.protobuf パッケージ) に関する補足
+
+protobuf ペイロードを使ったサーバー実装は更に POJO + Annotaion を使った方法と、GrpcMpExtension を使って従来型のサービス実装クラスをデプロイする方法の、2種類を提供しています。おすすめは POJO + Annotaion です。
+
+1. POJO + Annotaion を使った方法（デフォルト 有効）  
+Helidonが提供するアノテーションを使って、シンプルなコーディングができます。
+```
+@Grpc(name = "helloworld.Greeter")
+@ApplicationScoped
+public class GreeterSimpleService{
+
+    @Unary(name = "SayHello")
+    public HelloReply sayHello(HelloRequest req) {
+        System.out.println("gRPC GreeterSimpleService called - name: " + req.getName());
+        return HelloReply.newBuilder().setMessage("Hello " + req.getName()).build();
+    }
+}
+```
+ * 関連するファイル
 ```text
 oracle.demo.grpc.protobuf.GreeterSimpleService
 ```
 
-### GrpcMpExtensionを使って従来型のサービス実装クラスをデプロイする方法
-
+2. GrpcMpExtensionを使って従来型のサービス実装クラスをデプロイする方法（デフォルト 無効）  
+protobufコンパイラで生成されたJavaクラスを直接使用する方式です。
+```
+class GreeterService extends GreeterGrpc.GreeterImplBase { 
+    @Override
+    public void sayHello(HelloRequest req, StreamObserver<HelloReply> observer) {
+        System.out.println("gRPC GreeterService called - name: " + req.getName());
+        HelloReply reply = HelloReply.newBuilder().setMessage("Hello " + req.getName()).build();
+        observer.onNext(reply);
+        observer.onCompleted();        
+    }
+}
+```
+ * 関連するファイル
 ```text
 oracle.demo.grpc.protobuf.GreeterService
 oracle.demo.grpc.protobuf.GrpcExtension
@@ -241,6 +414,7 @@ META-INF/services/io.helidon.microprofile.grpc.server.spi.GrpcMpExtension
 1. META-INF/services/io.helidon.microprofile.grpc.server.spi.GrpcMpExtension を編集する
 ```text
 # コメントアウトを外す
+# oracle.demo.grpc.protobuf.GrpcExtension
 oracle.demo.grpc.protobuf.GrpcExtension
 ```
 
@@ -268,38 +442,7 @@ pom.xmlの通常ビルドフェーズとは独立してprotoファイルのコ�
 mvn -P protoc generate-sources
 ```
 
-## ■ OpenTracing SPAN定義のためのアノテーション (oracle.demo.tracing.interceptor パッケージ)
-
-MicroProfileのOpenTracingの実装の多くはSPANの定義を暗黙的に行っているケースが多く、コーディングしなくてもそれなりのトレース情報が出力されるので便利です。また、明示的にSPANを定義したい場合は@Tracedアノテーション(org.eclipse.microprofile.opentracing.Traced)を使って、メソッドにトレース出力をつけることができます。しかしながら、標準機能では必ずしも欲しい情報を出力してくれるとは限りません。そこで、ここではSPANの定義処理をCDI Interceptorとして実装して、Trace出力の内容をアノテーションである程度コントロールできるようにしてみました。
-
-実装はoracle.demo.tracing.interceptor パッケージにあります。使用例はoracle.demo.jpa.CountryDAOを見て下さい。  
-`/jpa/country?error=true` をGETすると以下のメソッドが呼ばれます。
-
-```java
-@Trace("JPA") 
-@TraceTag(key = "JPQL", value = "select c from Countries c")
-@TraceTag(key = "comment", value = "An error is expected by the wrong jpql statement.")
-public List<Country> getCountriesWithError(){
-    List<Country> countries = em.createQuery("select c from Countries c", Country.class).getResultList();
-    return countries;
-}
-```
-
-2つのアノテーションが利用可能です。
-
-| annotation   | 説明 |
-|--------------|------|
-| @Trace       | 必須 ; SPANを定義するInterceptorを示す |
-| @TraceTag    | オプション、key = キー, value = 値 ; SPAN内に定義するTagを追加する、複数使用可 |
-
-@Trace の パラメータ
-
-| parameter  | 説明 |
-|------------|------|
-| value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
-| stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
-
-## ■ MicroProfile Reactive Messaging (oracle.demo.reactive パッケージ)
+## ■ MicroProfile Reactive Messaging デモ (oracle.demo.reactive パッケージ)
 
 JPA/JDBC経由でデータベースにアクセスするデモ(oracle.demo.jpaパッケージ)のバリエーションとして、MicroProfile Reactive Messaging を使ったデータベースの非同期更新(Event Sourcing)処理を実装しています。RESTでリクエストを受け付けた後、非同期更新イベントを発行します。
 
@@ -453,7 +596,7 @@ WebLogic Server Deploy Tooling を使ってJMSリソースを追加し、サー�
 docker cp wls1411:/u01/oracle/wlserver/server/lib/wlthint3client.jar wlthint3client.jar
 ```
 
-## ■ MicroProfile GraphQL (oracle.demo.graphql パッケージ)
+## ■ MicroProfile GraphQL デモ (oracle.demo.graphql パッケージ)
 
 JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをMicroProfile GraphQL仕様にしたものを追加しました。  
 スキーマは `/graphql/schema.graphql` から取得できます。
