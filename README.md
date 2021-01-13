@@ -356,6 +356,37 @@ public List<Country> getCountriesWithError(){
 | value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
 | stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
 
+
+<br/>
+
+## ■ Metrics デモ (oracle.demo.metrics パッケージ)
+
+@Metered を使ってメソッドのメトリクスを取得したり、@Metrics を使って特定のメトリクスを定義したりできます。
+
+```bash
+# @Metered のついたメソッドをコール
+$ curl localhost:8080/mpmetrics/apple
+APPLE
+$ curl localhost:8080/mpmetrics/apple
+APPLE
+$ curl localhost:8080/mpmetrics/orange
+ORANGE
+$ curl localhost:8080/mpmetrics/orange
+ORANGE
+$ curl localhost:8080/mpmetrics/orange
+ORANGE
+
+# メトリクスは /metrics で取得できる
+$ curl -s localhost:8080/metrics | grep "^[^#].*_MetricsResource.*_total"
+application_oracle_demo_metrics_MetricsResource_apple_total 2
+application_oracle_demo_metrics_MetricsResource_orange_total 3
+application_oracle_demo_metrics_MetricsResource_total 5
+
+# サーバー内部でAPIを使ってメトリクスのレジストリを参照
+$ curl localhost:8080/mpmetrics/count-total
+5
+```
+
 <br/>
 
 ## ■ Fault Tolerance デモ (oracle.demo.ft パッケージ)
@@ -400,6 +431,19 @@ Bulkhead と Circuit Breaker を試すことができます。
 # usage: oracle.demo.ft.FaultToleranceTester -e <GETするURL> <同時呼び出し数>
 $ java -cp ./target/helidon-demo-mp.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/ft/bulkhead 4
 $ java -cp ./target/helidon-demo-mp.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/ft/circuit-breaker 6
+```
+
+Fault Tolerance のメトリクスも取得できます。
+
+```bash
+$ curl -s localhost:8080/metrics | grep "^[^#].*_FaultToleranceResource.*_circuitbreaker"
+application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreaker_callsFailed_total 7
+application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreaker_callsPrevented_total 5
+application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreaker_callsSucceeded_total 22
+application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreaker_closed_total_seconds 275.578616745
+application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreaker_halfOpen_total_seconds 96.159223938
+application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreaker_open_total_seconds 1.921960921
+application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreaker_opened_total 2
 ```
 
 <br/>
