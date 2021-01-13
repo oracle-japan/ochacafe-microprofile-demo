@@ -143,11 +143,11 @@ mvn post-integration-test -DskipTests=true # 便宜上post-integration-testに�
 
 ### リモート用のタグを付与する場合
 
-環境変数 REMOTE_REPO_PATH を設定した後、Mavenのプロファイルを指定して実行します。
+環境変数 REMOTE_REPO_PREFIX を設定した後、Mavenのプロファイルを指定して実行します。
 
 ```bash
 # export environment variable as appropriate
-export REMOTE_REPO_PATH=iad.ocir.io/some-tenant/some-additional-path
+export REMOTE_REPO_PREFIX=iad.ocir.io/some-tenant/some-additional-path/
 
 mvn -P remote-repo-prefix post-integration-test -DskipTests=true
 ```
@@ -156,14 +156,16 @@ mvn -P remote-repo-prefix post-integration-test -DskipTests=true
 
 ```bash
 $ docker images
-REPOSITORY                                        TAG                 IMAGE ID            CREATED             SIZE
-helidon-demo-mp                                   2.0-SNAPSHOT        1b4d2e82f64a        49 years ago        125MB
-helidon-demo-mp                                   latest              1b4d2e82f64a        49 years ago        125MB
-(remote docker repository path/)helidon-demo-mp   2.0-SNAPSHOT        116de0207be6        49 years ago        125MB
-(remote docker repository path/)helidon-demo-mp   latest              116de0207be6        49 years ago        125MB
+REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
+helidon-demo-mp                                     2.0-SNAPSHOT        1b4d2e82f64a        49 years ago        125MB
+helidon-demo-mp                                     latest              1b4d2e82f64a        49 years ago        125MB
+(remote docker repository prefix/)helidon-demo-mp   2.0-SNAPSHOT        116de0207be6        49 years ago        125MB
+(remote docker repository prefix/)helidon-demo-mp   latest              116de0207be6        49 years ago        125MB
 
-$ docker push (remote docker repository path/)helidon-demo-mp
+$ docker push (remote docker repository prefix/)helidon-demo-mp
 ```
+
+<br/>
 
 ## ■ MicroProfile Health デモ (oracle.demo.health パッケージ)
 
@@ -228,7 +230,7 @@ demo/k8s/liveness-check.yaml は環境変数 `demo.healthcheck.time-to-fail` を
 kubectl create namespace demo
 
 # export environment variable as appropriate
-export REMOTE_REPO_PATH=iad.ocir.io/some-tenant/some-additional-path
+export REMOTE_REPO_PREFIX=iad.ocir.io/some-tenant/some-additional-path/
 
 # (オプション)プライベートリポジトリの場合は、`docker-registry-secret` という secret を作成して下さい
 kubectl create secret docker-registry docker-registry-secret -n demo \
@@ -237,24 +239,19 @@ kubectl create secret docker-registry docker-registry-secret -n demo \
  --docker-password='access-token-or-something' \
  --docker-email='some-mail-address'
 
-# replace "${REMOTE_REPO_PATH}/helidon-demo-mp:latest" in liveness-check.yaml and apply
+# replace "${REMOTE_REPO_PREFIX}/helidon-demo-mp:latest" in liveness-check.yaml and apply
 envsubst < demo/k8s/liveness-check.yaml | kubectl apply -f -
 ```
 
-ここで Pod の状態を定期的に確認すると、再起動されていることが分かります。 
+ここで Pod の状態を定期的に確認すると、再起動されている ( RESTARTS がカウントアップされている) ことが分かります。 
 
 ```bash
-$ kubectl get pod -n demo
+$ kubectl get pod -n demo -w
 NAME                     READY   STATUS    RESTARTS   AGE
-helidon-demo-mp-health   1/1     Running   0          24s
-
-$ kubectl get pod -n demo
-NAME                     READY   STATUS    RESTARTS   AGE
-helidon-demo-mp-health   1/1     Running   1          81s
-
-$ kubectl get pod -n demo
-NAME                     READY   STATUS    RESTARTS   AGE
-helidon-demo-mp-health   1/1     Running   2          114s
+helidon-demo-mp-health   1/1     Running   0          12s
+helidon-demo-mp-health   1/1     Running   1          52s
+helidon-demo-mp-health   1/1     Running   2          103s
+helidon-demo-mp-health   1/1     Running   3          2m33s
 ```
 ```
 $ kubectl describe pod helidon-demo-mp-health -n demo
@@ -268,18 +265,23 @@ Events:
   Warning  Unhealthy  5m54s (x12 over 10m)  kubelet, 10.0.10.11  Liveness probe failed: HTTP probe failed with statuscode: 503
 ```
 
+<br/>
+
 ## ■ Open Tracing デモ (oracle.demo.tracing パッケージ)
 
 Kubernetes に デモのPodを4つと、jaegerのPodをデプロイします。
 
-```
-# replace "${REMOTE_REPO_PATH}/helidon-demo-mp:latest" in open-tracing.yaml and apply
+```bash
+# export environment variable as appropriate
+export REMOTE_REPO_PREFIX=iad.ocir.io/some-tenant/some-additional-path/
+
+# replace "${REMOTE_REPO_PREFIX}/helidon-demo-mp:latest" in open-tracing.yaml and apply
 envsubst < demo/k8s/open-tracing.yaml | kubectl apply -f -
 ```
 
 次のような状態になっているはずです。
 
-```
+```bash
 $ kubectl get all -n demo
 NAME                    READY   STATUS    RESTARTS   AGE
 pod/helidon-demo-mp-0   1/1     Running   0          5m37s
@@ -301,7 +303,7 @@ service/jaeger-np            NodePort    10.96.147.52    <none>        16686:300
 ポート 30080 はHelidon、ポート 30086 はJaegerのUIとなっています。必要に応じて KubernetesのNodeにsshポートフォーワードして、ローカルからアクセスできるようにして下さい。  
 ここで、リクエストをポストしてみます。
 
-```
+```bash
 cat demo/tracing/request.json | curl -v -X POST -H "Content-Type:application/json" localhost:30080/tracing/invoke -d @-
 ```
 
@@ -313,6 +315,8 @@ cat demo/tracing/request.json | curl -v -X POST -H "Content-Type:application/jso
 ```
 $ demo/tracing/tracing-demo.sh [start | stop]
 ```
+
+<br/>
 
 ## ■ OpenTracing SPAN定義のためのアノテーション (oracle.demo.tracing.interceptor パッケージ)
 
@@ -351,6 +355,54 @@ public List<Country> getCountriesWithError(){
 |------------|------|
 | value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
 | stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
+
+<br/>
+
+## ■ Fault Tolerance デモ (oracle.demo.ft パッケージ)
+
+Bulkhead と Circuit Breaker を試すことができます。
+
+```java
+    /*
+     * micoroprofile-config.properties ファイル内で
+     * oracle.demo.ft.FaultToleranceResource/bulkhead/Bulkhead/value=3
+     * としているので、実際に許容される多重度は 3
+     * フォーマット: <クラス名>/<メソッド名>/Bulkhead/value=<値>
+     */
+    @Bulkhead(1024) // - will be changed with Config property
+    @GET @Path("/bulkhead")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String bulkhead() {
+        sleep(); // 2秒スリープ
+        return "OK";
+    }
+
+    /*
+     * ローリング・ウィンドウとなる連続した4回の呼び出しのうち3回(4xfailureRatio=0.75)が失敗した場合
+     * サーキットはOpenとなる。サーキットは10秒間の間Openの状態を保ったのちHalf-Openに遷移し、
+     * 以降5連続呼び出しが成功した場合にClosedとなる。そうでない場合は再びOpenに戻る。
+     * 
+     * @Bulkhead(3)としているので、4以上同時に呼び出された場合メソッド自体はエラーとなる
+     */
+    @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 10 * 1000, successThreshold = 5)
+    @Bulkhead(3)
+    @GET @Path("/circuit-breaker")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String circuitBreaker(){
+        sleep(); // 2秒スリープ
+        return "OK";
+    }
+```
+
+テスト用のクライアントも用意しています。
+
+```bash
+# usage: oracle.demo.ft.FaultToleranceTester -e <GETするURL> <同時呼び出し数>
+$ java -cp ./target/helidon-demo-mp.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/ft/bulkhead 4
+$ java -cp ./target/helidon-demo-mp.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/ft/circuit-breaker 6
+```
+
+<br/>
 
 ## ■ gRPC デモ (oracle.demo.grpc パッケージ)
 
@@ -441,6 +493,8 @@ pom.xmlの通常ビルドフェーズとは独立してprotoファイルのコ�
 ```bash
 mvn -P protoc generate-sources
 ```
+
+<br/>
 
 ## ■ MicroProfile Reactive Messaging デモ (oracle.demo.reactive パッケージ)
 
@@ -596,6 +650,8 @@ WebLogic Server Deploy Tooling を使ってJMSリソースを追加し、サー�
 docker cp wls1411:/u01/oracle/wlserver/server/lib/wlthint3client.jar wlthint3client.jar
 ```
 
+<br/>
+
 ## ■ MicroProfile GraphQL デモ (oracle.demo.graphql パッケージ)
 
 JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをMicroProfile GraphQL仕様にしたものを追加しました。  
@@ -662,6 +718,8 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 
 ![データベースへのアクセス・パターン](doc/images/microprofile-demo-crud.png)
 
+<br/>
+
 ## ■ （おまけ）Cowsay (oracle.demo.cowweb パッケージ)
 
 https://github.com/ricksbrown/cowsay
@@ -677,10 +735,10 @@ $ curl localhost:8080/cowsay/say
                 ||----w |
                 ||     ||
 
-$ curl "localhost:8080/cowsay/think?message=Hello&cowfile=moose"
- _______
-( Hello )
- -------
+$ curl "localhost:8080/cowsay/think?message=Hello%21&cowfile=moose"
+ ________
+( Hello! )
+ --------
   o
    o   \_\_    _/_/
     o      \__/
@@ -691,6 +749,8 @@ $ curl "localhost:8080/cowsay/think?message=Hello&cowfile=moose"
 
 ```
 エンジョイ！
+
+<br/>
 
 ---
 _Copyright © 2019-2021, Oracle and/or its affiliates. All rights reserved._
