@@ -356,12 +356,31 @@ public List<Country> getCountriesWithError(){
 | value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
 | stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
 
-
 <br/>
 
 ## ■ Metrics デモ (oracle.demo.metrics パッケージ)
 
-@Metered を使ってメソッドのメトリクスを取得したり、@Metrics を使って特定のメトリクスを定義したりできます。
+Mwtrics には以下の3種類のスコープが存在します。
+
+| スコープ      | 説明 |
+|--------------|-------------------------------------------------------|
+| base         | 全てのMicroProfile実装で提供しなければいけないメトリクス  |
+| vendor       | ベンダ独自のメトリクス (optional)                       |
+| application  | アプリケーション独自のメトリクス (optional)              |
+
+REST エンドポイントは以下になります。
+
+| Endpoint                         | Request Type | Supported Format  | Description                                         |
+|----------------------------------|--------------|-------------------|-----------------------------------------------------|
+| `/metrics`                       | GET          | JSON, OpenMetrics | 全ての登録されているメトリクスを返す                   |
+| `/metrics/<scope>`               | GET          | JSON, OpenMetrics | 当該スコープに登録されているメトリクスを返す            |
+| `/metrics/<scope>/<metric_name>` | GET          | JSON, OpenMetrics | 当該スコープ・名前に一致するメトリクスを返す            |
+| `/metrics`                       | OPTIONS      | JSON              | 全ての登録されているメトリクスのメタデータを返す        |
+| `/metrics/<scope>`               | OPTIONS      | JSON              | 当該スコープに登録されているメトリクスのメタデータを返す |
+| `/metrics/<scope>/<metric_name>` | OPTIONS      | JSON              | 当該スコープ・名前に一致するメトリクスのメタデータを返す |
+
+
+このデモでは @Metered を使ってメソッドのメトリクスを取得したり、@Metrics を使って特定のメトリクスを定義したりできます。
 
 ```bash
 # @Metered のついたメソッドをコール
@@ -376,13 +395,13 @@ ORANGE
 $ curl localhost:8080/mpmetrics/orange
 ORANGE
 
-# メトリクスは /metrics で取得できる
+# メトリクスを取得 oracle_demo_metrics_MetricsResource はクラス名を表している
 $ curl -s localhost:8080/metrics | grep "^[^#].*_MetricsResource.*_total"
 application_oracle_demo_metrics_MetricsResource_apple_total 2
 application_oracle_demo_metrics_MetricsResource_orange_total 3
 application_oracle_demo_metrics_MetricsResource_total 5
 
-# サーバー内部でAPIを使ってメトリクスのレジストリを参照
+# このRESTコールの実装はAPIを使ってメトリクスのレジストリを参照している
 $ curl localhost:8080/mpmetrics/count-total
 5
 ```
@@ -391,7 +410,18 @@ $ curl localhost:8080/mpmetrics/count-total
 
 ## ■ Fault Tolerance デモ (oracle.demo.ft パッケージ)
 
-Bulkhead と Circuit Breaker を試すことができます。
+メソッドやクラスにアノテーションを付与して、障害発生時の振る舞いを設定することができます。
+
+| アノテーション   |  機能 |
+|-----------------|------|
+| Timeout         | メソッド実行が指定の時間に達した場合、例外(TimeoutException)を発生させる                                                 |
+| Retry           | メソッド実行の例外発生時、一定時間/回数処理を繰り返す                                                                    |
+| Fallback        | メソッド実行の例外発生時、代替メソッドを呼び出す                                                                         |
+| CircuitBreaker  | 例外発生が繰り返されるメソッドの実行を一時的に止めて、メソッドの処理を行う前に例外(CircuitBreakerOpenException)を発生させる  |
+| Bulkhead        | メソッドの同時実行数や（非同期実行の際の）待機キューの長さが指定の数を超えた場合、例外(BulkheadException)を発生させる        |
+| Asynchronous    | メソッド実行を非同期（別スレッド）で行う                                                                                |
+
+ここでは Bulkhead と Circuit Breaker を試すことができます。
 
 ```java
     /*
@@ -445,6 +475,227 @@ application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreak
 application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreaker_open_total_seconds 1.921960921
 application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreaker_opened_total 2
 ```
+
+<br/>
+
+## ■ Open API (oracle.demo.country パッケージ)
+
+APIの仕様を定義する規約である Open API に基づいたRESTエンドポイントのメタデータを公開できます。
+特に何もしなくても最低限の仕様情報は自動的に生成できますが、アノテーションを使って付加的な情報を付加することができます。
+`oracle.demo.App`  や `oracle.demo.country.CountryResource` にアノテーションを付加しています。
+
+```java
+    @Operation(summary = "Find country by country code", description = "国コードから国情報を検索します")
+    @APIResponses({ 
+            @APIResponse(
+                responseCode = "200", description = "国情報", 
+                content = {@Content(
+                                mediaType = "application/json", 
+                                schema = @Schema(type = SchemaType.OBJECT, implementation = Country.class)
+                            )}
+                ),
+            @APIResponse(responseCode = "401", description = "認証に失敗しました"),
+            @APIResponse(responseCode = "404", description = "指定した国コードから国情報が見つかりませんでした") 
+        })
+    @GET
+    @Path("/{countryId}")
+    public Country getCountry(
+                    @Parameter(
+                        name = "countryId", 
+                        description = "国際電話の国番号 - US=1, JP=81, etc.", 
+                        style = ParameterStyle.DEFAULT, 
+                        required = true
+                        ) 
+                    @PathParam("countryId") 
+                    int countryId) {
+        return countryService.getCountry(countryId);
+    }
+```
+
+APIの情報は /openapi から取得できます。
+
+```
+$ curl localhost:8080/openapi
+info: 
+  title: Helidon MP Demo
+  version: '2.2.0'
+openapi: 3.0.1
+paths:
+  /country/{countryId}: 
+    get: 
+      parameters:
+      - 
+        in: path
+        name: countryId
+        required: true
+        schema: 
+          format: int32
+          type: integer
+      description: 国コードから国情報を検索します
+      responses:
+        '401': 
+          description: 認証に失敗しました
+        '404': 
+          description: 指定した国コードから国情報が見つかりませんでした
+        '200': 
+          content:
+            application/json: 
+              schema: 
+                properties:
+                  countryId: 
+                    format: int32
+                    type: integer
+                  countryName: 
+                    type: string
+                type: object
+          description: 国情報
+      summary: Find country by country code
+```
+
+<br/>
+
+## ■ MicroProfile Rest Client (oracle.demo.restclient パッケージ)
+
+MicroProfile では RESTコールを行う「タイプセーフ」なクライアントAPIを規定しています。つまりJavaのメソッドを呼び出すと内部でREST呼び出しを行ってくれます。呼び出しのパラメータも返り値も全てJavaオブジェクトとして扱うことができ、RESTコールに関する手間を省きコーディング・ミスを減らすことができます。
+
+このデモでは、まずインターフェースを定義し、これに JAX-RS のアノテーションを付与しています。
+
+```java
+@Path("/movies")
+public interface MovieReviewService {
+
+     @GET @Path("/")
+     public Set<Movie> getAllMovies();
+
+     @GET @Path("/{movieId}/reviews")
+     public Set<Review> getAllReviews( @PathParam("movieId") String movieId );
+
+     @GET @Path("/{movieId}/reviews/{reviewId}")
+     public Review getReview( @PathParam("movieId") String movieId, @PathParam("reviewId") String reviewId );
+
+     @POST @Path("/{movieId}/reviews")
+     public String submitReview( @PathParam("movieId") String movieId, Review review );
+
+     @PUT @Path("/{movieId}/reviews/{reviewId}")
+     public Review updateReview( @PathParam("movieId") String movieId, @PathParam("reviewId") String reviewId, Review review );
+ }
+ ```
+
+このインターフェースを利用して、サーバー実装とクライアント実装を行っています。同一のインターフェースを用いてサーバーとクライアントを実装することができるので、両者間でAPI実装の差異が生じることはありません。
+
+```
+┌────────────────────┐                    ┌────────────────────────────┐
+│ MovieReviewService │ <-- implements --- │ MovieReviewServiceResource │
+└────────────────────┘                    └────────────────────────────┘
+┌────────────────────┐                    ┌──────────────────────────────────────┐
+│ MovieReviewService │ <--    uses    --- │ MovieReviewServiceRestClientResource │
+└────────────────────┘                    └──────────────────────────────────────┘
+
+// REST Client オブジェクトの作成
+MovieReviewService reviewSvc = RestClientBuilder.newBuilder().build(MovieReviewService.class);
+```
+
+以下のコマンドを実行してください。
+
+```bash
+# curl -> Rest Client -> Rest Server
+$ curl "localhost:8080/restclient/1/submit-review?star=5&comment=great%21"
+$ curl localhost:8080/restclient/1/reviews
+```
+
+<br/>
+
+## ■ Security (oracle.demo.security パッケージ)
+
+ユーザーに以下のロールがアサインされているとします。
+
+| user | password  | admin role | user role |
+|:-----|-----------|:----------:|:---------:|
+| john | password1 | Y          | Y         |
+| mary | password2 | Y          | N         |
+| ken  | password3 | N          | N         |
+
+設定ファイルで、ユーザーのBasic認証情報とロールを定義します。
+
+```
+security:
+    providers:
+    - abac:
+    - http-basic-auth:
+        realm: "helidon"
+        users:
+        - login: "john"
+          password: "password1"
+          roles: ["user", "admin"]
+        - login: "mary"
+          password: "password2"
+          roles: ["user"]
+        - login: "ken"
+          password: "password3"
+```
+
+`oracle.demo.security.SecurityResource` クラスでは、メソッドにアノテーションを付与することによってアクセスコントロールしています。
+
+```java
+    @Authenticated(optional = true) // any one can access
+    @GET @Path("/public") public String getPublic() {}
+
+    @Authenticated // needs log-in
+    @GET @Path("/guest")  public String getGuest() {}
+
+    @Authenticated @Authorized @RolesAllowed("admin") // needs admin role
+    @GET @Path("/admin")  public String getAdmin() {}
+
+    @Authenticated @Authorized @RolesAllowed("user") // needs user role
+    @GET @Path("/user")   public String getUser() {}
+```
+
+```bash
+# unknown user -> /public - @Authenticated(optional = true) // any one can access
+$ curl -v -u unknown:foo localhost:8080/security/basic/public
+< HTTP/1.1 200 OK
+
+# unknown user -> /guest - @Authenticated // needs log-in
+$ curl -v -u unknown:foo localhost:8080/security/basic/user
+< HTTP/1.1 401 Unauthorized
+
+# ken -> /guest
+$ curl -v -u ken:password3 localhost:8080/security/basic/guest
+< HTTP/1.1 200 OK
+
+# ken -> /guest with wrong password
+$ curl -v -u ken:password localhost:8080/security/basic/user
+< HTTP/1.1 401 Unauthorized
+
+# ken -> /admin - @Authenticated @Authorized @RolesAllowed("admin")
+$ curl -v -u ken:password3 localhost:8080/security/basic/admin
+< HTTP/1.1 403 Forbidden
+
+# ken -> /user - @Authenticated @Authorized @RolesAllowed("user")
+$ curl -v -u ken:password3 localhost:8080/security/basic/user
+< HTTP/1.1 403 Forbidden
+
+# mary (user role) -> /admin
+$ curl -v -u mary:password2 localhost:8080/security/basic/admin
+< HTTP/1.1 403 Forbidden
+
+# mary (user role) -> /user
+$ curl -v -u mary:password2 localhost:8080/security/basic/user
+< HTTP/1.1 200 OK
+```
+
+### Helidon の提供するセキュリティ・プロバイダ
+
+以下のプロバイダを設定することによって、Basic 認証だけでなく、様々なアクセスコントロールが可能です。
+* JWT Provider
+* HTTP Basic Authentication
+* HTTP Digest Authentication
+* Header Assertion
+* HTTP Signatures
+* ABAC Authorization
+* Google Login Authentication Provider
+* OIDC (OpenID Connect) Authentication Provider
+* IDCS (Oracle Identity Cloud Service) Role Mapping Provider
 
 <br/>
 
@@ -542,7 +793,8 @@ mvn -P protoc generate-sources
 
 ## ■ MicroProfile Reactive Messaging デモ (oracle.demo.reactive パッケージ)
 
-JPA/JDBC経由でデータベースにアクセスするデモ(oracle.demo.jpaパッケージ)のバリエーションとして、MicroProfile Reactive Messaging を使ったデータベースの非同期更新(Event Sourcing)処理を実装しています。RESTでリクエストを受け付けた後、非同期更新イベントを発行します。
+JPA/JDBC経由でデータベースにアクセスするデモ(oracle.demo.jpaパッケージ)のバリエーションとして、MicroProfile Reactive Messaging を使ったデータベースの非同期更新(Event Sourcing)処理を実装しています。RESTでリクエストを受け付けた後、非同期更新イベントを発行します。  
+[データベースへのアクセスパターン](#データベースへのアクセスパターン) を参照してください。
 
 ```bash
 # insert
@@ -583,7 +835,9 @@ curl -v http://localhost:8080/jpa/country/61 # 404 Not Found
 ### JMS Connector デモを有効化するには
 
 1. WebLogic Server をインストールし、JMSリソースを構成する  
-適当なキューを定義して下さい
+適当なキューを定義して下さい。  
+後述する「テスト用の WebLogic Server Docker インスタンスの作成」の項の手順に従えば、
+このデモ用の設定がされた Dockerコンテナ・ベースのWebLogic Serverを準備することができます。
 
 2. Mavenのローカル・リポジトリを作成して、WebLogic Serverのクライアント・ライブラリ(wlthint3client.jar)をデプロイする  
 クライアント・ライブラリはパブリックMavenリポジトリからは入手できませんので、ローカル・リポジトリをマニュアルで作成します。
@@ -658,7 +912,7 @@ mp.messaging:
   connector:
     helidon-jms:
       user: weblogic # 確認
-      password: Ochacafe00 # 確認
+      password: OCHaCafe6834 # 確認
       jndi:
         jms-factory: weblogic.jms.ConnectionFactory
         env-properties:
@@ -754,6 +1008,8 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
   -d '{ "query" : "mutation { deleteCountry (countryId:86) }" }'
 ```
+
+### データベースへのアクセスパターン
 
 結果、JDBC/JPAを使ったデータベースへのアクセスは、以下のバリエーションを実装しています。
 + REST経由の同期参照＆更新処理
