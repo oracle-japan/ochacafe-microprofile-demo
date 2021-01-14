@@ -23,38 +23,30 @@ import io.helidon.security.annotations.Authorized;
 @Path("/security/basic")
 public class SecurityResource {
 
-    @GET
-    @Path("/public")
-    @Produces(MediaType.TEXT_PLAIN)
+    @GET @Path("/public")
     @Authenticated(optional = true) // any one can access
+    @Produces(MediaType.TEXT_PLAIN)
     public String getPublic(@Context SecurityContext securityContext) {
         return dumpSecurityContext(securityContext);
     }
 
-    @GET
-    @Path("/guest")
-    @Produces(MediaType.TEXT_PLAIN)
+    @GET @Path("/guest")
     @Authenticated // needs log-in
+    @Produces(MediaType.TEXT_PLAIN)
     public String getGuest(@Context SecurityContext securityContext) {
         return dumpSecurityContext(securityContext);
     }
 
-    @GET
-    @Path("/admin")
+    @GET @Path("/admin")
+    @Authenticated @Authorized @RolesAllowed("admin") // needs admin role
     @Produces(MediaType.TEXT_PLAIN)
-    @Authenticated
-    @Authorized
-    @RolesAllowed("admin") // needs admin role
     public String getAdmin(@Context SecurityContext securityContext) {
         return dumpSecurityContext(securityContext);
     }
 
-    @GET
-    @Path("/user")
+    @GET @Path("/user")
+    @Authenticated @Authorized @RolesAllowed("user") // needs user role
     @Produces(MediaType.TEXT_PLAIN)
-    @Authenticated
-    @Authorized
-    @RolesAllowed("user") // needs user role
     public String getUser(@Context SecurityContext securityContext) {
         return dumpSecurityContext(securityContext);
     }

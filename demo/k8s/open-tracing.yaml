@@ -10,7 +10,7 @@ metadata:
 spec:
   containers:
   - name: api-helidon-container
-    image: ${REMOTE_REPO_PATH}/helidon-demo-mp:latest
+    image: ${REMOTE_REPO_PREFIX}helidon-demo-mp:latest
     imagePullPolicy: Always
     env:
     - name: tracing.service
@@ -31,7 +31,7 @@ spec:
   dnsPolicy: ClusterFirst
   containers:
   - name: api-helidon-container
-    image: ${REMOTE_REPO_PATH}/helidon-demo-mp:latest
+    image: ${REMOTE_REPO_PREFIX}helidon-demo-mp:latest
     imagePullPolicy: Always
     env:
     - name: tracing.service
@@ -52,7 +52,7 @@ spec:
   dnsPolicy: ClusterFirst
   containers:
   - name: api-helidon-container
-    image: ${REMOTE_REPO_PATH}/helidon-demo-mp:latest
+    image: ${REMOTE_REPO_PREFIX}helidon-demo-mp:latest
     imagePullPolicy: Always
     env:
     - name: tracing.service
@@ -73,7 +73,7 @@ spec:
   dnsPolicy: ClusterFirst
   containers:
   - name: api-helidon-container
-    image: ${REMOTE_REPO_PATH}/helidon-demo-mp:latest
+    image: ${REMOTE_REPO_PREFIX}helidon-demo-mp:latest
     imagePullPolicy: Always
     env:
     - name: tracing.service

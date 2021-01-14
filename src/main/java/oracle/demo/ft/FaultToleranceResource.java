@@ -1,5 +1,6 @@
 package oracle.demo.ft;
 
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -27,13 +28,12 @@ public class FaultToleranceResource {
 
     private void sleep(){
         try {
-            Thread.sleep(2 * 1000);
+            TimeUnit.SECONDS.sleep(2);
         } catch (InterruptedException ignore) {}
     }
 
-    @Bulkhead(1024) // - will change value with Config property
-    @GET
-    @Path("/bulkhead")
+    @Bulkhead(1024) // - will be changed with Config property
+    @GET @Path("/bulkhead")
     @Produces(MediaType.TEXT_PLAIN)
     public String bulkhead() {
         log("[START /ft/bulkhead]");
@@ -44,8 +44,7 @@ public class FaultToleranceResource {
 
     @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 10 * 1000, successThreshold = 5)
     @Bulkhead(3)
-    @GET
-    @Path("/circuit-breaker")
+    @GET @Path("/circuit-breaker")
     @Produces(MediaType.TEXT_PLAIN)
     public String circuitBreaker(){
         log("[START /ft/circuit-breaker]");

@@ -25,13 +25,13 @@ security:
         realm: "helidon"
         users:
         - login: "john"
-          password: "password"
+          password: "password1"
           roles: ["user", "admin"]
         - login: "mary"
-          password: "password"
+          password: "password2"
           roles: ["user"]
         - login: "ken"
-          password: "password"
+          password: "password3"
 
 # data source settings
 javax:

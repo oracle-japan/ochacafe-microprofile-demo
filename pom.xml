@@ -19,7 +19,7 @@
         <mainClass>oracle.demo.Main</mainClass>
         <docker.repo.prefix></docker.repo.prefix>
         <!-- prefix for remote repository ending with /-->
-        <docker.repo.remote.prefix>${REMOTE_REPO_PATH}/</docker.repo.remote.prefix>
+        <docker.repo.remote.prefix>${REMOTE_REPO_PREFIX}</docker.repo.remote.prefix>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <grpc.version>1.30.2</grpc.version>
     </properties>

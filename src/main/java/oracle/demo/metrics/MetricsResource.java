@@ -58,7 +58,7 @@ public class MetricsResource{
     public String apple(){
         logger.info("!!! APPLE");
         countup();
-        return "APPLE";
+        return "APPLE\n";
     }   
 
     @Metered
@@ -67,7 +67,7 @@ public class MetricsResource{
     public String orange(){
         logger.info("!!! ORANGE");
         countup();
-        return "ORANGE";
+        return "ORANGE\n";
     }
 
     @GET @Path("/count-total")
