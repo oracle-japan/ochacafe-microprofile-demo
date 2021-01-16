@@ -26,7 +26,7 @@ public class HealthCheckHelper {
     // helper method
     public static long getUptime(){
         final RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-        final String process = runtimeMXBean.getName();
+        //final String process = runtimeMXBean.getName();
         return runtimeMXBean.getUptime();
     }
 

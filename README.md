@@ -711,6 +711,10 @@ $ curl -v -u mary:password2 localhost:8080/security/basic/admin
 # mary (user role) -> /user
 $ curl -v -u mary:password2 localhost:8080/security/basic/user
 < HTTP/1.1 200 OK
+
+# John (admin role) -> /admin
+$ curl -v -u john:password1 localhost:8080/security/basic/admin
+< HTTP/1.1 200 OK
 ```
 </details>
 <br>
