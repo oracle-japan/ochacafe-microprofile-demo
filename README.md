@@ -2,7 +2,27 @@
 
 # [Helidon](https://helidon.io/) を使って [Eclipse MicroProfile](https://microprofile.io/) の仕様や拡張機能を確認するデモ
 
-[OCHaCafe 2 - #4 Cloud Native時代のモダンJavaの世界](https://ochacafe.connpass.com/event/155389/) のために作成したデモですが、随時実装を追加しています。
+[OCHaCafe 2 - #4 Cloud Native時代のモダンJavaの世界](https://ochacafe.connpass.com/event/155389/) のために作成したデモですが、随時実装を追加しています。  
+[**セッション・スライドはこちら**](http://tiny.cc/ochacafe-cn-java-slides)
+
+## 目次
+
++ [ビルド方法](#■-ビルド方法)
++ [アプリケーションの起動](#■-アプリケーションの起動)
++ [Docker イメージの作成](#■-docker-イメージの作成)
++ [Health デモ](#■-microprofile-health-デモ-oracledemohealth-パッケージ)
++ [Open Tracing デモ](#■-open-tracing-デモ-oracledemotracing-パッケージ)
++ [Open Tracing 拡張](#■-opentracing-span定義のためのアノテーション-oracledemotracinginterceptor-パッケージ)
++ [Metrics デモ](#■-metrics-デモ-oracledemometrics-パッケージ)
++ [Fault Tolerance デモ](#■-fault-tolerance-デモ-oracledemoft-パッケージ)
++ [Open API デモ](#■-open-api-oracledemocountry-パッケージ)
++ [Rest Client デモ](#■-microprofile-rest-client-oracledemorestclient-パッケージ)
++ [Security デモ](#■-security-oracledemosecurity-パッケージ)
++ [JPA/Transaction デモ](#■-jpa-java-persistence-api-デモ-oracledemojpa-パッケージ)
++ [gRPC デモ](#■-grpc-デモ-oracledemogrpc-パッケージ)
++ [Reactive Messaging デモ](#■-microprofile-reactive-messaging-デモ-oracledemoreactive-パッケージ)
++ [GraphQL デモ](#■-microprofile-graphql-デモ-oracledemographql-パッケージ)
++ [おまけ](#■-おまけcowsay-oracledemocowweb-パッケージ)
 
 ## デモのソース
 
@@ -115,7 +135,7 @@ demo
     └── start-weblogic.sh
 ```
 
-## ビルド方法
+## ■ ビルド方法
 
 ```bash
 # at first, generate java source files for gRPC by compiling proto file
@@ -124,7 +144,7 @@ mvn -P protoc generate-sources
 mvn package
 ```
 
-## アプリケーションの起動
+## ■ アプリケーションの起動
 
 ```bash
 java -jar target/helidon-demo-mp.jar
@@ -165,7 +185,7 @@ helidon-demo-mp                                     latest              1b4d2e82
 $ docker push (remote docker repository prefix/)helidon-demo-mp
 ```
 
-<br/>
+<br>
 
 ## ■ MicroProfile Health デモ (oracle.demo.health パッケージ)
 
@@ -265,7 +285,7 @@ Events:
   Warning  Unhealthy  5m54s (x12 over 10m)  kubelet, 10.0.10.11  Liveness probe failed: HTTP probe failed with statuscode: 503
 ```
 
-<br/>
+<br>
 
 ## ■ Open Tracing デモ (oracle.demo.tracing パッケージ)
 
@@ -316,7 +336,7 @@ cat demo/tracing/request.json | curl -v -X POST -H "Content-Type:application/jso
 $ demo/tracing/tracing-demo.sh [start | stop]
 ```
 
-<br/>
+<br>
 
 ## ■ OpenTracing SPAN定義のためのアノテーション (oracle.demo.tracing.interceptor パッケージ)
 
@@ -356,7 +376,7 @@ public List<Country> getCountriesWithError(){
 | value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
 | stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
 
-<br/>
+<br>
 
 ## ■ Metrics デモ (oracle.demo.metrics パッケージ)
 
@@ -406,7 +426,7 @@ $ curl localhost:8080/mpmetrics/count-total
 5
 ```
 
-<br/>
+<br>
 
 ## ■ Fault Tolerance デモ (oracle.demo.ft パッケージ)
 
@@ -476,7 +496,7 @@ application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreak
 application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreaker_opened_total 2
 ```
 
-<br/>
+<br>
 
 ## ■ Open API (oracle.demo.country パッケージ)
 
@@ -552,7 +572,7 @@ paths:
       summary: Find country by country code
 ```
 
-<br/>
+<br>
 
 ## ■ MicroProfile Rest Client (oracle.demo.restclient パッケージ)
 
@@ -584,14 +604,20 @@ public interface MovieReviewService {
 このインターフェースを利用して、サーバー実装とクライアント実装を行っています。同一のインターフェースを用いてサーバーとクライアントを実装することができるので、両者間でAPI実装の差異が生じることはありません。
 
 ```
+# サーバの実装
 ┌────────────────────┐                    ┌────────────────────────────┐
 │ MovieReviewService │ <-- implements --- │ MovieReviewServiceResource │
 └────────────────────┘                    └────────────────────────────┘
+
+# クライアントの実装
 ┌────────────────────┐                    ┌──────────────────────────────────────┐
 │ MovieReviewService │ <--    uses    --- │ MovieReviewServiceRestClientResource │
 └────────────────────┘                    └──────────────────────────────────────┘
+```
 
-// REST Client オブジェクトの作成
+REST Client オブジェクトの作成は RestClientBuilder を使って行います。
+
+```java
 MovieReviewService reviewSvc = RestClientBuilder.newBuilder().build(MovieReviewService.class);
 ```
 
@@ -603,7 +629,7 @@ $ curl "localhost:8080/restclient/1/submit-review?star=5&comment=great%21"
 $ curl localhost:8080/restclient/1/reviews
 ```
 
-<br/>
+<br>
 
 ## ■ Security (oracle.demo.security パッケージ)
 
@@ -650,6 +676,9 @@ security:
     @GET @Path("/user")   public String getUser() {}
 ```
 
+<details open="true">
+<summary>各々のRESTエンドポイントを異なるユーザーでGETしてみる</summary>
+
 ```bash
 # unknown user -> /public - @Authenticated(optional = true) // any one can access
 $ curl -v -u unknown:foo localhost:8080/security/basic/public
@@ -683,6 +712,8 @@ $ curl -v -u mary:password2 localhost:8080/security/basic/admin
 $ curl -v -u mary:password2 localhost:8080/security/basic/user
 < HTTP/1.1 200 OK
 ```
+</details>
+<br>
 
 ### Helidon の提供するセキュリティ・プロバイダ
 
@@ -697,7 +728,188 @@ $ curl -v -u mary:password2 localhost:8080/security/basic/user
 * OIDC (OpenID Connect) Authentication Provider
 * IDCS (Oracle Identity Cloud Service) Role Mapping Provider
 
-<br/>
+<br>
+
+## ■ JPA (Java Persistence API) デモ (oracle.demo.jpa パッケージ)
+
+Helidon は拡張機能として Java Persistence API (JPA) と Java Transaction API (JTA) をサポートしています。   
+このデモでは
++ H2 Database JDBC Driver (DataSource)
++ Hikari Connection Pool Extension
++ EclipseLink JPA Extension
++ JTA Extension
+
+の組み合わせで、データベースへの CRUD 処理を行っています。トランザクション処理 (commit/rollback) は コンテナ(Helidon) が管理します。
+
+```java 
+    @PersistenceContext(unitName = "CountryDS")
+    private EntityManager em;
+
+    @Transactional
+    public void updateCountry(int countryId, String countryName) {
+        final Country country = em.find(Country.class, countryId);
+        if(null == country) 
+            throw new CountryNotFoundException(String.format("Couldn't find country, id=%d", countryId));
+        country.setCountryName(countryName);
+        em.persist(country);
+    }
+```
+
+データベース操作の実行
+
+```bash
+# select
+curl localhost:8080/jpa/country/ # [{"countryId":1,"countryName":"USA"},{"countryId":81,"countryName":"Japan"}]
+
+# insert
+curl -X POST -H "Content-Type: application/json" localhost:8080/jpa/country \
+   -d '[{"countryId":86,"countryName":"China"}]'
+curl localhost:8080/jpa/country/86 # {"countryId":86,"countryName":"China"}
+
+# update
+curl -X PUT -H "Content-Type: application/x-www-form-urlencoded" localhost:8080/reactive/jpa/1 \
+  -d "name=United States"
+curl localhost:8080/jpa/country/1 # {"countryId":1,"countryName":"United States"}
+
+# delete
+curl -X DELETE localhost:8080/jpa/country/86
+curl -v localhost:8080/jpa/country/86 # 404 Not Found
+```
+
+### 接続先を H2 Databse から Oracle Database に変更するには？
+
+以下のファイルのコメントアウトを変更して、Oracle Database に接続するようにします。
+
+<details>
+<summary>pom.xml</summary>
+
+JDBC ドライバのライブラリを切り替えます。
+
+```xml
+        <!-- h2 jdbc driver -->
+        <!-- コメントアウトする
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.199</version>
+            <scope>runtime</scope>
+        </dependency>
+        -->
+
+        <!-- Oracle JDBC driver from Maven Central Repository -->
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc10</artifactId>
+            <version>19.6.0.0</version>
+        </dependency>
+```
+</details>
+
+<details>
+<summary>application.yaml</summary>
+
+コネクション・プールの設定を切り替えます。
+
+```yaml
+javax:
+  sql:
+    DataSource:
+      DemoDataSource:
+        ## default h2 --> コメントアウトする
+        #dataSourceClassName: org.h2.jdbcx.JdbcDataSource
+        #dataSource:
+        #    url: jdbc:h2:mem:greeting;INIT=RUNSCRIPT FROM 'classpath:createtable.ddl' 
+        #    user: sa
+        #    password: ""
+                
+        ## example config for Oracle database
+        dataSourceClassName: oracle.jdbc.pool.OracleDataSource
+        dataSource:
+            # Autonomous database の場合Walletファイルが必要です
+            # 接続文字列の書式も異なります
+            #url: jdbc:oracle:thin:@abc_high?TNS_ADMIN=/tnsdir
+            url: jdbc:oracle:thin:@//localhost:1521/PDB1.localdomain
+            user: demo
+            password: OCHaCafe6666
+                
+        ## example config for MySQL database
+        #driverClassName: com.mysql.jdbc.Driver
+        #jdbcUrl: jdbc:mysql://localhost:3306/demo
+        #username: oracle
+        #password: mysql
+```
+</details>
+
+<details>
+<summary>META-INF/persistence.xml</summary>
+
+`eclipselink.target-database` の値を切り替えます。
+
+```xml
+<persistence>
+    <persistence-unit name="GreetingDS" transaction-type="JTA">
+        <properties>
+            <!--
+            <property name="eclipselink.target-database" 
+            value="org.eclipse.persistence.platform.database.H2Platform" />
+            -->
+            <property name="eclipselink.target-database" value="Oracle" />
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="CountryDS" transaction-type="JTA">
+        <properties>
+            <!--
+            <property name="eclipselink.target-database" 
+            value="org.eclipse.persistence.platform.database.H2Platform" />
+            -->
+            <property name="eclipselink.target-database" value="Oracle" />
+        </properties>
+    </persistence-unit>
+</persistence>
+```
+</details>
+<br>
+
+### テスト用の Oracle Database インスタンスの作成するには？ 
+
+デモ用に設定済みの Oracle Database インスタンスを Docker コンテナで実行するためのスクリプトを用意しています。
+
+<details>
+<summary>0. (必要に応じて) Oracle コンテナ・レジストリへのログイン</summary>
+
+  
+事前に `docker login container-registry.oracle.com` を済ませておいて下さい。  
+[ポータル](https://container-registry.oracle.com/) にてソフトウェア利用許諾契約の確認が必要です。
+</details>
+
+<details>
+<summary>1. demo/oracledb/start-oracledb.sh の実行</summary>
+  
+Oracle Database の公式コンテナ・イメージを取得して起動します。  
+ `docker logs`を確認してデータベースが起動するまで待機して下さい。`Done ! The database is ready for use .` が表示されたらOKです。
+
+```
+$ docker logs -f oracledb
+...
+...
+Done ! The database is ready for use .
+Fri Jan 15 09:59:46 UTC 2021
+User check : root.
+Setup Oracle Database
+```
+</details>
+
+<details>
+<summary>2. demo/oracledb/populate-demodata.sh の実行</summary>
+
+デモ用のユーザーとテーブルを作成します。
+| | |
+|-------|--------------------|
+| User  | DEMO               |
+| Table | GREETINGS, COUNTRY |
+</details>
+<br>
 
 ## ■ gRPC デモ (oracle.demo.grpc パッケージ)
 
@@ -714,6 +926,8 @@ Hello OCHaCafe
 ```
 
 ### protobuf版 (oracle.demo.grpc.protobuf パッケージ) に関する補足
+
+[gRPC Java Quickstart](https://grpc.io/docs/languages/java/quickstart/) と同じprotoファイルを用いて、互換性のある実装を行っていますので、Quickstart で作成したクライアントから Helidon の gRPC サーバーを呼び出すことができます。  
 
 protobuf ペイロードを使ったサーバー実装は更に POJO + Annotaion を使った方法と、GrpcMpExtension を使って従来型のサービス実装クラスをデプロイする方法の、2種類を提供しています。おすすめは POJO + Annotaion です。
 
@@ -756,7 +970,8 @@ oracle.demo.grpc.protobuf.GrpcExtension
 META-INF/services/io.helidon.microprofile.grpc.server.spi.GrpcMpExtension
 ```
 
-### 実装の切り替え方
+<details>
+<summary>実装の切り替え方 ( POJO + Annotaion 方式 → GrpcMpExtension 方式 )</summary>
 
 1. META-INF/services/io.helidon.microprofile.grpc.server.spi.GrpcMpExtension を編集する
 ```text
@@ -779,17 +994,15 @@ public class GreeterSimpleService{
     }
 }
 ```
+</details>
+<br>
 
 ### gRPC - protoファイルのコンパイルについて
 
-pom.xmlの通常ビルドフェーズとは独立してprotoファイルのコンパイルを行うプロファイルを定義しています。
-以下のコマンドを使って、まず最初にソースを生成して、srcディレクトリにコピーをします。詳細は、pom.xml の内容を確認して下さい。
+pom.xml の通常ビルドフェーズとは独立してprotoファイルのコンパイルを行うプロファイルを定義しています。
+[ビルド方法](#ビルド方法) にあるとおり、protoc を使ってまず最初に proto ファイルから Java ソースを生成して、srcディレクトリにコピーをします。詳細は、pom.xml の内容を確認して下さい。
 
-```bash
-mvn -P protoc generate-sources
-```
-
-<br/>
+<br>
 
 ## ■ MicroProfile Reactive Messaging デモ (oracle.demo.reactive パッケージ)
 
@@ -814,7 +1027,7 @@ curl -v http://localhost:8080/jpa/country/86 # 404 Not Found
 
 ### JMS Connector
 
-更に、Helidonが提供している JMS Connectorを使って WebLogic Server の JMSキューを経由したデータベースの非同期更新(Event Sourcing)処理を実装しています。このデモの実行にはWebLogic Serverのクライアント・ライブラリが必要なので、デフォルトで無効にしています。
+更に、Helidonが提供している JMS Connectorを使って WebLogic Server の JMSキューを経由したデータベースの非同期更新(Event Sourcing)処理を実装しています。このデモの実行には WebLogic Server のクライアント・ライブラリが必要なので、デフォルトで無効にしています。
 
 ```bash
 # insert
@@ -832,14 +1045,19 @@ curl -X DELETE http://localhost:8080/reactive/jms/country/61
 curl -v http://localhost:8080/jpa/country/61 # 404 Not Found
 ```
 
-### JMS Connector デモを有効化するには
+### JMS Connector デモを有効化するには？
 
-1. WebLogic Server をインストールし、JMSリソースを構成する  
+<details>
+<summary>1. WebLogic Server をインストールし、JMSリソースを構成する</summary>
+
 適当なキューを定義して下さい。  
 後述する「テスト用の WebLogic Server Docker インスタンスの作成」の項の手順に従えば、
 このデモ用の設定がされた Dockerコンテナ・ベースのWebLogic Serverを準備することができます。
+</details>
 
-2. Mavenのローカル・リポジトリを作成して、WebLogic Serverのクライアント・ライブラリ(wlthint3client.jar)をデプロイする  
+<details>
+<summary>2. Mavenのローカル・リポジトリを作成して、WebLogic Serverのクライアント・ライブラリ(wlthint3client.jar)をデプロイする</summary>
+
 クライアント・ライブラリはパブリックMavenリポジトリからは入手できませんので、ローカル・リポジトリをマニュアルで作成します。
 `create-local-repo.sh` を編集してこのシェルを実行してください。`m2repo`フォルダにjarファイルがデプロイされます。  
 wlthint3client.jar は後述するWebLogic Serverのコンテナ・イメージから入手するのが簡単かもしれません。
@@ -859,7 +1077,11 @@ mvn deploy:deploy-file \
  -Dpackaging=jar \
  -DgeneratePom=true
 ```
-3. pom.xml 及び Javaソースのコメントアウトを外す
+</details>
+
+<details>
+<summary>3. pom.xml 及び Javaソースのコメントアウトを外す</summary>
+  
  - pom.xml
 ```xml
         <!-- WebLogic thin t3 client for 14.1.1 -->
@@ -893,7 +1115,10 @@ public class ReactiveJmsResourceTest{
     //@Test
     public void testCRUDCountry(){
 ```
-4. src/main/resources/application.yaml を編集して、WebLogic Serverの接続設定を行う
+</details>
+
+<details>
+<summary>4. src/main/resources/application.yaml を編集して、WebLogic Serverの接続設定を行う</summary>
 
 ```yaml
 # Reactive Messaging
@@ -920,26 +1145,39 @@ mp.messaging:
             factory.initial: weblogic.jndi.WLInitialContextFactory
             provider.url: t3://localhost:7001 # 確認
 ```
+</details>
+<br>
 
-### テスト用の WebLogic Server Docker インスタンスの作成 
+### テスト用の WebLogic Server Docker インスタンスの作成するには？ 
 
-JMS Connector のテストに使うための設定済み WebLogic Server インスタンスを Docker コンテナで実行するためのスクリプトを用意しています。
+JMS Connector のデモに使うための設定済み WebLogic Server インスタンスを Docker コンテナで実行するためのスクリプトを用意しています。
 
-0. (必要に応じて) Oracle コンテナ・レジストリへのログイン  
-事前に `docker login container-registry.oracle.com` を済ませておいて下さい。
+<details>
+<summary>0. (必要に応じて) Oracle コンテナ・レジストリへのログイン</summary>
+  
+事前に `docker login container-registry.oracle.com` を済ませておいて下さい。  
+[ポータル](https://container-registry.oracle.com/) にてソフトウェア利用許諾契約の確認が必要です。
+</details>
 
-1. demo/weblogic/start-weblogic.sh の実行  
+<details>
+<summary>1. demo/weblogic/start-weblogic.sh の実行</summary>
+  
 WebLogic Server の公式コンテナ・イメージを取得して起動します。  
  `docker logs`を確認してサーバーが起動するまで待機して下さい。`<Server state changed to RUNNING.>` が表示されたらOKです。
 
 ```
-$ docker logs --tail 3 wls1411
+$ docker logs -f wls1411
+...
+...
 <Jan 6, 2021, 3:29:24,496 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000331> <Started the WebLogic Server Administration Server "AdminServer" for domain "base_domain" running in development mode.> 
 <Jan 6, 2021, 3:29:24,611 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000360> <The server started in RUNNING mode.> 
 <Jan 6, 2021, 3:29:24,651 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000365> <Server state changed to RUNNING.> 
 ```
+</details>
 
-2. demo/weblogic/config-jms.sh の実行  
+<details>
+<summary>2. demo/weblogic/config-jms.sh の実行</summary>
+  
 WebLogic Server Deploy Tooling を使ってJMSリソースを追加し、サーバーを再起動します。
 
 尚、デモの実行に必要な wlthint3client.jar は、以下のようにコンテナから取得することが可能です。
@@ -947,8 +1185,8 @@ WebLogic Server Deploy Tooling を使ってJMSリソースを追加し、サー�
 ```bash
 docker cp wls1411:/u01/oracle/wlserver/server/lib/wlthint3client.jar wlthint3client.jar
 ```
-
-<br/>
+</details>
+<br>
 
 ## ■ MicroProfile GraphQL デモ (oracle.demo.graphql パッケージ)
 
@@ -980,7 +1218,9 @@ input CountryInput {
 }
 ```
 
-curlでテストする場合は、以下を参考にして下さい。  
+<details open>
+<summary>curlでテストする場合は、以下を参考にして下さい</summary>
+  
 同様の操作は、GrapghQLのテストケース(CountryGraphQLApiTest.java)でも行っていますので、そちらも参考にしてください。
 
 ```bash
@@ -1008,6 +1248,7 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
   -d '{ "query" : "mutation { deleteCountry (countryId:86) }" }'
 ```
+</details>
 
 ### データベースへのアクセスパターン
 
@@ -1018,7 +1259,7 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 
 ![データベースへのアクセス・パターン](doc/images/microprofile-demo-crud.png)
 
-<br/>
+<br>
 
 ## ■ （おまけ）Cowsay (oracle.demo.cowweb パッケージ)
 
@@ -1050,7 +1291,7 @@ $ curl "localhost:8080/cowsay/think?message=Hello%21&cowfile=moose"
 ```
 エンジョイ！
 
-<br/>
+<br>
 
 ---
 _Copyright © 2019-2021, Oracle and/or its affiliates. All rights reserved._
