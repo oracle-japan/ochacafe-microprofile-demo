@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import org.eclipse.microprofile.opentracing.Traced;
@@ -17,13 +17,12 @@ import oracle.demo.tracing.interceptor.TraceTag;
 @Dependent
 public class CountryDAO {
 
-    static {
-        // in case of Oracle, disable fan to avoid waiting for fan initialization timeout
-        System.setProperty("oracle.jdbc.fanEnabled", "false");
-    }
+    private final EntityManager em;
 
-    @PersistenceContext(unitName = "CountryDS")
-    private EntityManager em;
+    @Inject
+    public CountryDAO(EntityManagerUtil emUtil){
+        this.em = emUtil.getEntityManger();
+    }
 
     // This is a standard MicroProfile annotation
     @Traced

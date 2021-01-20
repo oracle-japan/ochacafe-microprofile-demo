@@ -96,6 +96,110 @@
                 <docker.repo.prefix>${docker.repo.remote.prefix}</docker.repo.prefix>
             </properties>
         </profile>
+
+        <profile>
+            <id>db-oracle</id>
+            <properties>
+                <oracle.jdbc.version>19.6.0.0</oracle.jdbc.version>
+            </properties>
+            <dependencies>
+                <!-- Oracle JDBC driver from Maven Central Repository -->
+                <dependency>
+                    <groupId>com.oracle.database.jdbc</groupId>
+                    <artifactId>ojdbc10</artifactId>
+                    <version>${oracle.jdbc.version}</version>
+                </dependency>
+
+                <!-- Oracle JDBC additional library required to support Internationalization -->
+                <dependency>
+                    <groupId>com.oracle.database.nls</groupId>
+                    <artifactId>orai18n</artifactId>
+                    <version>${oracle.jdbc.version}</version>
+                </dependency>
+
+                <!-- Oracle JDBC additional libraries required to support XMLType -->
+                <dependency>
+                    <groupId>com.oracle.database.xml</groupId>
+                    <artifactId>xdb6</artifactId>
+                    <version>18.3.0.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.oracle.database.xml</groupId>
+                    <artifactId>xmlparserv2</artifactId>
+                    <version>${oracle.jdbc.version}</version>
+                </dependency>
+
+                <!-- Oracle JDBC additional libraries required to support Oracle Wallets from Java -->
+                <dependency>
+                    <groupId>com.oracle.database.security</groupId>
+                    <artifactId>oraclepki</artifactId>
+                    <version>${oracle.jdbc.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.oracle.database.security</groupId>
+                    <artifactId>osdt_cert</artifactId>
+                    <version>${oracle.jdbc.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.oracle.database.security</groupId>
+                    <artifactId>osdt_core</artifactId>
+                    <version>${oracle.jdbc.version}</version>
+                </dependency>
+
+                <!-- Oracle JDBC additional libraries required to support FAN events in the driver -->
+                <dependency>
+                    <groupId>com.oracle.database.ha</groupId>
+                    <artifactId>simplefan</artifactId>
+                    <version>${oracle.jdbc.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.oracle.database.ha</groupId>
+                    <artifactId>ons</artifactId>
+                    <version>${oracle.jdbc.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>db-mysql</id>
+            <dependencies>
+                <!-- MySQL database driver -->
+                <dependency>
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                    <version>8.0.20</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>db-h2</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <!-- h2 jdbc driver -->
+                <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                    <version>1.4.199</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>weblogic</id>
+            <dependencies>
+                <!-- WebLogic thin t3 client for 14.1.1 -->
+                <dependency>
+                    <groupId>oracle.weblogic</groupId>
+                    <artifactId>wlthint3client</artifactId>
+                    <version>14.1.1.0.0</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
     </profiles>
 
     <dependencies>
@@ -139,14 +243,6 @@
             <groupId>io.helidon.messaging.jms</groupId>
             <artifactId>helidon-messaging-jms</artifactId>
         </dependency>
-        <!-- WebLogic thin t3 client for 14.1.1 -->
-        <!--
-        <dependency>
-            <groupId>oracle.weblogic</groupId>
-            <artifactId>wlthint3client</artifactId>
-            <version>14.1.1.0.0</version>
-        </dependency>
-        -->
 
         <!-- support gRPC-->
         <dependency>
@@ -233,88 +329,6 @@
             <groupId>io.helidon.microprofile.graphql</groupId>
             <artifactId>helidon-microprofile-graphql-server</artifactId>
         </dependency>
-
-        <!-- h2 jdbc driver -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.199</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- Oracle JDBC driver from Maven Central Repository -->
-        <!--
-        <dependency>
-            <groupId>com.oracle.database.jdbc</groupId>
-            <artifactId>ojdbc10</artifactId>
-            <version>19.6.0.0</version>
-        </dependency>
-        -->
-
-        <!-- Oracle JDBC additional library required to support Internationalization -->
-        <!--
-        <dependency>
-            <groupId>com.oracle.database.nls</groupId>
-            <artifactId>orai18n</artifactId>
-            <version>19.6.0.0</version>
-        </dependency>
-        -->
-
-        <!-- Oracle JDBC additional libraries required to support XMLType -->
-        <!--
-        <dependency>
-            <groupId>com.oracle.database.xml</groupId>
-            <artifactId>xdb6</artifactId>
-            <version>19.6.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.database.xml</groupId>
-            <artifactId>xmlparserv2</artifactId>
-            <version>19.6.0.0</version>
-        </dependency>
-        -->
-
-        <!-- Oracle JDBC additional libraries required to support Oracle Wallets from Java -->
-        <!--
-        <dependency>
-            <groupId>com.oracle.database.security</groupId>
-            <artifactId>oraclepki</artifactId>
-            <version>19.6.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.database.security</groupId>
-            <artifactId>osdt_cert</artifactId>
-            <version>19.6.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.database.security</groupId>
-            <artifactId>osdt_core</artifactId>
-            <version>19.6.0.0</version>
-        </dependency>
-        -->
-
-        <!-- Oracle JDBC additional libraries required to support FAN events in the driver -->
-        <!--
-        <dependency>
-            <groupId>com.oracle.database.ha</groupId>
-            <artifactId>simplefan</artifactId>
-            <version>19.6.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.database.ha</groupId>
-            <artifactId>ons</artifactId>
-            <version>19.6.0.0</version>
-        </dependency>
-        -->
-
-        <!-- MySQL database driver -->
-        <!--
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.20</version>
-        </dependency>
-        -->
 
         <!-- for client tools-->
         <dependency>

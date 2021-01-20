@@ -138,8 +138,8 @@ demo
 ## ■ ビルド方法
 
 ```bash
-# at first, generate java source files for gRPC by compiling proto file
-mvn -P protoc generate-sources
+# for the first time, generate java source files for gRPC by compiling proto file
+mvn clean -P protoc generate-sources
 # then create jar
 mvn package
 ```
@@ -782,98 +782,22 @@ curl -v localhost:8080/jpa/country/86 # 404 Not Found
 
 ### 接続先を H2 Databse から Oracle Database に変更するには？
 
-以下のファイルのコメントアウトを変更して、Oracle Database に接続するようにします。
-
-<details>
-<summary>pom.xml</summary>
-
-JDBC ドライバのライブラリを切り替えます。
-
-```xml
-        <!-- h2 jdbc driver -->
-        <!-- コメントアウトする
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.199</version>
-            <scope>runtime</scope>
-        </dependency>
-        -->
-
-        <!-- Oracle JDBC driver from Maven Central Repository -->
-        <dependency>
-            <groupId>com.oracle.database.jdbc</groupId>
-            <artifactId>ojdbc10</artifactId>
-            <version>19.6.0.0</version>
-        </dependency>
+1. Maven のプロファイル `db-oracle` を指定して package します。これにより JDBC 関連ライブラリが Oracle JDBC に切り替わります。
+```bash
+$ mvn -P db-oracle package -DskipTests=true
 ```
-</details>
-
-<details>
-<summary>application.yaml</summary>
-
-コネクション・プールの設定を切り替えます。
-
-```yaml
-javax:
-  sql:
-    DataSource:
-      DemoDataSource:
-        ## default h2 --> コメントアウトする
-        #dataSourceClassName: org.h2.jdbcx.JdbcDataSource
-        #dataSource:
-        #    url: jdbc:h2:mem:greeting;INIT=RUNSCRIPT FROM 'classpath:createtable.ddl' 
-        #    user: sa
-        #    password: ""
-                
-        ## example config for Oracle database
-        dataSourceClassName: oracle.jdbc.pool.OracleDataSource
-        dataSource:
-            # Autonomous database の場合Walletファイルが必要です
-            # 接続文字列の書式も異なります
-            #url: jdbc:oracle:thin:@abc_high?TNS_ADMIN=/tnsdir
-            url: jdbc:oracle:thin:@//localhost:1521/PDB1.localdomain
-            user: demo
-            password: OCHaCafe6666
-                
-        ## example config for MySQL database
-        #driverClassName: com.mysql.jdbc.Driver
-        #jdbcUrl: jdbc:mysql://localhost:3306/demo
-        #username: oracle
-        #password: mysql
+2. システムプロパティ `demo.persistence-unit=Oracle` を指定して Java を実行します (環境変数でも可)。
+```bash
+$ java -jar -Ddemo.persistence-unit=Oracle target/helidon-demo-mp.jar
 ```
-</details>
 
-<details>
-<summary>META-INF/persistence.xml</summary>
+META-INF/microprofile-config.properties でデータソースを設定することもできます。
+この場合、Java 実行時にシステムプロパティ `demo.data-source` を指定する必要はありません。
 
-`eclipselink.target-database` の値を切り替えます。
-
-```xml
-<persistence>
-    <persistence-unit name="GreetingDS" transaction-type="JTA">
-        <properties>
-            <!--
-            <property name="eclipselink.target-database" 
-            value="org.eclipse.persistence.platform.database.H2Platform" />
-            -->
-            <property name="eclipselink.target-database" value="Oracle" />
-        </properties>
-    </persistence-unit>
-
-    <persistence-unit name="CountryDS" transaction-type="JTA">
-        <properties>
-            <!--
-            <property name="eclipselink.target-database" 
-            value="org.eclipse.persistence.platform.database.H2Platform" />
-            -->
-            <property name="eclipselink.target-database" value="Oracle" />
-        </properties>
-    </persistence-unit>
-</persistence>
 ```
-</details>
-<br>
+# switch datasource - H2(default), Oracle, MySQL
+demo.persistence-unit=Oracle
+```
 
 ### テスト用の Oracle Database インスタンスの作成するには？ 
 
@@ -910,9 +834,28 @@ Setup Oracle Database
 デモ用のユーザーとテーブルを作成します。
 | | |
 |-------|--------------------|
+| PDB   | PDB1               |
 | User  | DEMO               |
 | Table | GREETINGS, COUNTRY |
 </details>
+
+<details>
+<summary>停止、再起動、削除</summary>
+
+```
+# 停止
+$ docker stop oracledb
+
+# 再起動 docker start して PDB をオープンする
+$ demo/oracledb/open-oracledb.sh
+
+$ 削除
+$ docker stop oracledb
+$ docker rm oracledb
+```
+
+</details>
+
 <br>
 
 ## ■ gRPC デモ (oracle.demo.grpc パッケージ)
@@ -1084,19 +1027,8 @@ mvn deploy:deploy-file \
 </details>
 
 <details>
-<summary>3. pom.xml 及び Javaソースのコメントアウトを外す</summary>
+<summary>3. Javaソースのコメントアウトを外す</summary>
   
- - pom.xml
-```xml
-        <!-- WebLogic thin t3 client for 14.1.1 -->
-        <!--
-        <dependency>
-            <groupId>oracle.weblogic</groupId>
-            <artifactId>wlthint3client</artifactId>
-            <version>14.1.1.0.0</version>
-        </dependency>
-        -->
-```
  - src/main/java/oracle/demo/reactive/ReactiveJmsResource.java
 ```java
     //@Outgoing("to-jms")
@@ -1148,6 +1080,18 @@ mp.messaging:
           java.naming:
             factory.initial: weblogic.jndi.WLInitialContextFactory
             provider.url: t3://localhost:7001 # 確認
+```
+</details>
+
+<details>
+<summary>5. weblogic プロファイルを指定して Maven ビルドする</summary>
+
+WebLogic クライアントライブラリを依存関係に含めます。Maven の仕様(プロファイルを指定するとデフォルト設定が効かなくなる)上、JPA のデモで使用するデータベースのプロファイルも同時に指定する必要があります。
+
+```bash
+$ mvn package -P db-h2,weblogic -DskipTests=true
+# or 
+$ mvn package -P db-oracale,weblogic -DskipTests=true
 ```
 </details>
 <br>

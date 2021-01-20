@@ -37,27 +37,24 @@ security:
 javax:
     sql:
         DataSource:
-            DemoDataSource:
-                ## default h2
+            H2DataSource: ## default h2
                 dataSourceClassName: org.h2.jdbcx.JdbcDataSource
                 dataSource:
                     url: jdbc:h2:mem:greeting;INIT=RUNSCRIPT FROM 'classpath:createtable.ddl' 
                     user: sa
                     password: ""
-                
-                ## example config for Oracle database
-                #dataSourceClassName: oracle.jdbc.pool.OracleDataSource
-                #dataSource:
-                #    #url: jdbc:oracle:thin:@abc_high?TNS_ADMIN=/tnsdir
-                #    url: jdbc:oracle:thin:@//localhost:1521/PDB1.localdomain
-                #    user: demo
-                #    password: OCHaCafe6666
-                
-                ## example config for MySQL database
-                #driverClassName: com.mysql.jdbc.Driver
-                #jdbcUrl: jdbc:mysql://localhost:3306/demo
-                #username: oracle
-                #password: mysql
+            OracleDataSource: # example config for Oracle database
+                dataSourceClassName: oracle.jdbc.pool.OracleDataSource
+                dataSource:
+                    #url: jdbc:oracle:thin:@abc_high?TNS_ADMIN=/tnsdir
+                    url: jdbc:oracle:thin:@//localhost:1521/PDB1.localdomain
+                    user: demo
+                    password: OCHaCafe6666
+            MySQLDataSource: # example config for MySQL database
+                driverClassName: com.mysql.jdbc.Driver
+                jdbcUrl: jdbc:mysql://localhost:3306/demo
+                username: oracle
+                password: mysql
 
 # Reactive Messaging
 mp.messaging:
