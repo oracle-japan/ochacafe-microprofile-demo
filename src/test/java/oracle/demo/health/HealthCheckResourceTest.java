@@ -14,7 +14,7 @@ import io.helidon.microprofile.tests.junit5.AddConfig;
 import io.helidon.microprofile.tests.junit5.HelidonTest;
 
 @HelidonTest
-@AddConfig(key = "demo.healthcheck.time-to-fail", value = "30") // seconds, need to keep enough time to start-up
+@AddConfig(key = "demo.healthcheck.time-to-fail", value = "60") // seconds, need to keep enough time to start-up
 public class HealthCheckResourceTest{
 
     @Inject private WebTarget webTarget;
@@ -29,7 +29,7 @@ public class HealthCheckResourceTest{
         // wait for timeout
         System.out.println("Waiting for timeout...");
         long uptime = HealthCheckHelper.getUptime();
-        sleep((30 * 1000L - uptime) / 1000 + 1L);
+        sleep((60 * 1000L - uptime) / 1000 + 1L);
         response = webTarget.path("/health/live").request().get();
         check(response, 503, "DOWN");
 
@@ -58,6 +58,7 @@ public class HealthCheckResourceTest{
     }
 
     private void sleep(long sec){
+        System.out.format("Will sleep %d sec.%n", sec);
         try{
             TimeUnit.SECONDS.sleep(sec);
         }catch(Exception e){}
