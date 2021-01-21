@@ -56,6 +56,8 @@ javax:
                 username: oracle
                 password: mysql
 
+#demo.dataSource: OracleDataSource # default: H2DataSource
+
 # Reactive Messaging
 mp.messaging:
 

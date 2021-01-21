@@ -782,21 +782,39 @@ curl -v localhost:8080/jpa/country/86 # 404 Not Found
 
 ### 接続先を H2 Databse から Oracle Database に変更するには？
 
+デフォルトでは、組み込みの H2 Database に接続するようになっていますが、接続先を Oracle Database をはじめ任意の JDBC 接続に変更できます。
+
 1. Maven のプロファイル `db-oracle` を指定して package します。これにより JDBC 関連ライブラリが Oracle JDBC に切り替わります。
 ```bash
 $ mvn -P db-oracle package -DskipTests=true
 ```
-2. システムプロパティ `demo.persistence-unit=Oracle` を指定して Java を実行します (環境変数でも可)。
+2. システムプロパティ `demo.dataSource=OracleDataSource` を指定して Java を実行します (環境変数でも可)。
 ```bash
-$ java -jar -Ddemo.persistence-unit=Oracle target/helidon-demo-mp.jar
+$ java -jar -Ddemo.dataSource=OracleDataSource target/helidon-demo-mp.jar
 ```
 
-META-INF/microprofile-config.properties でデータソースを設定することもできます。
-この場合、Java 実行時にシステムプロパティ `demo.data-source` を指定する必要はありません。
+application.yaml でデータソースを設定してビルドすることもできます(システムプロパティや環境変数は実行時にこの設定を上書きする)。  
+内部的にはMicroProfile Config APIを使って、起動時に `DemoDataSource` をダイナミックに構成するようになっています (io.helidon.config.Config.DSConfigSource クラス)。そして、META-INF/persistence.xml 内で `DemoDataSource` が参照されています。  
+Oracle だけでなく任意の DataSource/JDBC Driver を構成できます (JDBCドライバのライブラリは必要です)。
 
-```
-# switch datasource - H2(default), Oracle, MySQL
-demo.persistence-unit=Oracle
+```yaml
+javax:
+    sql:
+        DataSource:
+            H2DataSource: 
+                dataSourceClassName: org.h2.jdbcx.JdbcDataSource
+                dataSource:
+                    url: jdbc:h2:mem:greeting;INIT=RUNSCRIPT FROM 'classpath:createtable.ddl' 
+                    user: sa
+                    password: ""
+            OracleDataSource:
+                dataSourceClassName: oracle.jdbc.pool.OracleDataSource
+                dataSource:
+                    url: jdbc:oracle:thin:@abc_high?TNS_ADMIN=/tnsdir
+                    user: scott
+                    password: tiger
+
+demo.dataSource: OracleDataSource # default: H2DataSource
 ```
 
 ### テスト用の Oracle Database インスタンスの作成するには？ 
