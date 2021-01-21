@@ -1,8 +1,8 @@
 package oracle.demo.jpa;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -16,12 +16,8 @@ import javax.ws.rs.Produces;
 @Path("jpa/example")
 public class JPAExampleResource {
 
-    private final EntityManager em;
-
-    @Inject
-    public JPAExampleResource(EntityManagerUtil emUtil){
-        this.em = emUtil.getEntityManger();
-    }
+    @PersistenceContext(unitName = "Demo")
+    private EntityManager em;
 
     @GET
     @Path("response/{salutation}")

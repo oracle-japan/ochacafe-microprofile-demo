@@ -10,6 +10,8 @@ CONTAINER_NAME=oracledb
 
 docker start $CONTAINER_NAME
 
+sleep 10
+
 CONTAINER_ORACLE_HOME=$(docker exec $CONTAINER_NAME bash -c 'echo -n "$ORACLE_HOME"')
 
 echo "alter database open;" | \
