@@ -47,7 +47,7 @@ javax:
                 dataSourceClassName: oracle.jdbc.pool.OracleDataSource
                 dataSource:
                     #url: jdbc:oracle:thin:@abc_high?TNS_ADMIN=/tnsdir
-                    url: jdbc:oracle:thin:@//localhost:1521/PDB1.localdomain
+                    url: jdbc:oracle:thin:@//${ORACLE_HOST}:1521/PDB1
                     user: demo
                     password: OCHaCafe6666
             MySQLDataSource: # example config for MySQL database
@@ -56,7 +56,8 @@ javax:
                 username: oracle
                 password: mysql
 
-#demo.dataSource: OracleDataSource # default: H2DataSource
+ORACLE_HOST: localhost # localhost may not work in some cases
+#DEMO_DATASOURCE: OracleDataSource # default: H2DataSource
 
 # Reactive Messaging
 mp.messaging:

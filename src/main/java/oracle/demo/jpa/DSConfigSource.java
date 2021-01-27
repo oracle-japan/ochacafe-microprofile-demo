@@ -10,7 +10,7 @@ import org.eclipse.microprofile.config.spi.ConfigSource;
 import io.helidon.config.Config;
 
 /**
- * Dynamically configure "DemoDataSource" from "demo.dataSource"
+ * Dynamically configure "DemoDataSource" from "DEMO_DATASOURCE"
  */
 public class DSConfigSource implements ConfigSource {
 
@@ -20,7 +20,7 @@ public class DSConfigSource implements ConfigSource {
 
     public DSConfigSource(){
         final Config config = Config.create();
-        final String dsName = config.get("demo.dataSource").asString().orElse("H2DataSource");
+        final String dsName = config.get("DEMO_DATASOURCE").asString().orElse("H2DataSource");
         logger.info("Configuring DemoDataSource by copying '" + dsName + "'");
 
         config.get("javax.sql.DataSource." + dsName).traverse()

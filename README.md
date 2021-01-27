@@ -22,6 +22,7 @@
 + [gRPC デモ](#■-grpc-デモ-oracledemogrpc-パッケージ)
 + [Reactive Messaging デモ](#■-microprofile-reactive-messaging-デモ-oracledemoreactive-パッケージ)
 + [GraphQL デモ](#■-microprofile-graphql-デモ-oracledemographql-パッケージ)
++ [Mapped Diagnostic Context (Mdc) デモ](#■-Mapped-Diagnostic-Context-Mdc-デモ-oracledemologging-パッケージ)
 + [おまけ](#■-おまけcowsay-oracledemocowweb-パッケージ)
 
 ## デモのソース
@@ -185,6 +186,7 @@ helidon-demo-mp                                     latest              1b4d2e82
 $ docker push (remote docker repository prefix/)helidon-demo-mp
 ```
 
+[目次に戻る](#目次)
 <br>
 
 ## ■ MicroProfile Health デモ (oracle.demo.health パッケージ)
@@ -285,6 +287,7 @@ Events:
   Warning  Unhealthy  5m54s (x12 over 10m)  kubelet, 10.0.10.11  Liveness probe failed: HTTP probe failed with statuscode: 503
 ```
 
+[目次に戻る](#目次)
 <br>
 
 ## ■ Open Tracing デモ (oracle.demo.tracing パッケージ)
@@ -336,6 +339,7 @@ cat demo/tracing/request.json | curl -v -X POST -H "Content-Type:application/jso
 $ demo/tracing/tracing-demo.sh [start | stop]
 ```
 
+[目次に戻る](#目次)
 <br>
 
 ## ■ OpenTracing SPAN定義のためのアノテーション (oracle.demo.tracing.interceptor パッケージ)
@@ -376,6 +380,7 @@ public List<Country> getCountriesWithError(){
 | value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
 | stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
 
+[目次に戻る](#目次)
 <br>
 
 ## ■ Metrics デモ (oracle.demo.metrics パッケージ)
@@ -426,6 +431,7 @@ $ curl localhost:8080/mpmetrics/count-total
 5
 ```
 
+[目次に戻る](#目次)
 <br>
 
 ## ■ Fault Tolerance デモ (oracle.demo.ft パッケージ)
@@ -496,6 +502,7 @@ application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreak
 application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreaker_opened_total 2
 ```
 
+[目次に戻る](#目次)
 <br>
 
 ## ■ Open API (oracle.demo.country パッケージ)
@@ -572,6 +579,7 @@ paths:
       summary: Find country by country code
 ```
 
+[目次に戻る](#目次)
 <br>
 
 ## ■ MicroProfile Rest Client (oracle.demo.restclient パッケージ)
@@ -629,6 +637,7 @@ $ curl "localhost:8080/restclient/1/submit-review?star=5&comment=great%21"
 $ curl localhost:8080/restclient/1/reviews
 ```
 
+[目次に戻る](#目次)
 <br>
 
 ## ■ Security (oracle.demo.security パッケージ)
@@ -732,6 +741,7 @@ $ curl -v -u john:password1 localhost:8080/security/basic/admin
 * OIDC (OpenID Connect) Authentication Provider
 * IDCS (Oracle Identity Cloud Service) Role Mapping Provider
 
+[目次に戻る](#目次)
 <br>
 
 ## ■ JPA (Java Persistence API) デモ (oracle.demo.jpa パッケージ)
@@ -746,7 +756,7 @@ Helidon は拡張機能として Java Persistence API (JPA) と Java Transaction
 の組み合わせで、データベースへの CRUD 処理を行っています。トランザクション処理 (commit/rollback) は コンテナ(Helidon) が管理します。
 
 ```java 
-    @PersistenceContext(unitName = "CountryDS")
+    @PersistenceContext(unitName = "Demo")
     private EntityManager em;
 
     @Transactional
@@ -788,13 +798,13 @@ curl -v localhost:8080/jpa/country/86 # 404 Not Found
 ```bash
 $ mvn -P db-oracle package -DskipTests=true
 ```
-2. システムプロパティ `demo.dataSource=OracleDataSource` を指定して Java を実行します (環境変数でも可)。
+2. システムプロパティ `DEMO_DATASOURCE=OracleDataSource` を指定して Java を実行します (環境変数でも可)。
 ```bash
-$ java -jar -Ddemo.dataSource=OracleDataSource target/helidon-demo-mp.jar
+$ java -jar -DDEMO_DATASOURCE=OracleDataSource target/helidon-demo-mp.jar
 ```
 
 application.yaml でデータソースを設定してビルドすることもできます(システムプロパティや環境変数は実行時にこの設定を上書きする)。  
-内部的にはMicroProfile Config APIを使って、起動時に `DemoDataSource` をダイナミックに構成するようになっています (io.helidon.config.Config.DSConfigSource クラス)。そして、META-INF/persistence.xml 内で `DemoDataSource` が参照されています。  
+内部的にはMicroProfile Config APIを使って、起動時に `DemoDataSource` をダイナミックに構成するようになっています (io.helidon.config.Config.DSConfigSource クラスと META-INF/org.eclipse.microprofile.config.spi.ConfigSource を使って MicroProfile の仕様に基づいた Config の拡張を行っています)。そして、META-INF/persistence.xml 内で `DemoDataSource` が参照されています。
 Oracle だけでなく任意の DataSource/JDBC Driver を構成できます (JDBCドライバのライブラリは必要です)。
 
 ```yaml
@@ -814,7 +824,7 @@ javax:
                     user: scott
                     password: tiger
 
-demo.dataSource: OracleDataSource # default: H2DataSource
+DEMO_DATASOURCE: OracleDataSource # default: H2DataSource
 ```
 
 ### テスト用の Oracle Database インスタンスの作成するには？ 
@@ -826,23 +836,22 @@ demo.dataSource: OracleDataSource # default: H2DataSource
 
   
 事前に `docker login container-registry.oracle.com` を済ませておいて下さい。  
-[ポータル](https://container-registry.oracle.com/) にてソフトウェア利用許諾契約の確認が必要です。
+[ポータル](https://container-registry.oracle.com/) にてソフトウェア利用許諾契約 (Oracle Standard Terms and Restrictions) の確認が必要です。
 </details>
 
 <details>
 <summary>1. demo/oracledb/start-oracledb.sh の実行</summary>
   
 Oracle Database の公式コンテナ・イメージを取得して起動します。  
- `docker logs`を確認してデータベースが起動するまで待機して下さい。`Done ! The database is ready for use .` が表示されたらOKです。
+ `docker logs`を確認してデータベースが起動するまで待機して下さい。`DATABASE IS READY TO USE!` が表示されたらOKです。
 
 ```
 $ docker logs -f oracledb
 ...
 ...
-Done ! The database is ready for use .
-Fri Jan 15 09:59:46 UTC 2021
-User check : root.
-Setup Oracle Database
+#########################
+DATABASE IS READY TO USE!
+#########################
 ```
 </details>
 
@@ -858,22 +867,23 @@ Setup Oracle Database
 </details>
 
 <details>
-<summary>停止、再起動、削除</summary>
+<summary>停止、起動、削除</summary>
 
-```
+```bash
 # 停止
 $ docker stop oracledb
 
-# 再起動 docker start して PDB をオープンする
-$ demo/oracledb/open-oracledb.sh
+# 起動
+$ docker start oracledb
 
-$ 削除
+# 削除
 $ docker stop oracledb
 $ docker rm oracledb
 ```
 
 </details>
 
+[目次に戻る](#目次)
 <br>
 
 ## ■ gRPC デモ (oracle.demo.grpc パッケージ)
@@ -967,6 +977,7 @@ public class GreeterSimpleService{
 pom.xml の通常ビルドフェーズとは独立してprotoファイルのコンパイルを行うプロファイルを定義しています。
 [ビルド方法](#ビルド方法) にあるとおり、protoc を使ってまず最初に proto ファイルから Java ソースを生成して、srcディレクトリにコピーをします。詳細は、pom.xml の内容を確認して下さい。
 
+[目次に戻る](#目次)
 <br>
 
 ## ■ MicroProfile Reactive Messaging デモ (oracle.demo.reactive パッケージ)
@@ -1122,7 +1133,7 @@ JMS Connector のデモに使うための設定済み WebLogic Server インス�
 <summary>0. (必要に応じて) Oracle コンテナ・レジストリへのログイン</summary>
   
 事前に `docker login container-registry.oracle.com` を済ませておいて下さい。  
-[ポータル](https://container-registry.oracle.com/) にてソフトウェア利用許諾契約の確認が必要です。
+[ポータル](https://container-registry.oracle.com/) にてソフトウェア利用許諾契約 (Oracle Standard Terms and Restrictions) の確認が必要です。
 </details>
 
 <details>
@@ -1152,6 +1163,8 @@ WebLogic Server Deploy Tooling を使ってJMSリソースを追加し、サー�
 docker cp wls1411:/u01/oracle/wlserver/server/lib/wlthint3client.jar wlthint3client.jar
 ```
 </details>
+
+[目次に戻る](#目次)
 <br>
 
 ## ■ MicroProfile GraphQL デモ (oracle.demo.graphql パッケージ)
@@ -1160,7 +1173,7 @@ JPA経由でデータベースのCRUD操作をRestで公開するコードは既
 スキーマは `/graphql/schema.graphql` から取得できます。
 
 
-```text
+```graphql
 type Country {
   countryId: Int!
   countryName: String!
@@ -1225,6 +1238,160 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 
 ![データベースへのアクセス・パターン](doc/images/microprofile-demo-crud.png)
 
+[目次に戻る](#目次)
+<br>
+
+## ■ Mapped Diagnostic Context (Mdc) デモ (oracle.demo.logging パッケージ)
+
+Mapped Diagnostic Context (Mdc) は、並列処理で実行されるログ出力をトレースするために使うことができます。サーバーが複数のクライアントからのリクエストをマルチスレッドで処理する（=同じクラス＆メソッドのログ出力が入り乱れる）場合などに便利です。ログに実行スレッド名を出力することもできますが、単一のリクエストの処理が複数のスレッドにまたがって行われるようなケースでは、スレッドをまたがったトレースが困難になります。  
+
+このデモでは、実行コンテキストIDの付与 (Execution Context ID = ECID) を Mdc を使って実装します。Mdcの設定・消去は CDI Intercepter を使っていますので、本来の業務ロジックの処理(=メソッドの中身)には影響を与えずに、メソッドの実行前後で Mdc 関連の処理を割り込ませています。
+ECID がメソッドの実行時に存在しない場合、IDを新たに設定し、メソッド終了時に新規設定した ID を消去します。 ECID がメソッドの実行時に既に存在する場合、処理は行わずスルーします。
+
+**/logging**  
+- MdcResource#nomdc()
+  - @Mdc Sub#sub()
+    - CompletableFuture.supplyAsync()
+      - Supplier() [lambda]  
+
+**/logging/mdc**  
+- @Mdc MdcResource#mdc()
+  - @Mdc Sub#sub() 
+    - CompletableFuture.supplyAsync()
+      - Supplier() [lambda]  
+
+logging.properties では HelidonConsoleHandler を使い、%X{<キー>} で Mdc を出力します。
+
+```conf
+handlers=io.helidon.logging.jul.HelidonConsoleHandler
+java.util.logging.SimpleFormatter.format=!thread! ECID\{%X{ECID}\} %5$s%6$s%n
+```
+
+2つのエンドポイントに GET してみます。
+
+```
+curl http://localhost:8080/logging
+// ログ出力
+Thread[helidon-1,5,server] ECID{} Invoking Sub#get()
+Thread[helidon-1,5,server] ECID{a7171880-0cb9-40f6-8178-d1d385e85e4a} Sub#get() called
+Thread[sub-1,5,helidon-thread-pool-7] ECID{a7171880-0cb9-40f6-8178-d1d385e85e4a} Thread started
+Thread[helidon-1,5,server] ECID{a7171880-0cb9-40f6-8178-d1d385e85e4a} Thread ended
+Thread[helidon-1,5,server] ECID{} Ended Sub#get()
+
+curl http://localhost:8080/logging/mdc
+// ログ出力
+Thread[helidon-2,5,server] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Invoking Sub#get()
+Thread[helidon-2,5,server] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Sub#get() called
+Thread[sub-2,5,helidon-thread-pool-7] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Thread started
+Thread[helidon-2,5,server] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Thread ended
+Thread[helidon-2,5,server] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Ended Sub#get()
+```
+
+@Mdc を付与していないメソッドでは ECID が発行されていないのがわかります。またスレッドを超えて ECID が伝播されているのも確認できます。これは Helidon の提供する ThreadPoolSupplier から作成された ExecutorService が、Helidon のランタイム内で保持しているグローバル・コンテキストをスレッド間で受け渡しするからです。
+逆に言うと、通常の ExecutorService から作成される Thread では Helido のグローバル・コンテキストをそのままでは認識できません。この場合 `io.helidon.common.context.Contexts#wrap()` メソッドでグローバル・コンテキストに対応することができます。
+
+```
+ExecutorService es = Contexts.wrap(Executors.newSingleThreadExecutor());
+# now es is aware of helidon's global context
+```
+
+ECID は 並行処理される実行ログの中から、リクエスト単位のログを識別するのに役立ちます。
+
+```
+java -cp ./target/helidon-demo-mp.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/logging/mdc 3
+// ログ出力
+Thread[helidon-3,5,server] ECID{307aef62-bfe4-4220-bd3f-c72af557181e} Invoking Sub#get()
+Thread[helidon-3,5,server] ECID{307aef62-bfe4-4220-bd3f-c72af557181e} Sub#get() called
+Thread[sub-8,5,helidon-thread-pool-7] ECID{307aef62-bfe4-4220-bd3f-c72af557181e} Thread started
+Thread[helidon-2,5,server] ECID{c9a77067-5f93-4a28-8135-067882e084bd} Invoking Sub#get()
+Thread[helidon-1,5,server] ECID{4ce9e757-3ca9-4e68-99ad-0330c1675dbe} Invoking Sub#get()
+Thread[helidon-1,5,server] ECID{4ce9e757-3ca9-4e68-99ad-0330c1675dbe} Sub#get() called
+Thread[sub-9,5,helidon-thread-pool-7] ECID{4ce9e757-3ca9-4e68-99ad-0330c1675dbe} Thread started
+Thread[helidon-1,5,server] ECID{4ce9e757-3ca9-4e68-99ad-0330c1675dbe} Thread ended
+Thread[helidon-1,5,server] ECID{4ce9e757-3ca9-4e68-99ad-0330c1675dbe} Ended Sub#get()
+Thread[helidon-2,5,server] ECID{c9a77067-5f93-4a28-8135-067882e084bd} Sub#get() called
+Thread[helidon-3,5,server] ECID{307aef62-bfe4-4220-bd3f-c72af557181e} Thread ended
+Thread[sub-10,5,helidon-thread-pool-7] ECID{c9a77067-5f93-4a28-8135-067882e084bd} Thread started
+Thread[helidon-2,5,server] ECID{c9a77067-5f93-4a28-8135-067882e084bd} Thread ended
+Thread[helidon-2,5,server] ECID{c9a77067-5f93-4a28-8135-067882e084bd} Ended Sub#get()
+Thread[helidon-3,5,server] ECID{307aef62-bfe4-4220-bd3f-c72af557181e} Ended Sub#get()```
+```
+
+### (応用編) ECID による Oracle Database との連携 (oracle.demo.jpa.ecid パッケージ)
+
+Helidon で設定した Mdc を Oracle Database の Execution Context ID (ECID) として連携してみます。Oracle Database の JDBCドライバは ECID を受け取るための標準的な方法を提供しています。JDBC クライアントは以下のような形で 実行中のセッションに ECID を設定できます。
+
+```
+String ecid = ...
+java.sql.Connection con = ...
+con.setClientInfo("OCSID.ECID", ecid);
+```
+
+oracale.demo.jpa.ecid.EcidExampleResource で定義されてる二つのエンドポイント (/ecid/insert, ecid/update) は、意図的に完了時間を遅くするストアード・プロシージャを呼び出します。実装は以下のようになっており、@Mdc アノテーションによってこのメソッドに入るタイミングで Mdc がセットされ、さらに @Ecid アノテーションによって特定の条件に合致する場合に JDBC Connection 経由で ECID が設定されます。
+
+```java
+    @GET @Path("insert") @Produces("text/plain") // JAX-RS
+    @Transactional // JTA
+    @Mdc // set Mdc
+    @Ecid // set ECID when available
+    public String insertCountry(
+      @QueryParam("id") Integer id, @QueryParam("name") String name, @QueryParam("delay") Integer delay) {
+        logger.info(String.format("Insert (id = %d, name = %s, delay=%d)", id, name, delay));
+        em.createStoredProcedureQuery("DEMO.INSERT_COUNTRY")
+            .registerStoredProcedureParameter(1, Integer.class, ParameterMode.IN)
+            .registerStoredProcedureParameter(2, String.class, ParameterMode.IN)
+            .registerStoredProcedureParameter(3, Integer.class, ParameterMode.IN)
+            .setParameter(1, id)
+            .setParameter(2, name)
+            .setParameter(3, Optional.ofNullable(delay).orElse(30))
+            .execute();
+        return "OK\n";
+    }
+```
+
+では完了に60秒かかる INSERT 処理を呼び出してみます。
+
+```
+$ curl "http://localhost:8080/ecid/insert?id=9002&name=Test&delay=60"
+```
+
+Helidon のログには Insert 処理の ECID {e2f7bd76-b474-41bf-abe3-4e994fdfc251} が出力されています。
+
+```
+2021.01.24 03:42:31 INFO oracle.demo.jpa.ecid.EcidExampleResource Thread[helidon-1,5,server]{e2f7bd76-b474-41bf-abe3-4e994fdfc251}: Insert (id = 9002, name = Test, delay=60)
+```
+
+では、このオペレーションが完了する前に、v$session で ECID が伝達されているか確認します。
+
+```
+SQL> select username, ecid, sql_id 
+      from v$session 
+      where ecid = 'e2f7bd76-b474-41bf-abe3-4e994fdfc251';
+
+USERNAME
+--------------------------------------------------------------------------------
+ECID                                                             SQL_ID
+---------------------------------------------------------------- -------------
+DEMO
+e2f7bd76-b474-41bf-abe3-4e994fdfc251                             fdw79cubmrrxz
+```
+
+実行された SQL_ID も分かりますので、実行に関する統計情報も確認できます。 
+
+```
+SQL> select sql_id, executions, elapsed_time, sql_text
+      from v$sql
+      where sql_id = 'fdw79cubmrrxz';
+
+SQL_ID        EXECUTIONS ELAPSED_TIME
+------------- ---------- ------------
+SQL_TEXT
+--------------------------------------------------------------------------------
+fdw79cubmrrxz          2         6788
+BEGIN DEMO.INSERT_COUNTRY(:1 , :2 , :3 ); END;
+```
+
+[目次に戻る](#目次)
 <br>
 
 ## ■ （おまけ）Cowsay (oracle.demo.cowweb パッケージ)
@@ -1257,6 +1424,7 @@ $ curl "localhost:8080/cowsay/think?message=Hello%21&cowfile=moose"
 ```
 エンジョイ！
 
+[目次に戻る](#目次)
 <br>
 
 ---

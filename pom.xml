@@ -324,6 +324,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- support Mapped Diagnostic Context -->
+        <dependency>
+            <groupId>io.helidon.logging</groupId>
+            <artifactId>helidon-logging-jul</artifactId>
+        </dependency>
+
         <!-- support GraphQL -->
         <dependency>
             <groupId>io.helidon.microprofile.graphql</groupId>
