@@ -7,25 +7,28 @@
 
 ## 目次
 
-+ [ビルド方法](#■-ビルド方法)
-+ [アプリケーションの起動](#■-アプリケーションの起動)
-+ [Docker イメージの作成](#■-docker-イメージの作成)
-+ [Health デモ](#■-microprofile-health-デモ-oracledemohealth-パッケージ)
-+ [Open Tracing デモ](#■-open-tracing-デモ-oracledemotracing-パッケージ)
-+ [Open Tracing 拡張](#■-opentracing-span定義のためのアノテーション-oracledemotracinginterceptor-パッケージ)
-+ [Metrics デモ](#■-metrics-デモ-oracledemometrics-パッケージ)
-+ [Fault Tolerance デモ](#■-fault-tolerance-デモ-oracledemoft-パッケージ)
-+ [Open API デモ](#■-open-api-oracledemocountry-パッケージ)
-+ [Rest Client デモ](#■-microprofile-rest-client-oracledemorestclient-パッケージ)
-+ [Security デモ](#■-security-oracledemosecurity-パッケージ)
-+ [JPA/Transaction デモ](#■-jpa-java-persistence-api-デモ-oracledemojpa-パッケージ)
-+ [gRPC デモ](#■-grpc-デモ-oracledemogrpc-パッケージ)
-+ [Reactive Messaging デモ](#■-microprofile-reactive-messaging-デモ-oracledemoreactive-パッケージ)
-+ [GraphQL デモ](#■-microprofile-graphql-デモ-oracledemographql-パッケージ)
-+ [Mapped Diagnostic Context (Mdc) デモ](#■-Mapped-Diagnostic-Context-Mdc-デモ-oracledemologging-パッケージ)
-+ [おまけ](#■-おまけcowsay-oracledemocowweb-パッケージ)
++ [ビルド方法](#-ビルド方法)
++ [アプリケーションの起動](#-アプリケーションの起動)
++ [Docker イメージの作成](#-docker-イメージの作成)
++ [Health デモ](#-microprofile-health-デモ-oracledemohealth-パッケージ)
++ [Open Tracing デモ](#-open-tracing-デモ-oracledemotracing-パッケージ)
++ [Open Tracing 拡張](#-opentracing-span定義のためのアノテーション-oracledemotracinginterceptor-パッケージ)
++ [Metrics デモ](#-metrics-デモ-oracledemometrics-パッケージ)
++ [Fault Tolerance デモ](#-fault-tolerance-デモ-oracledemoft-パッケージ)
++ [Open API デモ](#-open-api-oracledemocountry-パッケージ)
++ [Rest Client デモ](#-microprofile-rest-client-oracledemorestclient-パッケージ)
++ [Security デモ](#-security-oracledemosecurity-パッケージ)
++ [JPA/Transaction デモ](#-jpa-java-persistence-api-デモ-oracledemojpa-パッケージ)
++ [gRPC デモ](#-grpc-デモ-oracledemogrpc-パッケージ)
++ [Reactive Messaging デモ](#-microprofile-reactive-messaging-デモ-oracledemoreactive-パッケージ)
++ [GraphQL デモ](#-microprofile-graphql-デモ-oracledemographql-パッケージ)
++ [Mapped Diagnostic Context (Mdc) デモ](#-Mapped-Diagnostic-Context-Mdc-デモ-oracledemologging-パッケージ)
++ [おまけ](#-おまけcowsay-oracledemocowweb-パッケージ)
 
 ## デモのソース
+
+<details>
+<summary>ディレクトリ ＆ ファイル</summary>
 
 ```text
 src/main
@@ -90,7 +93,17 @@ src/main
 │           │   ├── Country.java
 │           │   ├── CountryResource.java
 │           │   ├── Greeting.java
-│           │   └── JPAExampleResource.java
+│           │   ├── JPAExampleResource.java
+│           │   └── ecid [ECID Database連携]
+│           │       ├── EcidAware.java
+│           │       ├── EcidExampleResource.java
+│           │       ├── EcidInterceptor.java
+│           │       └── Ecid.java
+│           ├── logging [拡張機能 Mdc]
+│           │   ├── MdcInterceptor.java
+│           │   ├── Mdc.java
+│           │   ├── MdcResource.java
+│           │   └── Sub.java
 │           ├── grpc [拡張機能 gRPC]
 │           │   ├── javaobj [gRPC Javaシリアライゼーション版]
 │           │   │   ├── GreeterServiceImpl.java
@@ -128,15 +141,23 @@ demo
 │   └── simple-service.yaml
 ├── tracing [トレーシングデモ]
 │   ├── request.json
-│   └── tracing-demo.sh
+│   ├── tracing-demo.sh
+│   └── oracledb [Oracle database コンテナ作成・設定]
+│       ├── populate-demodata.sh
+│       ├── populate-demodata.sql
+│       ├── sqlplus.sh
+│       ├── sql.sh
+│       └── start-oracledb.sh
 └── weblogic [WebLogic Server コンテナ作成・設定]
     ├── config-jms.sh
     ├── config-jms.yaml
     ├── domain.properties
     └── start-weblogic.sh
 ```
+</details>
+<br>
 
-## ■ ビルド方法
+## § ビルド方法
 
 ```bash
 # for the first time, generate java source files for gRPC by compiling proto file
@@ -145,13 +166,18 @@ mvn clean -P protoc generate-sources
 mvn package
 ```
 
-## ■ アプリケーションの起動
+<br>
+
+## § アプリケーションの起動
 
 ```bash
 java -jar target/helidon-demo-mp.jar
 ```
 
-## ■ Docker イメージの作成
+[目次に戻る](#目次)
+<br>
+
+## § Docker イメージの作成
 
 Dockerfileを使わずに、[Jib](https://github.com/GoogleContainerTools/jib) を使ってMavenから直接イメージをビルドします.  
 ルートディレクトリにあるDockerfileを使ってもイメージの作成は可能です.
@@ -189,7 +215,7 @@ $ docker push (remote docker repository prefix/)helidon-demo-mp
 [目次に戻る](#目次)
 <br>
 
-## ■ MicroProfile Health デモ (oracle.demo.health パッケージ)
+## § MicroProfile Health デモ (oracle.demo.health パッケージ)
 
 `/health/live` (Liveness)、`/health/ready` (Readiness) 及び `/health` (複合パターン) のエンドポイントを使ってヘルスチェックができます。 
 
@@ -290,7 +316,7 @@ Events:
 [目次に戻る](#目次)
 <br>
 
-## ■ Open Tracing デモ (oracle.demo.tracing パッケージ)
+## § Open Tracing デモ (oracle.demo.tracing パッケージ)
 
 Kubernetes に デモのPodを4つと、jaegerのPodをデプロイします。
 
@@ -342,7 +368,7 @@ $ demo/tracing/tracing-demo.sh [start | stop]
 [目次に戻る](#目次)
 <br>
 
-## ■ OpenTracing SPAN定義のためのアノテーション (oracle.demo.tracing.interceptor パッケージ)
+## § OpenTracing SPAN定義のためのアノテーション (oracle.demo.tracing.interceptor パッケージ)
 
 MicroProfileのOpenTracingの実装の多くはSPANの定義を暗黙的に行っているケースが多く、コーディングしなくてもそれなりのトレース情報が出力されるので便利です。また、明示的にSPANを定義したい場合は@Tracedアノテーション(org.eclipse.microprofile.opentracing.Traced)を使って、メソッドにトレース出力をつけることができます。しかしながら、標準機能では必ずしも欲しい情報を出力してくれるとは限りません。そこで、ここではSPANの定義処理をCDI Interceptorとして実装して、Trace出力の内容をアノテーションである程度コントロールできるようにしてみました。
 
@@ -383,7 +409,7 @@ public List<Country> getCountriesWithError(){
 [目次に戻る](#目次)
 <br>
 
-## ■ Metrics デモ (oracle.demo.metrics パッケージ)
+## § Metrics デモ (oracle.demo.metrics パッケージ)
 
 Mwtrics には以下の3種類のスコープが存在します。
 
@@ -434,7 +460,7 @@ $ curl localhost:8080/mpmetrics/count-total
 [目次に戻る](#目次)
 <br>
 
-## ■ Fault Tolerance デモ (oracle.demo.ft パッケージ)
+## § Fault Tolerance デモ (oracle.demo.ft パッケージ)
 
 メソッドやクラスにアノテーションを付与して、障害発生時の振る舞いを設定することができます。
 
@@ -505,7 +531,7 @@ application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreak
 [目次に戻る](#目次)
 <br>
 
-## ■ Open API (oracle.demo.country パッケージ)
+## § Open API (oracle.demo.country パッケージ)
 
 APIの仕様を定義する規約である Open API に基づいたRESTエンドポイントのメタデータを公開できます。
 特に何もしなくても最低限の仕様情報は自動的に生成できますが、アノテーションを使って付加的な情報を付加することができます。
@@ -582,7 +608,7 @@ paths:
 [目次に戻る](#目次)
 <br>
 
-## ■ MicroProfile Rest Client (oracle.demo.restclient パッケージ)
+## § MicroProfile Rest Client (oracle.demo.restclient パッケージ)
 
 MicroProfile では RESTコールを行う「タイプセーフ」なクライアントAPIを規定しています。つまりJavaのメソッドを呼び出すと内部でREST呼び出しを行ってくれます。呼び出しのパラメータも返り値も全てJavaオブジェクトとして扱うことができ、RESTコールに関する手間を省きコーディング・ミスを減らすことができます。
 
@@ -640,7 +666,7 @@ $ curl localhost:8080/restclient/1/reviews
 [目次に戻る](#目次)
 <br>
 
-## ■ Security (oracle.demo.security パッケージ)
+## § Security (oracle.demo.security パッケージ)
 
 ユーザーに以下のロールがアサインされているとします。
 
@@ -685,7 +711,7 @@ security:
     @GET @Path("/user")   public String getUser() {}
 ```
 
-<details open="true">
+<details open>
 <summary>各々のRESTエンドポイントを異なるユーザーでGETしてみる</summary>
 
 ```bash
@@ -744,7 +770,7 @@ $ curl -v -u john:password1 localhost:8080/security/basic/admin
 [目次に戻る](#目次)
 <br>
 
-## ■ JPA (Java Persistence API) デモ (oracle.demo.jpa パッケージ)
+## § JPA (Java Persistence API) デモ (oracle.demo.jpa パッケージ)
 
 Helidon は拡張機能として Java Persistence API (JPA) と Java Transaction API (JTA) をサポートしています。   
 このデモでは
@@ -886,7 +912,7 @@ $ docker rm oracledb
 [目次に戻る](#目次)
 <br>
 
-## ■ gRPC デモ (oracle.demo.grpc パッケージ)
+## § gRPC デモ (oracle.demo.grpc パッケージ)
 
 gRPCで転送するデータのフォーマットはprotobuが一般的ですが、仕様上は任意のものが利用可能です。HelidonはgRPCを簡単にプロトタイプできるように、Javaシリアライゼーションを使った実装方法も提供しています。このデモにおいても、**protobufを用いた方法** (oracle.demo.grpc.protobuf パッケージ) と **Javaシリアライゼーションを用いた方法** (oracle.demo.grpc.javaobj パッケージ) の2種類を提供しています。
 
@@ -980,7 +1006,7 @@ pom.xml の通常ビルドフェーズとは独立してprotoファイルのコ�
 [目次に戻る](#目次)
 <br>
 
-## ■ MicroProfile Reactive Messaging デモ (oracle.demo.reactive パッケージ)
+## § MicroProfile Reactive Messaging デモ (oracle.demo.reactive パッケージ)
 
 JPA/JDBC経由でデータベースにアクセスするデモ(oracle.demo.jpaパッケージ)のバリエーションとして、MicroProfile Reactive Messaging を使ったデータベースの非同期更新(Event Sourcing)処理を実装しています。RESTでリクエストを受け付けた後、非同期更新イベントを発行します。  
 [データベースへのアクセスパターン](#データベースへのアクセスパターン) を参照してください。
@@ -1028,15 +1054,15 @@ curl -v http://localhost:8080/jpa/country/61 # 404 Not Found
 
 適当なキューを定義して下さい。  
 後述する「テスト用の WebLogic Server Docker インスタンスの作成」の項の手順に従えば、
-このデモ用の設定がされた Dockerコンテナ・ベースのWebLogic Serverを準備することができます。
+このデモ用の設定がされた Dockerコンテナ・ベースの WebLogic Server を準備することができます。
 </details>
 
 <details>
-<summary>2. Mavenのローカル・リポジトリを作成して、WebLogic Serverのクライアント・ライブラリ(wlthint3client.jar)をデプロイする</summary>
+<summary>2. Mavenのローカル・リポジトリを作成して、WebLogic Server のクライアント・ライブラリ(wlthint3client.jar)をデプロイする</summary>
 
 クライアント・ライブラリはパブリックMavenリポジトリからは入手できませんので、ローカル・リポジトリをマニュアルで作成します。
 `create-local-repo.sh` を編集してこのシェルを実行してください。`m2repo`フォルダにjarファイルがデプロイされます。  
-wlthint3client.jar は後述するWebLogic Serverのコンテナ・イメージから入手するのが簡単かもしれません。
+wlthint3client.jar は後述する WebLogic Server のコンテナ・イメージから入手するのが簡単かもしれません。
 
 ```bash
 WL_HOME=${HOME}/opt/wls1411
@@ -1083,7 +1109,7 @@ public class ReactiveJmsResourceTest{
 </details>
 
 <details>
-<summary>4. src/main/resources/application.yaml を編集して、WebLogic Serverの接続設定を行う</summary>
+<summary>4. src/main/resources/application.yaml を編集して、WebLogic Server の接続設定を行う</summary>
 
 ```yaml
 # Reactive Messaging
@@ -1125,7 +1151,7 @@ $ mvn package -P db-oracale,weblogic -DskipTests=true
 </details>
 <br>
 
-### テスト用の WebLogic Server Docker インスタンスの作成するには？ 
+### WebLogic Server のテスト用 Docker インスタンスを作成するには？ 
 
 JMS Connector のデモに使うための設定済み WebLogic Server インスタンスを Docker コンテナで実行するためのスクリプトを用意しています。
 
@@ -1167,7 +1193,7 @@ docker cp wls1411:/u01/oracle/wlserver/server/lib/wlthint3client.jar wlthint3cli
 [目次に戻る](#目次)
 <br>
 
-## ■ MicroProfile GraphQL デモ (oracle.demo.graphql パッケージ)
+## § MicroProfile GraphQL デモ (oracle.demo.graphql パッケージ)
 
 JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをMicroProfile GraphQL仕様にしたものを追加しました。  
 スキーマは `/graphql/schema.graphql` から取得できます。
@@ -1241,11 +1267,11 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 [目次に戻る](#目次)
 <br>
 
-## ■ Mapped Diagnostic Context (Mdc) デモ (oracle.demo.logging パッケージ)
+## § Mapped Diagnostic Context (Mdc) デモ (oracle.demo.logging パッケージ)
 
 Mapped Diagnostic Context (Mdc) は、並列処理で実行されるログ出力をトレースするために使うことができます。サーバーが複数のクライアントからのリクエストをマルチスレッドで処理する（=同じクラス＆メソッドのログ出力が入り乱れる）場合などに便利です。ログに実行スレッド名を出力することもできますが、単一のリクエストの処理が複数のスレッドにまたがって行われるようなケースでは、スレッドをまたがったトレースが困難になります。  
 
-このデモでは、実行コンテキストIDの付与 (Execution Context ID = ECID) を Mdc を使って実装します。Mdcの設定・消去は CDI Intercepter を使っていますので、本来の業務ロジックの処理(=メソッドの中身)には影響を与えずに、メソッドの実行前後で Mdc 関連の処理を割り込ませています。
+このデモでは、実行コンテキストIDの付与 (Execution Context ID = ECID) を Mdc を使って実装します。Mdcの設定・消去は CDI Intercepter (@Mdc アノテーション) を使っていますので、本来の業務ロジックの処理(=メソッドの中身)には影響を与えずに、メソッドの実行前後で Mdc 関連の処理を割り込ませています。
 ECID がメソッドの実行時に存在しない場合、IDを新たに設定し、メソッド終了時に新規設定した ID を消去します。 ECID がメソッドの実行時に既に存在する場合、処理は行わずスルーします。
 
 **/logging**  
@@ -1270,7 +1296,7 @@ java.util.logging.SimpleFormatter.format=!thread! ECID\{%X{ECID}\} %5$s%6$s%n
 2つのエンドポイントに GET してみます。
 
 ```
-curl http://localhost:8080/logging
+curl http://localhost:8080/logging # MdcResource#nomdc()
 // ログ出力
 Thread[helidon-1,5,server] ECID{} Invoking Sub#get()
 Thread[helidon-1,5,server] ECID{a7171880-0cb9-40f6-8178-d1d385e85e4a} Sub#get() called
@@ -1278,7 +1304,7 @@ Thread[sub-1,5,helidon-thread-pool-7] ECID{a7171880-0cb9-40f6-8178-d1d385e85e4a}
 Thread[helidon-1,5,server] ECID{a7171880-0cb9-40f6-8178-d1d385e85e4a} Thread ended
 Thread[helidon-1,5,server] ECID{} Ended Sub#get()
 
-curl http://localhost:8080/logging/mdc
+curl http://localhost:8080/logging/mdc # @Mdc MdcResource#mdc()
 // ログ出力
 Thread[helidon-2,5,server] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Invoking Sub#get()
 Thread[helidon-2,5,server] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Sub#get() called
@@ -1394,7 +1420,7 @@ BEGIN DEMO.INSERT_COUNTRY(:1 , :2 , :3 ); END;
 [目次に戻る](#目次)
 <br>
 
-## ■ （おまけ）Cowsay (oracle.demo.cowweb パッケージ)
+## § （おまけ）Cowsay (oracle.demo.cowweb パッケージ)
 
 https://github.com/ricksbrown/cowsay
 
