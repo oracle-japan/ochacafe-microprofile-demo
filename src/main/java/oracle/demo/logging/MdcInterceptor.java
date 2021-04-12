@@ -1,16 +1,19 @@
 package oracle.demo.logging;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.annotation.Priority;
+import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
 import io.helidon.logging.common.HelidonMdc;
+import io.opentracing.Span;
 
 /**
  * Set/unset Mdc value during invocation of target method 
@@ -22,6 +25,10 @@ import io.helidon.logging.common.HelidonMdc;
 public class MdcInterceptor {
 
     private final Logger logger = Logger.getLogger(MdcInterceptor.class.getName());
+
+    @Inject
+    private io.opentracing.Tracer tracer;
+
 
     @AroundInvoke
     public Object obj(InvocationContext ic) throws Exception{
@@ -36,8 +43,10 @@ public class MdcInterceptor {
         // set mdc only when the value doesn't exist
         String uuid = null;
         if(value.isEmpty()){
-            uuid = UUID.randomUUID().toString();
-            HelidonMdc.set(key, uuid);
+            // get open tracing id if available
+            final Span span = tracer.activeSpan();
+            final String id = Objects.nonNull(span) ? span.context().toTraceId() : UUID.randomUUID().toString();
+            HelidonMdc.set(key, id);
             logger.fine(String.format("Set Mdc: %s=%s", key, uuid));
         }
         try{

@@ -1,13 +1,13 @@
-/.settings/
-/.classpath
-/.project
-/.metadata
-/.vscode
-/.factorypath
+.settings
+.classpath
+.project
+.metadata
+.vscode
+.dockerignore
+.factorypath
 
 /m2repo
 
-.dockerignore
 /.gradle/
 /gradle.properties
 /gradle-app.setting

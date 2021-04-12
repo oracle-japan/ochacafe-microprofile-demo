@@ -853,7 +853,7 @@ javax:
 DEMO_DATASOURCE: OracleDataSource # default: H2DataSource
 ```
 
-### テスト用の Oracle Database インスタンスの作成するには？ 
+### テスト用の Oracle Database インスタンスを作成するには？ 
 
 デモ用に設定済みの Oracle Database インスタンスを Docker コンテナで実行するためのスクリプトを用意しています。
 
@@ -1298,19 +1298,19 @@ java.util.logging.SimpleFormatter.format=!thread! ECID\{%X{ECID}\} %5$s%6$s%n
 ```
 curl http://localhost:8080/logging # MdcResource#nomdc()
 // ログ出力
-Thread[helidon-1,5,server] ECID{} Invoking Sub#get()
-Thread[helidon-1,5,server] ECID{a7171880-0cb9-40f6-8178-d1d385e85e4a} Sub#get() called
-Thread[sub-1,5,helidon-thread-pool-7] ECID{a7171880-0cb9-40f6-8178-d1d385e85e4a} Thread started
-Thread[helidon-1,5,server] ECID{a7171880-0cb9-40f6-8178-d1d385e85e4a} Thread ended
-Thread[helidon-1,5,server] ECID{} Ended Sub#get()
+MdcResource Thread[helidon-1,5,server]{}: Invoking Sub#get()
+Sub Thread[helidon-1,5,server]{4cfbec87bab0829c}: Sub#get() called
+Sub Thread[sub-1,5,helidon-thread-pool-7]{4cfbec87bab0829c}: Thread started
+Sub Thread[helidon-1,5,server]{4cfbec87bab0829c}: Thread ended
+MdcResource Thread[helidon-1,5,server]{}: Ended Sub#get()
 
 curl http://localhost:8080/logging/mdc # @Mdc MdcResource#mdc()
 // ログ出力
-Thread[helidon-2,5,server] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Invoking Sub#get()
-Thread[helidon-2,5,server] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Sub#get() called
-Thread[sub-2,5,helidon-thread-pool-7] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Thread started
-Thread[helidon-2,5,server] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Thread ended
-Thread[helidon-2,5,server] ECID{c52dc4d6-deb1-4de7-91b0-39b57fd12e7a} Ended Sub#get()
+MdcResource Thread[helidon-2,5,server]{8cd601a8d345d884}: Invoking Sub#get()
+Sub Thread[helidon-2,5,server]{8cd601a8d345d884}: Sub#get() called
+Sub Thread[sub-2,5,helidon-thread-pool-7]{8cd601a8d345d884}: Thread started
+Sub Thread[helidon-2,5,server]{8cd601a8d345d884}: Thread ended
+MdcResource Thread[helidon-2,5,server]{8cd601a8d345d884}: Ended Sub#get()
 ```
 
 @Mdc を付与していないメソッドでは ECID が発行されていないのがわかります。またスレッドを超えて ECID が伝播されているのも確認できます。これは Helidon の提供する ThreadPoolSupplier から作成された ExecutorService が、Helidon のランタイム内で保持しているグローバル・コンテキストをスレッド間で受け渡しするからです。
@@ -1324,28 +1324,30 @@ ExecutorService es = Contexts.wrap(Executors.newSingleThreadExecutor());
 ECID は 並行処理される実行ログの中から、リクエスト単位のログを識別するのに役立ちます。
 
 ```
+# Fault Tolerance のデモで使った「複数リクエスト同時発射装置」で試してみる
 java -cp ./target/helidon-demo-mp.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/logging/mdc 3
 // ログ出力
-Thread[helidon-3,5,server] ECID{307aef62-bfe4-4220-bd3f-c72af557181e} Invoking Sub#get()
-Thread[helidon-3,5,server] ECID{307aef62-bfe4-4220-bd3f-c72af557181e} Sub#get() called
-Thread[sub-8,5,helidon-thread-pool-7] ECID{307aef62-bfe4-4220-bd3f-c72af557181e} Thread started
-Thread[helidon-2,5,server] ECID{c9a77067-5f93-4a28-8135-067882e084bd} Invoking Sub#get()
-Thread[helidon-1,5,server] ECID{4ce9e757-3ca9-4e68-99ad-0330c1675dbe} Invoking Sub#get()
-Thread[helidon-1,5,server] ECID{4ce9e757-3ca9-4e68-99ad-0330c1675dbe} Sub#get() called
-Thread[sub-9,5,helidon-thread-pool-7] ECID{4ce9e757-3ca9-4e68-99ad-0330c1675dbe} Thread started
-Thread[helidon-1,5,server] ECID{4ce9e757-3ca9-4e68-99ad-0330c1675dbe} Thread ended
-Thread[helidon-1,5,server] ECID{4ce9e757-3ca9-4e68-99ad-0330c1675dbe} Ended Sub#get()
-Thread[helidon-2,5,server] ECID{c9a77067-5f93-4a28-8135-067882e084bd} Sub#get() called
-Thread[helidon-3,5,server] ECID{307aef62-bfe4-4220-bd3f-c72af557181e} Thread ended
-Thread[sub-10,5,helidon-thread-pool-7] ECID{c9a77067-5f93-4a28-8135-067882e084bd} Thread started
-Thread[helidon-2,5,server] ECID{c9a77067-5f93-4a28-8135-067882e084bd} Thread ended
-Thread[helidon-2,5,server] ECID{c9a77067-5f93-4a28-8135-067882e084bd} Ended Sub#get()
-Thread[helidon-3,5,server] ECID{307aef62-bfe4-4220-bd3f-c72af557181e} Ended Sub#get()```
+Thread[helidon-4,5,server]{699595b3c0a746ff}: Invoking Sub#get()
+Thread[helidon-4,5,server]{699595b3c0a746ff}: Sub#get() called
+Thread[helidon-5,5,server]{a00dc58b026dec6c}: Invoking Sub#get()
+Thread[sub-3,5,helidon-thread-pool-7]{699595b3c0a746ff}: Thread started
+Thread[helidon-5,5,server]{a00dc58b026dec6c}: Sub#get() called
+Thread[helidon-3,5,server]{2e2f6112b8ec0330}: Invoking Sub#get()
+Thread[sub-4,5,helidon-thread-pool-7]{a00dc58b026dec6c}: Thread started
+Thread[helidon-5,5,server]{a00dc58b026dec6c}: Thread ended
+Thread[helidon-5,5,server]{a00dc58b026dec6c}: Ended Sub#get()
+Thread[helidon-3,5,server]{2e2f6112b8ec0330}: Sub#get() called
+Thread[sub-5,5,helidon-thread-pool-7]{2e2f6112b8ec0330}: Thread started
+Thread[helidon-3,5,server]{2e2f6112b8ec0330}: Thread ended
+Thread[helidon-3,5,server]{2e2f6112b8ec0330}: Ended Sub#get()
+Thread[helidon-4,5,server]{699595b3c0a746ff}: Thread ended
+Thread[helidon-4,5,server]{699595b3c0a746ff}: Ended Sub#get()
 ```
 
 ### (応用編) ECID による Oracle Database との連携 (oracle.demo.jpa.ecid パッケージ)
 
-Helidon で設定した Mdc を Oracle Database の Execution Context ID (ECID) として連携してみます。Oracle Database の JDBCドライバは ECID を受け取るための標準的な方法を提供しています。JDBC クライアントは以下のような形で 実行中のセッションに ECID を設定できます。
+Helidon で設定した Mdc を Oracle Database の Execution Context ID (ECID) として連携してみます。さらに、このデモでは ECID として Open Tracing の Trace ID が利用できる場合はそれを利用するように実装していますので、RESTの最初の入り口から Database の SQL まで end-to-end でトレーシングが可能になります。  
+Oracle Database の JDBCドライバは ECID を受け取るための標準的な方法を提供しています。JDBC クライアントは以下のような形で 実行中のセッションに ECID を設定できます。  
 
 ```
 String ecid = ...
@@ -1381,10 +1383,10 @@ oracale.demo.jpa.ecid.EcidExampleResource で定義されてる二つのエン�
 $ curl "http://localhost:8080/ecid/insert?id=9002&name=Test&delay=60"
 ```
 
-Helidon のログには Insert 処理の ECID {e2f7bd76-b474-41bf-abe3-4e994fdfc251} が出力されています。
+Helidon のログには Insert 処理の ECID {a32f6112b8ec0350} が出力されています。
 
 ```
-2021.01.24 03:42:31 INFO oracle.demo.jpa.ecid.EcidExampleResource Thread[helidon-1,5,server]{e2f7bd76-b474-41bf-abe3-4e994fdfc251}: Insert (id = 9002, name = Test, delay=60)
+2021.01.24 03:42:31 INFO oracle.demo.jpa.ecid.EcidExampleResource Thread[helidon-1,5,server]{a32f6112b8ec0350}: Insert (id = 9002, name = Test, delay=60)
 ```
 
 では、このオペレーションが完了する前に、v$session で ECID が伝達されているか確認します。
@@ -1392,14 +1394,11 @@ Helidon のログには Insert 処理の ECID {e2f7bd76-b474-41bf-abe3-4e994fdfc
 ```
 SQL> select username, ecid, sql_id 
       from v$session 
-      where ecid = 'e2f7bd76-b474-41bf-abe3-4e994fdfc251';
+      where ecid = 'a32f6112b8ec0350';
 
-USERNAME
---------------------------------------------------------------------------------
-ECID                                                             SQL_ID
----------------------------------------------------------------- -------------
-DEMO
-e2f7bd76-b474-41bf-abe3-4e994fdfc251                             fdw79cubmrrxz
+USERNAME ECID             SQL_ID
+-------- ---------------- -------------
+DEMO     a32f6112b8ec0350 fdw79cubmrrxz
 ```
 
 実行された SQL_ID も分かりますので、実行に関する統計情報も確認できます。 

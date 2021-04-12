@@ -37,7 +37,7 @@ public final class Helloworld {
    *
    * Protobuf type {@code helloworld.HelloRequest}
    */
-  public  static final class HelloRequest extends
+  public static final class HelloRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:helloworld.HelloRequest)
       HelloRequestOrBuilder {
@@ -124,6 +124,7 @@ public final class Helloworld {
      * <code>string name = 1;</code>
      * @return The name.
      */
+    @java.lang.Override
     public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
@@ -140,6 +141,7 @@ public final class Helloworld {
      * <code>string name = 1;</code>
      * @return The bytes for name.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
@@ -611,7 +613,7 @@ public final class Helloworld {
    *
    * Protobuf type {@code helloworld.HelloReply}
    */
-  public  static final class HelloReply extends
+  public static final class HelloReply extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:helloworld.HelloReply)
       HelloReplyOrBuilder {
@@ -698,6 +700,7 @@ public final class Helloworld {
      * <code>string message = 1;</code>
      * @return The message.
      */
+    @java.lang.Override
     public java.lang.String getMessage() {
       java.lang.Object ref = message_;
       if (ref instanceof java.lang.String) {
@@ -714,6 +717,7 @@ public final class Helloworld {
      * <code>string message = 1;</code>
      * @return The bytes for message.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getMessageBytes() {
       java.lang.Object ref = message_;
