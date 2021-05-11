@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
       - name: helidon-demo-mp-container
-      image: ${REMOTE_REPO_PREFIX}helidon-demo-mp:latest
-      imagePullPolicy: Always
+        image: ${REMOTE_REPO_PREFIX}helidon-demo-mp:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
       imagePullSecrets:
