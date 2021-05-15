@@ -179,37 +179,30 @@ java -jar target/helidon-demo-mp.jar
 
 ## § Docker イメージの作成
 
-Dockerfileを使わずに、[Jib](https://github.com/GoogleContainerTools/jib) を使ってMavenから直接イメージをビルドします.  
-ルートディレクトリにあるDockerfileを使ってもイメージの作成は可能です.
-
-### 通常（ローカル）のタグを付与する場合
+環境変数 REMOTE_REPO_PREFIX を設定した後、mvn を使って、docker イメージの作成とリモート・リポジトリへの push を行います
 
 ```bash
-mvn post-integration-test -DskipTests=true # 便宜上post-integration-testにアサインしているだけ
+# REMOTE_REPO_PREFIX -> リモート・リポジトリのパス (/で終わる)
+# 以下の例だと、iad.ocir.io/some-tenant/some-path/helidon-mp-demo:{version} となる
+export REMOTE_REPO_PREFIX=iad.ocir.io/some-tenant/some-path/
+
+# イメージの作成とタグ付け
+mvn exec:exec@docker-build
+
+# iad.ocir.io/some-tenant/some-path/helidon-mp-demo:latest
+mvn exec:exec@docker-push-latest
+
+# iad.ocir.io/some-tenant/some-path/helidon-mp-demo:{version}
+mvn exec:exec@docker-push-version
 ```
-
-### リモート用のタグを付与する場合
-
-環境変数 REMOTE_REPO_PREFIX を設定した後、Mavenのプロファイルを指定して実行します。
-
-```bash
-# export environment variable as appropriate
-export REMOTE_REPO_PREFIX=iad.ocir.io/some-tenant/some-additional-path/
-
-mvn -P remote-repo-prefix post-integration-test -DskipTests=true
-```
-
-ローカルリポジトリに作成されたイメージをリポートリポジトリにpushします.
 
 ```bash
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-helidon-demo-mp                                     2.0-SNAPSHOT        1b4d2e82f64a        49 years ago        125MB
-helidon-demo-mp                                     latest              1b4d2e82f64a        49 years ago        125MB
-(remote docker repository prefix/)helidon-demo-mp   2.0-SNAPSHOT        116de0207be6        49 years ago        125MB
-(remote docker repository prefix/)helidon-demo-mp   latest              116de0207be6        49 years ago        125MB
-
-$ docker push (remote docker repository prefix/)helidon-demo-mp
+helidon-demo-mp                                     2.2.2               80612d9f5ee0        4 seconds ago       299MB
+helidon-demo-mp                                     latest              80612d9f5ee0        4 seconds ago       299MB
+iad.ocir.io/some-tenant/some-path/helidon-demo-mp   2.2.2               80612d9f5ee0        4 seconds ago       299MB
+iad.ocir.io/some-tenant/some-path/helidon-demo-mp   latest              80612d9f5ee0        4 seconds ago       299MB
 ```
 
 [目次に戻る](#目次)
@@ -364,6 +357,88 @@ cat demo/tracing/request.json | curl -v -X POST -H "Content-Type:application/jso
 ```
 $ demo/tracing/tracing-demo.sh [start | stop]
 ```
+
+### OCI Application Performance Monitoring (APM) の Tracer を使う
+
+OCI APM 用の Tracer を使うと、トレーシングの情報やサーバーの各種メトリクスを OCI APM に送ることができます。OCI APM では、jaeger や zpkin と同様に[トレーシング可視化](doc/images/oci-apm-tracing.png)を行ったり（OCI, OKE, OS, JVM 等詳細な情報が参照可能）、HelidonのCPU/ヒープ使用状況などの[サーバー監視](doc/images/oci-apm-monitoring.png)ができます。  
+
+以下に、設定手順を示します。詳しくは[ドキュメント](https://docs.oracle.com/en-us/iaas/application-performance-monitoring/doc/configure-apm-tracer.html)を参照して下さい。
+
+
+<details>
+<summary>1. pom.xml の編集</summary>
+  
+リポジトリを追加します。
+
+```xml
+    <repositories>
+        <repository>
+            <id>project-local</id >
+            <url>file:m2repo </url>
+        </repository>
+        <repository>
+            <id>oci</id>
+            <name>OCI Object Store</name>
+            <url>https://objectstorage.us-ashburn-1.oraclecloud.com/n/idhph4hmky92/b/prod-agent-binaries/o</url>
+          </repository>
+    </repositories>
+```
+
+dependency を追加します（モジュールを jaeger/zipkin から切り替えます）。
+
+```xml
+        <dependency>
+            <groupId>io.helidon.microprofile.tracing</groupId>
+            <artifactId>helidon-microprofile-tracing</artifactId>
+        </dependency>
+        <!-- jaeger -->
+        <!-- dependency>
+            <groupId>io.helidon.tracing</groupId>
+            <artifactId>helidon-tracing-jaeger</artifactId>
+        </dependency -->
+        <!-- zipkin -->
+        <!-- dependency>
+            <groupId>io.helidon.tracing</groupId>
+            <artifactId>helidon-tracing-zipkin</artifactId>
+        </dependency -->
+        <!-- OCI APM Tracer -->
+        <dependency>
+            <groupId>com.oracle.apm.agent.java</groupId>
+            <artifactId>apm-java-agent-tracer</artifactId>
+            <version>RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.apm.agent.java</groupId>
+            <artifactId>apm-java-agent-helidon</artifactId>
+            <version>RELEASE</version>
+        </dependency>
+```
+</details>
+
+<details>
+<summary>2. application.yaml の編集</summary>
+  
+
+```yaml
+tracing:
+  enabled: true
+  service: helidon-demo-mp
+  # for jaeger
+  #host: jaeger
+  #sampler-type: remote
+  #sampler-manager: jaeger:5778      
+  # for OCI APM Tracer
+  name: "Helidon APM Tracer"
+  data-upload-endpoint: <data upload endpoint of your OCI domain>
+  private-data-key: <private data key of your OCI domain>
+  collect-metrics: true # optional - default true
+  collect-resources: true # optional - default true
+```
+
+data-upload-endpoint、private-data-key は、OCI APM の管理コンソールで取得できます。
+
+</details>
+
 
 [目次に戻る](#目次)
 <br>

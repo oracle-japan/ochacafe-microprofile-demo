@@ -15,7 +15,22 @@ grpc:
     myserver:           
       host: localhost      
       port: 50051
-   
+
+# Tracing
+tracing:
+  enabled: true
+  service: helidon-demo-mp
+  # for jaeger
+  host: jaeger
+  sampler-type: remote
+  sampler-manager: jaeger:5778      
+  # for OCI APM Tracer
+  name: "Helidon APM Tracer"
+  data-upload-endpoint: <data upload endpoint of your OCI domain>
+  private-data-key: <private data key of your OCI domain>
+  collect-metrics: true # optional - default true
+  collect-resources: true # optional - default true
+
 # security settings - simple basic auth
 # can work with oracle.demo.SecurityResource
 security:

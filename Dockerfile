@@ -13,6 +13,7 @@ ADD pom.xml .
 # Do the Maven build!
 # Incremental docker builds will resume here when you change sources
 ADD src src
+RUN mvn -P protoc generate-sources
 RUN mvn package -DskipTests
 RUN echo "done!"
 

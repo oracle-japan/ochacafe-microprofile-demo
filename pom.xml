@@ -11,7 +11,7 @@
 
     <groupId>oracle.demo</groupId>
     <artifactId>helidon-demo-mp</artifactId>
-    <version>2.2.2-SNAPSHOT</version>
+    <version>2.2.2</version>
     <!-- packaging>jar</packaging -->
     <name>${project.artifactId}</name>
 
@@ -269,13 +269,26 @@
             <groupId>io.helidon.microprofile.tracing</groupId>
             <artifactId>helidon-microprofile-tracing</artifactId>
         </dependency>
+        <!-- jaeger -->
         <dependency>
             <groupId>io.helidon.tracing</groupId>
             <artifactId>helidon-tracing-jaeger</artifactId>
         </dependency>
+        <!-- zipkin -->
         <!-- dependency>
             <groupId>io.helidon.tracing</groupId>
             <artifactId>helidon-tracing-zipkin</artifactId>
+        </dependency -->
+        <!-- OCI APM Tracer -->
+        <!-- dependency>
+            <groupId>com.oracle.apm.agent.java</groupId>
+            <artifactId>apm-java-agent-tracer</artifactId>
+            <version>RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.apm.agent.java</groupId>
+            <artifactId>apm-java-agent-helidon</artifactId>
+            <version>RELEASE</version>
         </dependency -->
 
         <!-- support idcs login -->
@@ -423,81 +436,61 @@
                 </configuration>
             </plugin>
 
-            <!-- making docker image using jib : mvn post-integration-test -->
-            <!-- workaround jib related issues: beans.xml must exist in each classpath  -->
+            <!-- makeing docker image -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.1.0</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
                 <executions>
+                    <!-- docker build -->
                     <execution>
-                        <id>workaround-jib-issue-for-cdi</id>
-                        <phase>pre-integration-test</phase>
+                        <id>docker-build</id>
                         <goals>
-                            <goal>copy-resources</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>target/jib/app/classes/META-INF</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>src/main/resources/META-INF</directory>
-                                    <filtering>true</filtering>
-                                    <includes>
-                                        <include>beans.xml</include>
-                                    </includes>
-                                </resource>
-                            </resources>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.prefix}${project.artifactId}:${project.version}</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.prefix}${project.artifactId}:latest</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.remote.prefix}${project.artifactId}:${project.version}</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.remote.prefix}${project.artifactId}:latest</argument>
+                                <argument>.</argument>
+                            </arguments>
+                            <workingDirectory>${project.basedir}</workingDirectory>
                         </configuration>
                     </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <version>2.7.0</version>
-                <configuration>
-                    <from>
-                        <image>adoptopenjdk:11-jre-hotspot</image>
-                    </from>
-                    <to>
-                        <!-- image>${docker.repo}</image -->
-                        <image>${docker.repo.prefix}${project.artifactId}</image>
-                        <tags>
-                            <tag>${project.version}</tag>
-                            <tag>latest</tag>
-                        </tags>
-                    </to>
-                    <!-- matched with maven-resources-plugin -->
-                    <!-- depricated extraDirectory>target/jib</extraDirectory -->
-                    <extraDirectories>
-                        <paths>
-                            <path>target/jib</path>
-                        </paths>
-                    </extraDirectories>
-                    <container>
-                        <!-- good defaults intended for containers -->
-                        <jvmFlags>
-                            <jmxFlag>-server</jmxFlag>
-                            <jmxFlag>-Djava.awt.headless=true</jmxFlag>
-                            <jmxFlag>-XX:+UnlockExperimentalVMOptions</jmxFlag>
-                            <jmxFlag>-XX:+UseG1GC</jmxFlag>
-                            <!-- for oracle jdbc driver-->
-                            <jmxFlag>-Doracle.jdbc.fanEnabled=false</jmxFlag>
-                        </jvmFlags>
-                        <mainClass>${mainClass}</mainClass>
-                        <ports>
-                            <port>8080</port>
-                            <port>50051</port>
-                        </ports>
-                    </container>
-                </configuration>
-                <executions>
+                    <!-- docker push to remote repo -->
                     <execution>
+                        <id>docker-push-latest</id>
                         <goals>
-                            <goal>dockerBuild</goal>
+                            <goal>exec</goal>
                         </goals>
-                        <!-- phase>package</phase -->
-                        <phase>post-integration-test</phase>
+                        <configuration>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>push</argument>
+                                <argument>${docker.repo.remote.prefix}${project.artifactId}:latest</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>docker-push-version</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>push</argument>
+                                <argument>${docker.repo.remote.prefix}${project.artifactId}:${project.version}</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -511,6 +504,11 @@
             <id>project-local</id >
             <url>file:m2repo </url>
         </repository>
+        <!-- repository>
+            <id>oci</id>
+            <name>OCI Object Store</name>
+            <url>https://objectstorage.us-ashburn-1.oraclecloud.com/n/idhph4hmky92/b/prod-agent-binaries/o</url>
+          </repository -->
     </repositories>
 
 </project>
