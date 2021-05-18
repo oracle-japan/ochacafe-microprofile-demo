@@ -11,7 +11,9 @@
 + [アプリケーションの起動](#-アプリケーションの起動)
 + [Docker イメージの作成](#-docker-イメージの作成)
 + [Health デモ](#-microprofile-health-デモ-oracledemohealth-パッケージ)
+  - [Kubernetes で Health Check を試してみる](#-Kubernetes-で-Health-Check-を試してみる)
 + [Open Tracing デモ](#-open-tracing-デモ-oracledemotracing-パッケージ)
+  - [OCI Application Performance Monitoring (APM) の Tracer を使う](#-OCI-Application-Performance-Monitoring-APM-の-Tracer-を使う)
 + [Open Tracing 拡張](#-opentracing-span定義のためのアノテーション-oracledemotracinginterceptor-パッケージ)
 + [Metrics デモ](#-metrics-デモ-oracledemometrics-パッケージ)
 + [Fault Tolerance デモ](#-fault-tolerance-デモ-oracledemoft-パッケージ)
@@ -19,10 +21,13 @@
 + [Rest Client デモ](#-microprofile-rest-client-oracledemorestclient-パッケージ)
 + [Security デモ](#-security-oracledemosecurity-パッケージ)
 + [JPA/Transaction デモ](#-jpa-java-persistence-api-デモ-oracledemojpa-パッケージ)
+  - [接続先を H2 Databse から Oracle Database に変更するには？](#-接続先を-H2-Databse-から-Oracle-Database-に変更するには？)
 + [gRPC デモ](#-grpc-デモ-oracledemogrpc-パッケージ)
 + [Reactive Messaging デモ](#-microprofile-reactive-messaging-デモ-oracledemoreactive-パッケージ)
+  - [JMS Connector](#-JMS-Connector)
 + [GraphQL デモ](#-microprofile-graphql-デモ-oracledemographql-パッケージ)
 + [Mapped Diagnostic Context (Mdc) デモ](#-Mapped-Diagnostic-Context-Mdc-デモ-oracledemologging-パッケージ)
++ [Scheduling デモ](#-Scheduling-デモ-oracledemoscheduling-パッケージ)
 + [おまけ](#-おまけcowsay-oracledemocowweb-パッケージ)
 
 ## デモのソース
@@ -989,17 +994,19 @@ $ docker rm oracledb
 
 ## § gRPC デモ (oracle.demo.grpc パッケージ)
 
-gRPCで転送するデータのフォーマットはprotobuが一般的ですが、仕様上は任意のものが利用可能です。HelidonはgRPCを簡単にプロトタイプできるように、Javaシリアライゼーションを使った実装方法も提供しています。このデモにおいても、**protobufを用いた方法** (oracle.demo.grpc.protobuf パッケージ) と **Javaシリアライゼーションを用いた方法** (oracle.demo.grpc.javaobj パッケージ) の2種類を提供しています。
+Helidon MP はアノテーションを使って簡単に gRPC サーバーを実装することができます。  
+gRPCの転送データのフォーマットである protobuf を用意する必要がありますが、このデモでは、ビルド時の `mvn -P protoc generate-sources` で必要な Java ソースファイルを生成しています。
 
 ```bash
-# どちらも REST -> gRPC Client -> gRPC Server と呼び出される
+# REST -> gRPC Client -> gRPC Server と呼び出される
 
-$ curl localhost:8080/grpc-protobuf/client # protobuf版
+$ curl localhost:8080/grpc-protobuf/client
 Hello world
 
-$ curl localhost:8080/grpc-javaobj/client?name=OCHaCafe # Javaシリアライゼーション版
-Hello OCHaCafe
 ```
+
+注: 2.3.0 から Java シリアライゼーションを用いた方法は depricated になりました。
+
 
 ### protobuf版 (oracle.demo.grpc.protobuf パッケージ) に関する補足
 
@@ -1490,6 +1497,57 @@ SQL_TEXT
 fdw79cubmrrxz          2         6788
 BEGIN DEMO.INSERT_COUNTRY(:1 , :2 , :3 ); END;
 ```
+
+[目次に戻る](#目次)
+<br>
+
+## § Scheduling デモ (oracle.demo.scheduling パッケージ)
+
+@Scheduled または @FixedRate アノテーションを使って、定期実行するタスクをスケジュールできます。
+
+```
+    @FixedRate(initialDelay = 2, value = 3, timeUnit = TimeUnit.MINUTES)
+    public void fixedRate0() {
+        log();
+    }    
+
+    @Scheduled("0/30  * * ? * *") // like cron
+    private void scheduled0(){
+        log();
+    }
+
+    @Scheduled("15,45 * * ? * *") // like cron
+    private void scheduled1(){
+        log();
+    }
+```
+
+上記のようなアノテーションをつけたメソッドを定義しておくと、以下のようなタスク実行結果となります。
+
+```
+...
+15:21:00 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
+15:21:09 INFO: Scheduled event (fixedRate0) - @FixedRate(initialDelay=2, value(interval)=3, timeUnit=MINUTES)
+15:21:15 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
+15:21:30 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
+15:21:45 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
+15:22:00 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
+15:22:15 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
+15:22:30 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
+15:22:45 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
+15:23:00 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
+15:23:15 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
+15:23:30 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
+15:23:45 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
+15:24:00 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
+15:24:09 INFO: Scheduled event (fixedRate0) - @FixedRate(initialDelay=2, value(interval)=3, timeUnit=MINUTES)
+15:24:15 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
+15:24:30 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
+...
+```
+
+注: ログの出力がうるさいので、ソースのアノテーションをコメントアウトしています。デモする場合は、oracle.demo.scheduling.Scheduer.java のコメントアウトを外して下さい。
+
 
 [目次に戻る](#目次)
 <br>

@@ -5,13 +5,13 @@
     <parent>
         <groupId>io.helidon.applications</groupId>
         <artifactId>helidon-mp</artifactId>
-        <version>2.2.2</version>
+        <version>2.3.0</version>
         <relativePath />
     </parent>
 
     <groupId>oracle.demo</groupId>
     <artifactId>helidon-demo-mp</artifactId>
-    <version>2.2.2</version>
+    <version>2.3.0.0</version>
     <!-- packaging>jar</packaging -->
     <name>${project.artifactId}</name>
 
@@ -19,7 +19,7 @@
         <mainClass>oracle.demo.Main</mainClass>
         <docker.repo.prefix></docker.repo.prefix>
         <!-- prefix for remote repository ending with /-->
-        <docker.repo.remote.prefix>${REMOTE_REPO_PREFIX}</docker.repo.remote.prefix>
+        <docker.repo.remote.prefix>${env.REMOTE_REPO_PREFIX}</docker.repo.remote.prefix>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <grpc.version>1.35.0</grpc.version>
     </properties>
@@ -87,14 +87,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-
-        <!-- mvn -P remote-repo-prefix ... -->
-        <profile>
-            <id>remote-repo-prefix</id>
-            <properties>
-                <docker.repo.prefix>${docker.repo.remote.prefix}</docker.repo.prefix>
-            </properties>
         </profile>
 
         <profile>
@@ -291,6 +283,13 @@
             <version>RELEASE</version>
         </dependency -->
 
+        <!-- Tracing Exempler -->
+        <dependency>
+            <groupId>io.helidon.metrics</groupId>
+            <artifactId>helidon-metrics-trace-exemplar</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- support idcs login -->
         <!--
         <dependency>
@@ -347,6 +346,12 @@
         <dependency>
             <groupId>io.helidon.microprofile.graphql</groupId>
             <artifactId>helidon-microprofile-graphql-server</artifactId>
+        </dependency>
+
+        <!-- support scheduling -->
+        <dependency>
+            <groupId>io.helidon.microprofile.scheduling</groupId>
+            <artifactId>helidon-microprofile-scheduling</artifactId>
         </dependency>
 
         <!-- for client tools-->
@@ -442,6 +447,25 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <executions>
+                    <!-- docker build -->
+                    <execution>
+                        <id>docker-local-build</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.prefix}${project.artifactId}:${project.version}</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.prefix}${project.artifactId}:latest</argument>
+                                <argument>.</argument>
+                            </arguments>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                        </configuration>
+                    </execution>
                     <!-- docker build -->
                     <execution>
                         <id>docker-build</id>
