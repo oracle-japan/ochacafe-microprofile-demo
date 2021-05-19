@@ -110,17 +110,15 @@ src/main
 │           │   ├── MdcResource.java
 │           │   └── Sub.java
 │           ├── grpc [拡張機能 gRPC]
-│           │   ├── javaobj [gRPC Javaシリアライゼーション版]
-│           │   │   ├── GreeterServiceImpl.java
-│           │   │   ├── GreeterService.java
-│           │   │   └── GrpcResource.java
-│           │   └── protobuf [gRPC protobuf版]
+│           │   └── protobuf
 │           │       ├── GreeterSimpleService.java
 │           │       ├── GreeterService.java
 │           │       ├── GrpcResource.java
 │           │       └── helloworld
 │           │           ├── GreeterGrpc.java
 │           │           └── Helloworld.java
+│           ├── scheduling [拡張機能 スケジューリング]
+│           │   └── Scheduler.java
 │           └── cowweb [おまけ]
 │               └── CowwebResource.java
 ├── proto
@@ -146,6 +144,7 @@ demo
 │   └── simple-service.yaml
 ├── tracing [トレーシングデモ]
 │   ├── request.json
+│   ├── request_local.json
 │   ├── tracing-demo.sh
 │   └── oracledb [Oracle database コンテナ作成・設定]
 │       ├── populate-demodata.sh
