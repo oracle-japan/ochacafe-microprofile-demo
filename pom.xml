@@ -20,6 +20,7 @@
         <docker.repo.prefix></docker.repo.prefix>
         <!-- prefix for remote repository ending with /-->
         <docker.repo.remote.prefix>${env.REMOTE_REPO_PREFIX}</docker.repo.remote.prefix>
+        <docker.file>Dockerfile</docker.file>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <grpc.version>1.35.0</grpc.version>
     </properties>
@@ -89,6 +90,59 @@
             </build>
         </profile>
 
+        <!-- tracing option dependencies-->
+        <profile>
+            <!-- jaeger -->
+            <id>tracing-jaeger</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.helidon.tracing</groupId>
+                    <artifactId>helidon-tracing-jaeger</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <!-- zipkin -->
+            <id>tracing-zipkin</id>
+            <dependencies>
+                <dependency>
+                    <groupId>io.helidon.tracing</groupId>
+                    <artifactId>helidon-tracing-zipkin</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <!-- OCI Application Performance Monitoring -->
+            <id>tracing-oci-apm</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.oracle.apm.agent.java</groupId>
+                    <artifactId>apm-java-agent-tracer</artifactId>
+                    <!-- version>RELEASE</version -->
+                    <!-- /com/oracle/apm/agent/java/apm-java-agent-tracer/maven-metadata.xml -->
+                    <version>1.0.1389</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.oracle.apm.agent.java</groupId>
+                    <artifactId>apm-java-agent-helidon</artifactId>
+                    <!-- version>RELEASE</version -->
+                    <!-- /com/oracle/apm/agent/java/apm-java-agent-helidon/maven-metadata.xml -->
+                    <version>1.0.1389</version>
+                </dependency>
+            </dependencies>
+            <repositories>
+                <repository>
+                    <id>oci</id>
+                    <name>OCI Object Store</name>
+                    <url>https://objectstorage.us-ashburn-1.oraclecloud.com/n/idhph4hmky92/b/prod-agent-binaries/o</url>
+                  </repository>
+            </repositories>
+        </profile>
+
+        <!-- JDBC option dependencies -->
         <profile>
             <id>db-oracle</id>
             <properties>
@@ -151,11 +205,10 @@
                 </dependency>
             </dependencies>
         </profile>
-
         <profile>
+            <!-- MySQL database driver -->
             <id>db-mysql</id>
             <dependencies>
-                <!-- MySQL database driver -->
                 <dependency>
                     <groupId>mysql</groupId>
                     <artifactId>mysql-connector-java</artifactId>
@@ -163,14 +216,13 @@
                 </dependency>
             </dependencies>
         </profile>
-
         <profile>
+            <!-- h2 jdbc driver -->
             <id>db-h2</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
-                <!-- h2 jdbc driver -->
                 <dependency>
                     <groupId>com.h2database</groupId>
                     <artifactId>h2</artifactId>
@@ -180,6 +232,7 @@
             </dependencies>
         </profile>
 
+        <!-- WebLogic client lib -->
         <profile>
             <id>weblogic</id>
             <dependencies>
@@ -256,32 +309,11 @@
             <version>${grpc.version}</version>
         </dependency>
 
-        <!-- support tracing -->
+        <!-- support tracing, see profiles for tracing options -->
         <dependency>
             <groupId>io.helidon.microprofile.tracing</groupId>
             <artifactId>helidon-microprofile-tracing</artifactId>
         </dependency>
-        <!-- jaeger -->
-        <dependency>
-            <groupId>io.helidon.tracing</groupId>
-            <artifactId>helidon-tracing-jaeger</artifactId>
-        </dependency>
-        <!-- zipkin -->
-        <!-- dependency>
-            <groupId>io.helidon.tracing</groupId>
-            <artifactId>helidon-tracing-zipkin</artifactId>
-        </dependency -->
-        <!-- OCI APM Tracer -->
-        <!-- dependency>
-            <groupId>com.oracle.apm.agent.java</groupId>
-            <artifactId>apm-java-agent-tracer</artifactId>
-            <version>RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.apm.agent.java</groupId>
-            <artifactId>apm-java-agent-helidon</artifactId>
-            <version>RELEASE</version>
-        </dependency -->
 
         <!-- Tracing Exempler -->
         <dependency>
@@ -441,7 +473,7 @@
                 </configuration>
             </plugin>
 
-            <!-- makeing docker image -->
+            <!-- making docker image -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -461,6 +493,8 @@
                                 <argument>${docker.repo.prefix}${project.artifactId}:${project.version}</argument>
                                 <argument>-t</argument>
                                 <argument>${docker.repo.prefix}${project.artifactId}:latest</argument>
+                                <argument>-f</argument>
+                                <argument>${docker.file}</argument>
                                 <argument>.</argument>
                             </arguments>
                             <workingDirectory>${project.basedir}</workingDirectory>
@@ -484,6 +518,8 @@
                                 <argument>${docker.repo.remote.prefix}${project.artifactId}:${project.version}</argument>
                                 <argument>-t</argument>
                                 <argument>${docker.repo.remote.prefix}${project.artifactId}:latest</argument>
+                                <argument>-f</argument>
+                                <argument>${docker.file}</argument>
                                 <argument>.</argument>
                             </arguments>
                             <workingDirectory>${project.basedir}</workingDirectory>
@@ -528,11 +564,6 @@
             <id>project-local</id >
             <url>file:m2repo </url>
         </repository>
-        <!-- repository>
-            <id>oci</id>
-            <name>OCI Object Store</name>
-            <url>https://objectstorage.us-ashburn-1.oraclecloud.com/n/idhph4hmky92/b/prod-agent-binaries/o</url>
-          </repository -->
     </repositories>
 
 </project>

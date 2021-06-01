@@ -185,19 +185,20 @@ java -jar target/helidon-demo-mp.jar
 
 環境変数 REMOTE_REPO_PREFIX を設定した後、mvn を使って、docker イメージの作成とリモート・リポジトリへの push を行います
 
-```bash
+```
 # REMOTE_REPO_PREFIX -> リモート・リポジトリのパス (/で終わる)
 # 以下の例だと、iad.ocir.io/some-tenant/some-path/helidon-mp-demo:{version} となる
 export REMOTE_REPO_PREFIX=iad.ocir.io/some-tenant/some-path/
 
 # イメージの作成とタグ付け
-mvn exec:exec@docker-build
+mvn exec:exec@docker-build [-Ddocker.file=<任意のDockerfileを指定したい場合>]
 
-# iad.ocir.io/some-tenant/some-path/helidon-mp-demo:latest
-mvn exec:exec@docker-push-latest
+# iad.ocir.io/some-tenant/some-path/helidon-mp-demo への image push
+mvn exec:exec@docker-push-latest exec:exec@docker-push-version
 
-# iad.ocir.io/some-tenant/some-path/helidon-mp-demo:{version}
-mvn exec:exec@docker-push-version
+# ローカル・イメージの作成だけ行いたい場合
+# イメージの名前は helidon-mp-demo:{version} となる
+mvn exec:exec@docker-local-build [-Ddocker.file=<任意のDockerfileを指定したい場合>]
 ```
 
 ```bash
@@ -364,74 +365,31 @@ $ demo/tracing/tracing-demo.sh [start | stop]
 
 ### OCI Application Performance Monitoring (APM) の Tracer を使う
 
-OCI APM 用の Tracer を使うと、トレーシングの情報やサーバーの各種メトリクスを OCI APM に送ることができます。OCI APM では、jaeger や zpkin と同様に[トレーシング可視化](doc/images/oci-apm-tracing.png)を行ったり（OCI, OKE, OS, JVM 等詳細な情報が参照可能）、HelidonのCPU/ヒープ使用状況などの[サーバー監視](doc/images/oci-apm-monitoring.png)ができます。  
-
-以下に、設定手順を示します。詳しくは[ドキュメント](https://docs.oracle.com/en-us/iaas/application-performance-monitoring/doc/configure-apm-tracer.html)を参照して下さい。
+上記のデモは、Jaeger を前提にしていますが、その他にも複数の Tracer を設定することができます。 Maven のプロファイルを使って Tracer を切り替えます。
 
 
-<details>
-<summary>1. pom.xml の編集</summary>
-  
-リポジトリを追加します。
+| Tracer  | Maven プロファイル         |
+|---------|---------------------------|
+| Jaeger  | tracing-jaeger (default)  |
+| Zipkin  | tracing-zipkin            |
+| OCI APM | tracing-oci-apm           |
 
-```xml
-    <repositories>
-        <repository>
-            <id>project-local</id >
-            <url>file:m2repo </url>
-        </repository>
-        <repository>
-            <id>oci</id>
-            <name>OCI Object Store</name>
-            <url>https://objectstorage.us-ashburn-1.oraclecloud.com/n/idhph4hmky92/b/prod-agent-binaries/o</url>
-          </repository>
-    </repositories>
-```
 
-dependency を追加します（モジュールを jaeger/zipkin から切り替えます）。
+OCI APM 用の Tracer を使うと、トレーシングの情報やサーバーの各種メトリクスを OCI APM に送ることができます。OCI APM では、jaeger や zpkin と同様に[トレーシング可視化](doc/images/oci-apm-tracing.png)を行ったり（OCI, OKE, OS, JVM 等詳細な情報が参照可能）、HelidonのCPU/ヒープ使用状況などの[サーバー監視](doc/images/oci-apm-monitoring.png)ができます。詳しくは[ドキュメント](https://docs.oracle.com/en-us/iaas/application-performance-monitoring/doc/configure-apm-tracer.html)を参照して下さい。
 
-```xml
-        <dependency>
-            <groupId>io.helidon.microprofile.tracing</groupId>
-            <artifactId>helidon-microprofile-tracing</artifactId>
-        </dependency>
-        <!-- jaeger -->
-        <!-- dependency>
-            <groupId>io.helidon.tracing</groupId>
-            <artifactId>helidon-tracing-jaeger</artifactId>
-        </dependency -->
-        <!-- zipkin -->
-        <!-- dependency>
-            <groupId>io.helidon.tracing</groupId>
-            <artifactId>helidon-tracing-zipkin</artifactId>
-        </dependency -->
-        <!-- OCI APM Tracer -->
-        <dependency>
-            <groupId>com.oracle.apm.agent.java</groupId>
-            <artifactId>apm-java-agent-tracer</artifactId>
-            <version>RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.apm.agent.java</groupId>
-            <artifactId>apm-java-agent-helidon</artifactId>
-            <version>RELEASE</version>
-        </dependency>
-```
-</details>
+
+設定の切り替えは、以下の要領で行って下さい。
 
 <details>
-<summary>2. application.yaml の編集</summary>
+<summary>1. application.yaml の編集</summary>
   
+Jaeger, Zipkin の設定については[こちら](https://helidon.io/docs/v2/#/mp/tracing/01_tracing)を参照してください。  
+OCI APM の場合の設定は、以下のようになります。
 
 ```yaml
 tracing:
   enabled: true
   service: helidon-demo-mp
-  # for jaeger
-  #host: jaeger
-  #sampler-type: remote
-  #sampler-manager: jaeger:5778      
-  # for OCI APM Tracer
   name: "Helidon APM Tracer"
   data-upload-endpoint: <data upload endpoint of your OCI domain>
   private-data-key: <private data key of your OCI domain>
@@ -439,7 +397,19 @@ tracing:
   collect-resources: true # optional - default true
 ```
 
-data-upload-endpoint、private-data-key は、OCI APM の管理コンソールで取得できます。
+data-upload-endpoint、private-data-key は、OCI APM の管理コンソールで取得できます。  
+また、設定については、`tracing.data-upload-endpoint`, `tracing.private-data-key` を Dockerfile や K8s のマニフェストファイルの中で環境変数として渡すことも可能です。
+
+</details>
+
+<details>
+<summary>2. Maven ビルド時のプロファイル指定 </summary>
+  
+```bash
+mvn package # Jaegerの場合 (デフォルト)
+mvn -P tracing-zipkin,db-h2 package # Zipkin の場合 
+mvn -P tracing-oci-apm,db-h2 package # OCI APM の場合
+```
 
 </details>
 
@@ -1015,7 +985,7 @@ protobuf ペイロードを使ったサーバー実装は更に POJO + Annotaion
 
 1. POJO + Annotaion を使った方法（デフォルト 有効）  
 Helidonが提供するアノテーションを使って、シンプルなコーディングができます。
-```
+```java
 @Grpc(name = "helloworld.Greeter")
 @ApplicationScoped
 public class GreeterSimpleService{
@@ -1034,7 +1004,7 @@ oracle.demo.grpc.protobuf.GreeterSimpleService
 
 2. GrpcMpExtensionを使って従来型のサービス実装クラスをデプロイする方法（デフォルト 無効）  
 protobufコンパイラで生成されたJavaクラスを直接使用する方式です。
-```
+```java
 class GreeterService extends GreeterGrpc.GreeterImplBase { 
     @Override
     public void sayHello(HelloRequest req, StreamObserver<HelloReply> observer) {
