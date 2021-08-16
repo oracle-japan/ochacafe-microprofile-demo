@@ -191,14 +191,14 @@ java -jar target/helidon-demo-mp.jar
 export REMOTE_REPO_PREFIX=iad.ocir.io/some-tenant/some-path/
 
 # イメージの作成とタグ付け
-mvn exec:exec@docker-build [-Ddocker.file=<任意のDockerfileを指定したい場合>]
+mvn -f pom-docker.xml exec:exec@docker-build [-Ddocker.file=<任意のDockerfileを指定したい場合>]
 
 # iad.ocir.io/some-tenant/some-path/helidon-mp-demo への image push
-mvn exec:exec@docker-push-latest exec:exec@docker-push-version
+mvn -f pom-docker.xml exec:exec@docker-push-latest exec:exec@docker-push-version
 
 # ローカル・イメージの作成だけ行いたい場合
 # イメージの名前は helidon-mp-demo:{version} となる
-mvn exec:exec@docker-local-build [-Ddocker.file=<任意のDockerfileを指定したい場合>]
+mvn -f pom-docker.xml exec:exec@docker-local-build [-Ddocker.file=<任意のDockerfileを指定したい場合>]
 ```
 
 ```bash

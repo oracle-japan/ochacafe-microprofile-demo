@@ -3,6 +3,7 @@ package oracle.demo.tracing;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.POST;
@@ -11,6 +12,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -27,9 +30,13 @@ public class TracingResource{
     @POST
     @Path("/invoke")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response handleRequest(TraceOrder[] orders){
+    public Response handleRequest(TraceOrder[] orders, @Context HttpHeaders headers){
 
         logger.info("!!! New request");
+
+        headers.getRequestHeaders().forEach((key, values) -> {
+            values.forEach(val -> logger.info(String.format("Header: %s=%s", key, val)));
+        });
 
         // SpanContext spanContext = serverRequest.spanContext(); // you can comment out this line
         // optional, you could also use GlobalTracer.get() if it is configured

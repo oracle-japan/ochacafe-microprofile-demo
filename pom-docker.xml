@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>oracle.demo</groupId>
+    <artifactId>helidon-demo-mp</artifactId>
+    <version>2.3.0.0</version>
+    <!-- packaging>jar</packaging -->
+    <name>${project.artifactId}</name>
+
+    <properties>
+        <docker.repo.prefix></docker.repo.prefix>
+        <docker.repo.remote.prefix>${env.REMOTE_REPO_PREFIX}</docker.repo.remote.prefix>
+        <docker.file>Dockerfile</docker.file>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- making docker image -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <!-- docker build -->
+                    <execution>
+                        <id>docker-local-build</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.prefix}${project.artifactId}:${project.version}</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.prefix}${project.artifactId}:latest</argument>
+                                <argument>-f</argument>
+                                <argument>${docker.file}</argument>
+                                <argument>.</argument>
+                            </arguments>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                        </configuration>
+                    </execution>
+                    <!-- docker build -->
+                    <execution>
+                        <id>docker-build</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.prefix}${project.artifactId}:${project.version}</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.prefix}${project.artifactId}:latest</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.remote.prefix}${project.artifactId}:${project.version}</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.repo.remote.prefix}${project.artifactId}:latest</argument>
+                                <argument>-f</argument>
+                                <argument>${docker.file}</argument>
+                                <argument>.</argument>
+                            </arguments>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                        </configuration>
+                    </execution>
+                    <!-- docker push to remote repo -->
+                    <execution>
+                        <id>docker-push-latest</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>push</argument>
+                                <argument>${docker.repo.remote.prefix}${project.artifactId}:latest</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>docker-push-version</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>push</argument>
+                                <argument>${docker.repo.remote.prefix}${project.artifactId}:${project.version}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
