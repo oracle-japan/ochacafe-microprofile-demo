@@ -1,0 +1,8 @@
+FROM adoptopenjdk:11-jre-hotspot
+WORKDIR /work
+
+RUN curl -L https://search.maven.org/remotecontent?filepath=org/jboss/narayana/rts/lra-coordinator-quarkus/5.11.1.Final/lra-coordinator-quarkus-5.11.1.Final-runner.jar -o narayana-coordinator.jar
+
+CMD ["java", "-Dquarkus.http.port=8070", "-jar", "narayana-coordinator.jar"]
+
+EXPOSE 8070

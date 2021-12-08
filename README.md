@@ -28,6 +28,7 @@
 + [GraphQL デモ](#-microprofile-graphql-デモ-oracledemographql-パッケージ)
 + [Mapped Diagnostic Context (Mdc) デモ](#-Mapped-Diagnostic-Context-Mdc-デモ-oracledemologging-パッケージ)
 + [Scheduling デモ](#-Scheduling-デモ-oracledemoscheduling-パッケージ)
++ [MicroProfile LRA デモ](#-MicroProfile-LRA-デモ-oracledemolra-パッケージ)
 + [おまけ](#-おまけcowsay-oracledemocowweb-パッケージ)
 
 ## デモのソース
@@ -58,41 +59,24 @@ src/main
 │           │   ├── CORS.java
 │           │   ├── DebugFilter.java
 │           │   └── Debug.java
-│           ├── mapper [JAX-RSの例外マッパー]
-│           │   └── CountryNotFoundExceptionMapper.java
 │           ├── ft [フォルトトレランス]
 │           │   ├── FaultToleranceResource.java
 │           │   └── FaultToleranceTester.java
+│           ├── graphql [GraphQL]
+│           │   ├── Country.java
+│           │   └── CountryGraphQLApi.java
+│           ├── grpc [拡張機能 gRPC]
+│           │   └── protobuf
+│           │       ├── GreeterSimpleService.java
+│           │       ├── GreeterService.java
+│           │       ├── GrpcResource.java
+│           │       └── helloworld
+│           │           ├── GreeterGrpc.java
+│           │           └── Helloworld.java
 │           ├── health [ヘルスチェック]
 │           │   ├── HealthCheckHelper.java
 │           │   ├── HealthCheckResource.java
 │           │   └── MyHealthCheck.java
-│           ├── metrics [メトリクス]
-│           │   └── MetricsResource.java
-│           ├── restclient [RESTクライアント]
-│           │   ├── Movie.java
-│           │   ├── MovieReviewService.java
-│           │   ├── MovieReviewServiceResource.java
-│           │   ├── MovieReviewServiceRestClientResource.java
-│           │   └── Review.java
-│           ├── security [セキュリティ]
-│           │   ├── IdcsResource.java
-│           │   └── SecurityResource.java
-│           ├── tracing [トレーシング]
-│           │   ├── TracingResource.java
-│           │   └── interceptor [SPAN定義 Interceptor & アノテーション]
-│           │       ├── TraceInterceptor.java
-│           │       ├── Trace.java
-│           │       ├── TraceTagHolder.java
-│           │       └── TraceTag.java
-│           ├── reactive [Reactive Messaging & Connecter]
-│           │   ├── DaoEvent.java
-│           │   ├── ExecutorServiceHelper.java
-│           │   ├── ReactiveJmsResource.java
-│           │   └── ReactiveResource.java
-│           ├── graphql [GraphQL]
-│           │   ├── Country.java
-│           │   └── CountryGraphQLApi.java
 │           ├── jpa [拡張機能 JPA/JTA]
 │           │   ├── CountryDAO.java
 │           │   ├── Country.java
@@ -109,16 +93,38 @@ src/main
 │           │   ├── Mdc.java
 │           │   ├── MdcResource.java
 │           │   └── Sub.java
-│           ├── grpc [拡張機能 gRPC]
-│           │   └── protobuf
-│           │       ├── GreeterSimpleService.java
-│           │       ├── GreeterService.java
-│           │       ├── GrpcResource.java
-│           │       └── helloworld
-│           │           ├── GreeterGrpc.java
-│           │           └── Helloworld.java
+│           ├── lra [LRA - Long Running Actions]
+│           │   ├── LRAExampleResource.java
+│           │   ├── LRAMain.java
+│           │   ├── LRAService1.java
+│           │   └── LRAService2.java
+│           ├── mapper [JAX-RSの例外マッパー]
+│           │   └── CountryNotFoundExceptionMapper.java
+│           ├── metrics [メトリクス]
+│           │   └── MetricsResource.java
+│           ├── reactive [Reactive Messaging & Connecter]
+│           │   ├── DaoEvent.java
+│           │   ├── ExecutorServiceHelper.java
+│           │   ├── ReactiveJmsResource.java
+│           │   └── ReactiveResource.java
+│           ├── restclient [RESTクライアント]
+│           │   ├── Movie.java
+│           │   ├── MovieReviewService.java
+│           │   ├── MovieReviewServiceResource.java
+│           │   ├── MovieReviewServiceRestClientResource.java
+│           │   └── Review.java
 │           ├── scheduling [拡張機能 スケジューリング]
 │           │   └── Scheduler.java
+│           ├── security [セキュリティ]
+│           │   ├── IdcsResource.java
+│           │   └── SecurityResource.java
+│           ├── tracing [トレーシング]
+│           │   ├── TracingResource.java
+│           │   └── interceptor [SPAN定義 Interceptor & アノテーション]
+│           │       ├── TraceInterceptor.java
+│           │       ├── Trace.java
+│           │       ├── TraceTagHolder.java
+│           │       └── TraceTag.java
 │           └── cowweb [おまけ]
 │               └── CowwebResource.java
 ├── proto
@@ -130,33 +136,17 @@ src/main
     ├── logging.properties [ログ設定ファイル]
     ├── META-INF
     │   ├── beans.xml [CDIの設定ファイル]
+    │   ├── microprofile-config-k8s.properties [k8sデプロイ用プロファイル]
     │   ├── microprofile-config.properties [MicroProfile設定ファイル]
     │   ├── persistence.xml [JPAの設定ファイル]
     │   └── services
-    │       └── io.helidon.microprofile.grpc.server.spi.GrpcMpExtension [gRPC Extension設定ファイル]
+    │       ├── io.helidon.microprofile.grpc.server.spi.GrpcMpExtension  [gRPC Extension設定ファイル]
+    │       └── org.eclipse.microprofile.config.spi.ConfigSource [JDBC関連Config設定ファイル]
     └── WEB [静的コンテンツのフォルダー]
-        └── index.html 
-demo
-├── k8s [kubernetesデプロイメント用マニフェスト]
-│   ├── liveness-check.yaml
-│   ├── open-tracing.yaml
-│   ├── simple-deployment.yaml
-│   └── simple-service.yaml
-├── tracing [トレーシングデモ]
-│   ├── request.json
-│   ├── request_local.json
-│   ├── tracing-demo.sh
-│   └── oracledb [Oracle database コンテナ作成・設定]
-│       ├── populate-demodata.sh
-│       ├── populate-demodata.sql
-│       ├── sqlplus.sh
-│       ├── sql.sh
-│       └── start-oracledb.sh
-└── weblogic [WebLogic Server コンテナ作成・設定]
-    ├── config-jms.sh
-    ├── config-jms.yaml
-    ├── domain.properties
-    └── start-weblogic.sh
+        ├── apm.html
+        ├── apm.js
+        ├── apmrum.js.example
+        └── index.html
 ```
 </details>
 <br>
@@ -164,10 +154,8 @@ demo
 ## § ビルド方法
 
 ```bash
-# for the first time, generate java source files for gRPC by compiling proto file
-mvn clean -P protoc generate-sources
-# then create jar
-mvn package
+# for the first time, generate java source files for gRPC by compiling proto file, then package
+mvn clean -P protoc initialize && mvn package -DskipTests=true
 ```
 
 <br>
@@ -653,6 +641,12 @@ paths:
           description: 国情報
       summary: Find country by country code
 ```
+
+### OpenAPI UI
+
+Maven のプロファイル `openapi-ui` を指定してビルドすると OpenAPI のユーザーインタフェースを表示することができます。  
+ブラウザから /openapi-ui/index.html にアクセスして下さい。
+
 
 [目次に戻る](#目次)
 <br>
@@ -1474,20 +1468,20 @@ BEGIN DEMO.INSERT_COUNTRY(:1 , :2 , :3 ); END;
 
 @Scheduled または @FixedRate アノテーションを使って、定期実行するタスクをスケジュールできます。
 
-```
+```java
     @FixedRate(initialDelay = 2, value = 3, timeUnit = TimeUnit.MINUTES)
-    public void fixedRate0() {
-        log();
+    public void fixedRate0(FixedRateInvocation inv) {
+        logger.info(inv.description());
     }    
 
-    @Scheduled("0/30  * * ? * *") // like cron
-    private void scheduled0(){
-        log();
+    @Scheduled("0/30  * * ? * *")
+    private void scheduled0(CronInvocation inv){
+        logger.info(inv.description());
     }
 
-    @Scheduled("15,45 * * ? * *") // like cron
-    private void scheduled1(){
-        log();
+    @Scheduled("15,45 * * ? * *")
+    private void scheduled1(CronInvocation inv){
+        logger.info(inv.description());
     }
 ```
 
@@ -1495,31 +1489,209 @@ BEGIN DEMO.INSERT_COUNTRY(:1 , :2 , :3 ); END;
 
 ```
 ...
-15:21:00 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
-15:21:09 INFO: Scheduled event (fixedRate0) - @FixedRate(initialDelay=2, value(interval)=3, timeUnit=MINUTES)
-15:21:15 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
-15:21:30 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
-15:21:45 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
-15:22:00 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
-15:22:15 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
-15:22:30 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
-15:22:45 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
-15:23:00 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
-15:23:15 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
-15:23:30 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
-15:23:45 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
-15:24:00 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
-15:24:09 INFO: Scheduled event (fixedRate0) - @FixedRate(initialDelay=2, value(interval)=3, timeUnit=MINUTES)
-15:24:15 INFO: Scheduled event (scheduled1) - @Scheduled("15,45 * * ? * *")
-15:24:30 INFO: Scheduled event (scheduled0) - @Scheduled("0/30  * * ? * *")
+10:00:45 INFO oracle.demo.scheduling.Scheduler Thread[scheduled-2,5,main]: at 15 and 45 seconds
+10:01:00 INFO oracle.demo.scheduling.Scheduler Thread[scheduled-6,5,main]: every 30 seconds
+10:01:11 INFO oracle.demo.scheduling.Scheduler Thread[scheduled-3,5,main]: every 3 minutes with initial delay 2 minutes
+10:01:15 INFO oracle.demo.scheduling.Scheduler Thread[scheduled-7,5,main]: at 15 and 45 seconds
+10:01:30 INFO oracle.demo.scheduling.Scheduler Thread[scheduled-4,5,main]: every 30 seconds
 ...
 ```
 
-注: ログの出力がうるさいので、ソースのアノテーションをコメントアウトしています。デモする場合は、oracle.demo.scheduling.Scheduer.java のコメントアウトを外して下さい。
+注: ログの出力がうるさいので、ソースのアノテーションをコメントアウトしています(=デフォルトではスケジューリングされていません)。デモする場合は、oracle.demo.scheduling.Scheduer.java のコメントアウトを外して下さい。
 
 
 [目次に戻る](#目次)
 <br>
+
+## § MicroProfile LRA デモ (oracle.demo.lra パッケージ)
+
+[MicroProfile LRA (Long Running Actions)](https://projects.eclipse.org/projects/technology.microprofile/releases/lra-1.0) とは、分散環境での一貫性を保証するための手法の1つで、マイクロサービスにおける SAGA pattern（非同期通信、分散ロックなし、補償アクションを使ったリカバリ）を実現する仕様です。
+このデモでは、仕様ドキュメントに記載のある[補償トランザクションのパターン](https://download.eclipse.org/microprofile/microprofile-lra-1.0-M1/images/lra.png)を試します。
+
+### (事前作業) LRA Coordinator の作成＆起動
+
+LRA の実行には、サービス間のトランザクションを管理するコーディネータが介在します。まずのこのコーディネータの Docker コンテナを作成して起動します。
+
+```sh
+# Cordinator のコンテナイメージを作成
+$ demo/lra/create_lra_coordinator_image.sh
+...
+Successfully built xxxxxxxxxxxx
+Successfully tagged helidon/lra-coordinator:latest
+
+# Coordinator を起動
+$ docker run --rm -d --name lra-coordinator -p 8070:8070 --network="host" helidon/lra-coordinator
+...
+...
+
+# 起動を確認
+$ docker ps -f "name=lra-coordinator" --format "{{.Names}} - {{.Status}}"
+lra-coordinator - Up 10 seconds
+```
+
+--network="host" でコンテナを起動していることに注意して下さい（現在の実装の制約です）。
+
+それでは、以降で実際に LRA を試してみます。LRAMain, LRAService1, LRAService2 の3つのサービスがトランザクションに関係します。
+LRAMain がトランザクションを開始し、LRAService1, LRAService2 がそのトランザクションに参加します。
+
+1. クライアント (curl) が LRAMain を呼び出す (body = LRAMainから呼び出すサービスのリスト)
+2. LRAMain でトランザクションが開始
+3. LRAMain が LRAService1, LRAService2 を呼び出す
+4. LRAService1, LRAService2 はトランザクションに参加し、処理（実際は何もしない）を行いリターン
+5. LRAMain は LRAService1, LRAService2 呼び出し後、リターンするタイミングでトランザクションも終了
+6. クライアントがレスポンスを受け取る
+
+### ソースの解説
+
+LRAMain#start でトランザクションが開始されます。
+
+```java
+  @LRA(
+      value = LRA.Type.REQUIRES_NEW,
+      timeLimit = 3000, timeUnit = ChronoUnit.MILLIS
+  )
+  @POST @Path("start")
+  public Response start(@HeaderParam(LRA_HTTP_CONTEXT_HEADER) URI lraId, String[] urls, 
+                                            @QueryParam("raise-error") boolean raiseError){
+    ...
+  }
+```
+
+LRAService1, LRAService2 の各メソッドは、LRAMain で開始されたトランザクションに参加します。
+
+```java
+  @LRA(value = LRA.Type.REQUIRED, end=false)
+  @GET @Path("serv")
+  public Response serve(@HeaderParam(LRA_HTTP_CONTEXT_HEADER) URI lraId){
+    ...
+  }
+```
+
+トランザクションの結果は、LRAMain の @AfterLRA のアノテーションのついたメソッドに通知されます。
+
+```java
+  @AfterLRA
+  @PUT @Path("after")
+  public Response notifyLRAFinished(@HeaderParam(LRA_HTTP_CONTEXT_HEADER) URI lraId, LRAStatus status) {
+    ...
+  }
+```
+
+end=false なので、トランザクションは 呼び出し元である LRAMain の後続処理まで継続されます。
+
+### 正常パターン
+
+クライアントからリクエスト送信
+
+```bash
+cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lra-main/start -d @-
+[
+  "http://localhost:8080/lra-service1/serv",
+  "http://localhost:8080/lra-service2/serv"
+]
+EOF
+< HTTP/1.1 200 OK
+< Long-Running-Action: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65
+```
+
+サーバーログ
+
+```txt
+INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 started
+INFO LRAMain : http://localhost:8080/lra-service1/serv <- calling
+INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 joined
+INFO LRAService1 : Done.
+INFO LRAMain : http://localhost:8080/lra-service1/serv -> 200 OK
+INFO LRAMain : http://localhost:8080/lra-service2/serv <- calling
+INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 joined
+INFO LRAService1 : Done.
+INFO LRAMain : http://localhost:8080/lra-service2/serv -> 200 OK
+INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 completed 🎉
+INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 completed 🎉
+INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 completed 🎉
+INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 ended with status "Closed"
+```
+
+各サービスの @Complete アノテーションのついたメソッドが呼び出されています。
+
+
+### 異常（Exception による補償トランザクション起動）パターン
+
+LRAMain がリターン直前に RuntimeException を throw するシナリオ
+
+```bash
+cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lra-main/start?raise-error=true -d @-
+[
+  "http://localhost:8080/lra-service1/serv",
+  "http://localhost:8080/lra-service2/serv"
+]
+EOF
+< HTTP/1.1 500 Internal Server Error
+< Long-Running-Action: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42
+```
+
+サーバーログ
+
+```txt
+INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d started
+INFO LRAMain : http://localhost:8080/lra-service1/serv <- calling
+INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d joined
+INFO LRAService1 : Done.
+INFO LRAMain : http://localhost:8080/lra-service1/serv -> 200 OK
+INFO LRAMain : http://localhost:8080/lra-service2/serv <- calling
+INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d joined
+INFO LRAService1 : Done.
+INFO LRAMain : http://localhost:8080/lra-service2/serv -> 200 OK
+WARNING io.helidon.microprofile.server.JaxRsCdiExtension Thread[helidon-6,5,server]: Internal server error
+java.lang.RuntimeException
+        at oracle.demo.lra.LRAMain.start(LRAMain.java:66)
+        ...
+
+SEVERE LRAMain : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d compensated 🚒
+SEVERE LRAService1 : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d compensated 🚒
+SEVERE LRAService1 : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d compensated 🚒
+INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d ended with status "Cancelled"
+```
+
+今度は、各サービスの @Compensate アノテーションのついたメソッドが呼び出されています。
+
+### 異常（タイムアウトによる補償トランザクション起動）パターン
+
+LRAService2 はトランザクションのタイムアウト値 (3000ms) を超える処理遅延が生じるシナリオ
+
+```bash
+$ cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lra-main/start -d @-
+[
+  "http://localhost:8080/lra-service1/serv",
+  "http://localhost:8080/lra-service2/serv-slow"
+]
+EOF
+< HTTP/1.1 200 OK
+< Long-Running-Action: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908
+```
+
+サーバーログ
+
+```txt
+INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 started
+INFO LRAMain : http://localhost:8080/lra-service1/serv <- calling
+INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 joined
+INFO LRAService1 : Done.
+INFO LRAMain : http://localhost:8080/lra-service1/serv -> 200 OK
+INFO LRAMain : http://localhost:8080/lra-service2/serv-slow <- calling
+INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 joined
+SEVERE LRAMain : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 compensated 🚒
+SEVERE LRAService1 : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 compensated 🚒
+SEVERE LRAService1 : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 compensated 🚒
+INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 ended with status "Cancelled"
+INFO LRAService1 : Done.
+INFO LRAMain : http://localhost:8080/lra-service2/serv-slow -> 200 OK
+```
+LRAMain の処理自体は正常終了して、クライアントにも 200 OK が返っていますが、タイムアウトによりトランザクションはキャンセルされ、補償トランザクションが呼びだれています。
+
+[目次に戻る](#目次)
+<br>
+
 
 ## § （おまけ）Cowsay (oracle.demo.cowweb パッケージ)
 

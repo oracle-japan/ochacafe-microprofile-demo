@@ -1,11 +1,43 @@
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Cache-Control" content="no-cache">
-  <title>OCHaCafe Demo</title>
+  <meta http-equiv="" content="no-cache">
+  <meta charset="utf-8"/>
+  <title>Helidon MicroProfile Demo</title>
+
+  <script src="apmrum.js"></script>
+  <script async crossorigin="anonymous" src="https://aaaac6k7z5qgeaaaaaaaaaagfu.apm-agt.us-ashburn-1.oci.oraclecloud.com/static/jslib/apmrum.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+  <script src="apm.js"></script>
+
 </head>
 <body>
-  <H2>Welcome to OCHaCafe!</H2> 
+  <H2>Welcome to Helidon MicroProfile Demo</H2> 
+
+  <div>
+    <button id="button_get" type="button">GET</button>
+    <button id="button_post" type="button">POST</button>
+    <button id="button_clear" type="button">CLEAR</button>
+    <p>
+    Path: <input type="text" id="path" size="48" value=""></input>
+    <br>
+        <button id="button_health" type="button">/health</button>
+        <button id="button_openapi" type="button">/openapi</button>
+        <button id="button_jpa" type="button">/jpa/country</button>
+        <button id="button_jpa_error" type="button">/jpa/country?error=true</button>
+        <button id="button_tracing" type="button">/tracing/invoke</button>
+    <br>
+    </p>
+    Body:<br>
+    <textarea id="input_body" rows="8" cols="80"></textarea>
+</div>
+  <hr>
+  <p><div id="div0"></div></p>
+  <p><pre id="pre1"><pre></p>
+
+
 </body>
 </html>
 

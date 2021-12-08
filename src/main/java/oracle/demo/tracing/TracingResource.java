@@ -1,9 +1,8 @@
 package oracle.demo.tracing;
 
-import java.util.Optional;
-import java.util.logging.Level;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.POST;
@@ -16,7 +15,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 /**
  * tracing demo
@@ -26,6 +24,8 @@ import javax.ws.rs.core.Response.Status;
 public class TracingResource{
 
     private final Logger logger = Logger.getLogger(TracingResource.class.getName());
+
+    private final Client client = ClientBuilder.newBuilder().connectTimeout(5, TimeUnit.SECONDS).build();
     
     @POST
     @Path("/invoke")
@@ -38,34 +38,48 @@ public class TracingResource{
             values.forEach(val -> logger.info(String.format("Header: %s=%s", key, val)));
         });
 
-        // SpanContext spanContext = serverRequest.spanContext(); // you can comment out this line
-        // optional, you could also use GlobalTracer.get() if it is configured
-        // Tracer tracer = serverRequest.webServer().configuration().tracer(); // you can comment out this line
-
         boolean failed = false;
         for(TraceOrder order : orders){
-            Client client = ClientBuilder.newClient();
-            try{
-                logger.info("Invoking endpoint: " + order.endpoint);
-                final Response response = client.target(order.endpoint)
-                            .request()
-                            // .property(TRACER_PROPERTY_NAME, tracer) // you can comment out this line
-                            // .property(CURRENT_SPAN_CONTEXT_PROPERTY_NAME, spanContext) // you can comment out this line
-                            .post(Entity.entity(order.orders, MediaType.APPLICATION_JSON));
-                logger.info("Response: " + response.toString());
-            }catch(Exception e){
-                logger.log(Level.WARNING, "Failed to invoke: " + e.getMessage(), e);
-                failed = true;
-            }finally{
-                Optional.ofNullable(client).ifPresent(c -> c.close());
+
+            // first handle calls
+            if(Objects.nonNull(order.calls)){
+                for(Call call : order.calls){
+                    logger.info("Invoking call: " + call.method + " " + call.endpoint);
+                    Response response = null;
+                    if(call.method.equalsIgnoreCase("GET")){
+                        response = client.target(call.endpoint).request().get();
+                    }else if(call.method.equalsIgnoreCase("POST")){
+                        response = client.target(call.endpoint).request()
+                        .post(Entity.entity(call.body, MediaType.APPLICATION_JSON));
+                    }
+                    logger.info("Response: " + response.toString());
+                    String responseBody = response.readEntity(String.class);
+                    if(responseBody.length() > 512){
+                        responseBody = responseBody.substring(0, 512).concat("\n...");
+                    }
+                    logger.info("Response body:\n" + responseBody);
+                }
             }
+
+            // then route to another order
+            logger.info("Invoking endpoint: " + order.endpoint);
+            final Response response = client.target(order.endpoint).request()
+                        .post(Entity.entity(order.orders, MediaType.APPLICATION_JSON));
+            logger.info("Response: " + response.toString());
         }
-        return failed ? Response.status(Status.INTERNAL_SERVER_ERROR).build() : Response.ok().build();
+        return Response.ok().build();
     }   
 
     public static class TraceOrder{
         public String endpoint;
         public TraceOrder[] orders;
+        public Call[] calls;
+    }
+
+    public static class Call{
+        public String method;
+        public String endpoint;
+        public Object body; // json
     }
 
 }
@@ -74,22 +88,37 @@ public class TracingResource{
 [
     {
         "endpoint" : "http://helidon-demo-mp-1:8080/tracing/invoke",
-        "orders" : []
+        "orders" : [],
+        "calls" : [
+            {
+                "method" : "GET",
+                "endpoint" : "http://helidon-demo-mp-1:8080/jpa/country/1"
+            }
+        ]
     },
     {
         "endpoint" : "http://helidon-demo-mp-2:8080/tracing/invoke",
         "orders" : [
             {
                 "endpoint" : "http://helidon-demo-mp-3:8080/tracing/invoke",
-                "orders" : []
-            },
+                "orders" : [],
+                "calls" : [
+                    {
+                        "method" : "GET",
+                        "endpoint" : "http://helidon-demo-mp-3:8080/jpa/country?error=true"
+                    },
+                    {
+                        "method" : "GET",
+                        "endpoint" : "https://api.weather.gov/alerts/active?area=CA"
+                    }                    
+                ]
+            }
+        ],
+        "calls" : [
             {
-                "endpoint" : "http://helidon-demo-mp-0:8080/tracing/invokeX",
-                "orders" : []
-            },
-            {
-                "endpoint" : "http://helidon-demo-mp-1:8080/tracing/invoke",
-                "orders" : []
+                "method" : "POST",
+                "endpoint" : "http://helidon-demo-mp-2:8080/echo",
+                "body" : { "text" : "Hello World!" }
             }
         ]
     }

@@ -15,6 +15,8 @@ spec:
     env:
     - name: tracing.service
       value: helidon-demo-mp-0
+    - name: mp.config.profile
+      value: k8s
     ports:
     - containerPort: 8080
   imagePullSecrets:
@@ -36,6 +38,8 @@ spec:
     env:
     - name: tracing.service
       value: helidon-demo-mp-1
+    - name: mp.config.profile
+      value: k8s
     ports:
     - containerPort: 8080
   imagePullSecrets:
@@ -57,6 +61,8 @@ spec:
     env:
     - name: tracing.service
       value: helidon-demo-mp-2
+    - name: mp.config.profile
+      value: k8s
     ports:
     - containerPort: 8080
   imagePullSecrets:
@@ -78,6 +84,8 @@ spec:
     env:
     - name: tracing.service
       value: helidon-demo-mp-3
+    - name: mp.config.profile
+      value: k8s
     ports:
     - containerPort: 8080
   imagePullSecrets:

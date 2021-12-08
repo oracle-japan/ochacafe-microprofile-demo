@@ -58,7 +58,10 @@ public class MyHealthCheck {
     @Produces
     @Readiness
     public HealthCheck checkReadiness() {
-        return () -> HealthCheckResponse.named(nameReadiness).up().build();
+        return () -> HealthCheckResponse
+                .named(nameReadiness)
+                .withData("availableProcessors", Runtime.getRuntime().availableProcessors())
+                .up().build();
     }
 
 

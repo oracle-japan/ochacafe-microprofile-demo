@@ -1,0 +1,45 @@
+# Pods - helidon x 4 (no jaeger)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lra-coordinator-deployment
+  labels:
+    app: lra-coordinator
+  namespace: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lra-coordinator
+  template:
+    metadata:
+      labels:
+        app: lra-coordinator
+    spec:
+      containers:
+      - name: api-helidon-container
+        image: ${REMOTE_REPO_PREFIX}helidon/lra-coordinator-narayana
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8070
+      imagePullSecrets:
+      - name: docker-registry-secret
+---
+# Services - in order to lookup pods
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: lra-coordinator
+  labels:
+    app: lra-coordinator
+  namespace: demo
+spec:
+  ports:
+  - name: http
+    port: 8070
+    targetPort: 8070
+  selector:
+    app: lra-coordinator
+---

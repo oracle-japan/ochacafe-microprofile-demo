@@ -8,49 +8,28 @@ import javax.enterprise.context.ApplicationScoped;
 
 import io.helidon.microprofile.scheduling.FixedRate;
 import io.helidon.microprofile.scheduling.Scheduled;
+import io.helidon.scheduling.CronInvocation;
+import io.helidon.scheduling.FixedRateInvocation;
+import io.helidon.scheduling.Scheduling;
 
 @ApplicationScoped
 public class Scheduler {
 
     private static final Logger logger = Logger.getLogger(Scheduler.class.getName());
 
-    private void log(){
-        final String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
-        for(Method method : Scheduler.class.getDeclaredMethods()){
-            if(method.getName().equals(methodName)){
-                final Scheduled scheduled = method.getAnnotation(Scheduled.class);
-                if(null != scheduled){
-                    final String scheduledValue = scheduled.value();
-                    logger.info(String.format("Scheduled event (%s) - @Scheduled(\"%s\")", methodName, scheduledValue));
-                    return;
-                }
-                final FixedRate fixedRate = method.getAnnotation(FixedRate.class);
-                if(null != fixedRate){
-                    final long interval = fixedRate.value();
-                    final long initialDelay = fixedRate.initialDelay();
-                    final TimeUnit timeUnit = fixedRate.timeUnit();
-                    logger.info(String.format("Scheduled event (%s) - @FixedRate(initialDelay=%d, value(interval)=%d, timeUnit=%s)",
-                                        methodName, initialDelay, interval, timeUnit));
-                    return;
-                }
-            }
-        }
-    }
-
-    //@FixedRate(initialDelay = 2, value = 3, timeUnit = TimeUnit.MINUTES)
-    public void fixedRate0() {
-        log();
+    //@FixedRate(initialDelay = 1, value = 2, timeUnit = TimeUnit.MINUTES)
+    public void fixedRate0(FixedRateInvocation inv) {
+        logger.info(inv.description());
     }    
 
     //@Scheduled("0/30  * * ? * *")
-    private void scheduled0(){
-        log();
+    private void scheduled0(CronInvocation inv){
+        logger.info(inv.description());
     }
 
     //@Scheduled("15,45 * * ? * *")
-    private void scheduled1(){
-        log();
+    private void scheduled1(CronInvocation inv){
+        logger.info(inv.description());
     }
-
 
 }

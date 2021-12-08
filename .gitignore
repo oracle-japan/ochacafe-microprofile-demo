@@ -1,10 +1,5 @@
-.settings
-.classpath
-.project
-.metadata
-.vscode
-.dockerignore
-.factorypath
+.*
+!.gitignore
 
 /m2repo
 
@@ -17,4 +12,6 @@
 /sources
 /ObjectStore
 /apm-tracer-log
-/local
+
+microprofile-config-dev.properties
+apmrum.js

@@ -1,0 +1,65 @@
+@TRACING_TEST_ENDPOINT = localhost:8080
+
+###
+
+POST http://{{TRACING_TEST_ENDPOINT}}/tracing/invoke
+Content-Type: application/json
+
+[
+    {
+        "endpoint" : "http://helidon-demo-mp-1:8080/tracing/invoke",
+        "orders" : []
+    },
+    {
+      "endpoint" : "http://helidon-demo-mp-2:8080/tracing/invoke",
+        "orders" : [
+            {
+                "endpoint" : "http://helidon-demo-mp-3:8080/tracing/invoke",
+                "orders" : [
+                    {
+                        "endpoint" : "http://helidon-demo-mp-1:8080/tracing/invoke",
+                        "orders" : []
+                    }
+                ]
+            },
+            {
+                "endpoint" : "http://helidon-demo-mp-0:8080/tracing/invoke",
+                "orders" : []
+            }
+        ]
+    }
+]
+
+### test local
+
+POST http://{{TRACING_TEST_ENDPOINT}}/tracing/invoke
+Content-Type: application/json
+
+[
+    {
+        "endpoint" : "http://localhost:8080/tracing/invoke",
+        "orders" : []
+    },
+    {
+      "endpoint" : "http://localhost:8080/tracing/invoke",
+        "orders" : [
+            {
+                "endpoint" : "http://localhost:8080/tracing/invoke",
+                "orders" : [
+                    {
+                        "endpoint" : "http://localhost:8080/tracing/invoke",
+                        "orders" : []
+                    }
+                ]
+            },
+            {
+                "endpoint" : "http://localhost:8080/tracing/invoke",
+                "orders" : []
+            }
+        ]
+    }
+]
+
+###
+
+
