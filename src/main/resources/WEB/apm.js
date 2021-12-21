@@ -12,7 +12,7 @@ $(function () {
       cache: false,
       dataType : "text",
       success: function (data, textStatus) {
-        console.log(data);
+        //console.log(data);
         $('#div0').text(textStatus);
         var str = data;
         try {
