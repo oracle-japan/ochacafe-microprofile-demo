@@ -1687,7 +1687,7 @@ INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-
 INFO LRAService1 : Done.
 INFO LRAMain : http://localhost:8080/lra-service2/serv-slow -> 200 OK
 ```
-LRAMain の処理自体は正常終了して、クライアントにも 200 OK が返っていますが、タイムアウトによりトランザクションはキャンセルされ、補償トランザクションが呼びだれています。
+LRAMain の処理自体は正常終了して、クライアントにも 200 OK が返っていますが、タイムアウトによりトランザクションはキャンセルされ、補償トランザクションが呼び出されています。
 
 [目次に戻る](#目次)
 <br>
