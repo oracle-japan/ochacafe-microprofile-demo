@@ -3,21 +3,18 @@ package oracle.demo.lra;
 import java.net.URI;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -54,14 +51,11 @@ public class LRAMain {
 
     @LRA(
         value = LRA.Type.REQUIRES_NEW,
-        timeLimit = 5000, timeUnit = ChronoUnit.MILLIS
+        timeLimit = 3000, timeUnit = ChronoUnit.MILLIS
     )
     @POST
     @Path("start")
-    public Response start(@HeaderParam(LRA_HTTP_CONTEXT_HEADER) URI lraId, String[] urls, 
-                            @QueryParam("raise-error") boolean raiseError,
-                            @QueryParam("check-final-status") boolean checkFinalStatus
-                        ){
+    public Response start(@HeaderParam(LRA_HTTP_CONTEXT_HEADER) URI lraId, String[] urls, @QueryParam("raise-error") boolean raiseError){
         logger.log(Level.INFO, "LRA id: {0} started", lraId);
 
         for(String url : urls){
@@ -106,7 +100,8 @@ public class LRAMain {
 
     @POST
     @Path("monitor")
-    public Response monitor(String[] urls, @QueryParam("raise-error") boolean raiseError, @Context UriInfo uriInfo){
+    @Produces(MediaType.TEXT_PLAIN)
+    public String monitor(String[] urls, @QueryParam("raise-error") boolean raiseError, @Context UriInfo uriInfo){
 
         URI target = uriInfo.getBaseUriBuilder().path("lra-main/start").queryParam("raise-error", raiseError).build();
         logger.info("Calling LRA initiator: " + target);
@@ -118,23 +113,26 @@ public class LRAMain {
         String status = statusMonitor.getStatus(URI.create(lraId), 10*1000);
         logger.log(Level.INFO, "LRA id: {0} final status \"{1}\"", new Object[]{lraId, status});
 
-        return Response.ok(status + "\r\n").build();
+        return status;
     }
 
     public static class StatusMonitor{
 
         private final ConcurrentHashMap<URI, LRAStatus> trans = new ConcurrentHashMap<>();
 
-        public String getStatus(URI lraId, long timeout){
+        public synchronized String getStatus(URI lraId, long timeout){
+            //logger.info("getStatus()");
             final long startTime = System.currentTimeMillis();
             while(true){
                 LRAStatus lraStatus = trans.get(lraId);
+                logger.info("Status: " + lraStatus);
                 if(Objects.nonNull(lraStatus)){
                     trans.remove(lraId);
                     return lraStatus.name();
                 }else{
                     try{
-                        Thread.sleep(100);
+                        //logger.info("Sleeping");
+                        wait(timeout);
                     }catch(InterruptedException ignore){}
                 }
                 final long currentTime = System.currentTimeMillis(); 
@@ -142,8 +140,10 @@ public class LRAMain {
             }
         }
 
-        public void setStauts(URI lraId, LRAStatus lraStatus){
+        public synchronized void setStauts(URI lraId, LRAStatus lraStatus){
+            //logger.info("setStatus()");
             trans.put(lraId, lraStatus);
+            notifyAll();
         } 
 
     }
