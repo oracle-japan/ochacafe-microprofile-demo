@@ -4,12 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>oracle.demo</groupId>
-    <artifactId>helidon-demo-mp</artifactId>
-    <version>2.3.0.0</version>
-    <!-- packaging>jar</packaging -->
-    <name>${project.artifactId}</name>
+    <artifactId>helidon-demo-mp-docker-build</artifactId>
+    <version>2.5.0</version>
+    <name>helidon-demo-mp-docker-build</name>
 
     <properties>
+        <docker.image>helidon-demo-mp</docker.image>
+        <docker.image.version>2.5.0</docker.image.version>
         <docker.repo.prefix></docker.repo.prefix>
         <docker.repo.remote.prefix>${env.REMOTE_REPO_PREFIX}</docker.repo.remote.prefix>
         <docker.file>Dockerfile</docker.file>
@@ -34,9 +35,9 @@
                             <arguments>
                                 <argument>build</argument>
                                 <argument>-t</argument>
-                                <argument>${docker.repo.prefix}${project.artifactId}:${project.version}</argument>
+                                <argument>${docker.repo.prefix}${docker.image}:${docker.image.version}</argument>
                                 <argument>-t</argument>
-                                <argument>${docker.repo.prefix}${project.artifactId}:latest</argument>
+                                <argument>${docker.repo.prefix}${docker.image}:latest</argument>
                                 <argument>-f</argument>
                                 <argument>${docker.file}</argument>
                                 <argument>.</argument>
@@ -55,13 +56,13 @@
                             <arguments>
                                 <argument>build</argument>
                                 <argument>-t</argument>
-                                <argument>${docker.repo.prefix}${project.artifactId}:${project.version}</argument>
+                                <argument>${docker.repo.prefix}${docker.image}:${docker.image.version}</argument>
                                 <argument>-t</argument>
-                                <argument>${docker.repo.prefix}${project.artifactId}:latest</argument>
+                                <argument>${docker.repo.prefix}${docker.image}:latest</argument>
                                 <argument>-t</argument>
-                                <argument>${docker.repo.remote.prefix}${project.artifactId}:${project.version}</argument>
+                                <argument>${docker.repo.remote.prefix}${docker.image}:${docker.image.version}</argument>
                                 <argument>-t</argument>
-                                <argument>${docker.repo.remote.prefix}${project.artifactId}:latest</argument>
+                                <argument>${docker.repo.remote.prefix}${docker.image}:latest</argument>
                                 <argument>-f</argument>
                                 <argument>${docker.file}</argument>
                                 <argument>.</argument>
@@ -79,7 +80,7 @@
                             <executable>docker</executable>
                             <arguments>
                                 <argument>push</argument>
-                                <argument>${docker.repo.remote.prefix}${project.artifactId}:latest</argument>
+                                <argument>${docker.repo.remote.prefix}${docker.image}:latest</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -92,7 +93,7 @@
                             <executable>docker</executable>
                             <arguments>
                                 <argument>push</argument>
-                                <argument>${docker.repo.remote.prefix}${project.artifactId}:${project.version}</argument>
+                                <argument>${docker.repo.remote.prefix}${docker.image}:${docker.image.version}</argument>
                             </arguments>
                         </configuration>
                     </execution>

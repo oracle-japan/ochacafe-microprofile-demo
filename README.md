@@ -1660,7 +1660,7 @@ INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-
 LRAService2 はトランザクションのタイムアウト値 (3000ms) を超える処理遅延が生じるシナリオ
 
 ```bash
-$ cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lra-main/start -d @-
+cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lra-main/start -d @-
 [
   "http://localhost:8080/lra-service1/serv",
   "http://localhost:8080/lra-service2/serv-slow"
@@ -1687,7 +1687,22 @@ INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-
 INFO LRAService1 : Done.
 INFO LRAMain : http://localhost:8080/lra-service2/serv-slow -> 200 OK
 ```
-LRAMain の処理自体は正常終了して、クライアントにも 200 OK が返っていますが、タイムアウトによりトランザクションはキャンセルされ、補償トランザクションが呼び出されています。
+LRAMain の処理自体は正常終了して、クライアントにも 200 OK が返っていますが、タイムアウトによりトランザクションはキャンセルされ、補償トランザクションが呼び出されています。  
+
+イニシエータのメソッドの中では最終的なトランザクションのステータスは確認しようがありません。イニシエータが正常にリターンしたとしても、トランザクションとしてはタイムアウトが発生していて補償トランザクションが走る可能性があります。
+上記にあるとおり、LRA トランザクションのイニシエータとなっている /lra-main/monitor のレスポンスには Long-Running-Action というヘッダにトランザクションIDがセットされています。この ID を使って、LRA トランザクションコーディネータからコールバックされる最終的なステータスを同期的に待ち受けてみましょう（本質的にはこんなことをやったら LRA が台無しですが...）。
+
+```bash
+cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lra-main/monitor -d @- 
+[
+  "http://localhost:8080/lra-service1/serv",
+  "http://localhost:8080/lra-service2/serv-slow"
+]
+EOF
+< HTTP/1.1 200 OK
+Cancelled
+```
+
 
 [目次に戻る](#目次)
 <br>
