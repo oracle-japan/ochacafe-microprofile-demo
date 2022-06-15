@@ -1,7 +1,6 @@
 package oracle.demo.lra;
 
 import java.net.URI;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
