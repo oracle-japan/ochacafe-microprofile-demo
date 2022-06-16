@@ -958,7 +958,7 @@ $ docker rm oracledb
 ## § gRPC デモ (oracle.demo.grpc パッケージ)
 
 Helidon MP はアノテーションを使って簡単に gRPC サーバーを実装することができます。  
-gRPCの転送データのフォーマットである protobuf を用意する必要がありますが、このデモでは、ビルド時の `mvn -P protoc generate-sources` で必要な Java ソースファイルを生成しています。
+gRPCの転送データのフォーマットである protobuf を用意する必要がありますが、このデモでは、ビルド時の `mvn -P protoc initialize` で必要な Java ソースファイルを生成しています。
 
 ```bash
 # REST -> gRPC Client -> gRPC Server と呼び出される
