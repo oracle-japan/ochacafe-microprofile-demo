@@ -5,13 +5,13 @@
     <parent>
         <groupId>io.helidon.applications</groupId>
         <artifactId>helidon-mp</artifactId>
-        <version>2.5.0</version>
+        <version>2.5.1</version>
         <relativePath />
     </parent>
 
     <groupId>oracle.demo</groupId>
     <artifactId>helidon-demo-mp</artifactId>
-    <version>2.5.0</version>
+    <version>2.5.1</version>
     <name>${project.artifactId}</name>
 
     <properties>
@@ -210,7 +210,7 @@
                 <dependency>
                     <groupId>mysql</groupId>
                     <artifactId>mysql-connector-java</artifactId>
-                    <version>8.0.27</version>
+                    <version>8.0.28</version>
                 </dependency>
             </dependencies>
         </profile>
