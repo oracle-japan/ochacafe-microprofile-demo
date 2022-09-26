@@ -83,3 +83,9 @@ mp.messaging:
             factory.initial: weblogic.jndi.WLInitialContextFactory
             provider.url: t3://localhost:7001
 
+# MicroProfile LRA Coordinator
+mp.lra:
+  coordinator.url: http://localhost:8070/lra-coordinator
+  #participant.url: http://localhost:8080
+  propagation.active: true
+  coordinator.headers-propagation.prefix: ["x-b3-", "oracle-tmm-", "authorization", "refresh-"]

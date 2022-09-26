@@ -5,12 +5,12 @@
 
     <groupId>oracle.demo</groupId>
     <artifactId>helidon-demo-mp-docker-build</artifactId>
-    <version>2.5.0</version>
+    <version>2.5.1</version>
     <name>helidon-demo-mp-docker-build</name>
 
     <properties>
         <docker.image>helidon-demo-mp</docker.image>
-        <docker.image.version>2.5.0</docker.image.version>
+        <docker.image.version>2.5.1</docker.image.version>
         <docker.repo.prefix></docker.repo.prefix>
         <docker.repo.remote.prefix>${env.REMOTE_REPO_PREFIX}</docker.repo.remote.prefix>
         <docker.file>Dockerfile</docker.file>
