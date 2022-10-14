@@ -1603,12 +1603,12 @@ INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4
 INFO LRAService1 : Done.
 INFO LRAMain : http://localhost:8080/lra-service1/serv -> 200 OK
 INFO LRAMain : http://localhost:8080/lra-service2/serv <- calling
-INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 joined
-INFO LRAService1 : Done.
+INFO LRAService2 : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 joined
+INFO LRAService2 : Done.
 INFO LRAMain : http://localhost:8080/lra-service2/serv -> 200 OK
 INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 completed 🎉
 INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 completed 🎉
-INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 completed 🎉
+INFO LRAService2 : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 completed 🎉
 INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65 ended with status "Closed"
 ```
 
@@ -1639,8 +1639,8 @@ INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4
 INFO LRAService1 : Done.
 INFO LRAMain : http://localhost:8080/lra-service1/serv -> 200 OK
 INFO LRAMain : http://localhost:8080/lra-service2/serv <- calling
-INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d joined
-INFO LRAService1 : Done.
+INFO LRAService2 : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d joined
+INFO LRAService2 : Done.
 INFO LRAMain : http://localhost:8080/lra-service2/serv -> 200 OK
 WARNING io.helidon.microprofile.server.JaxRsCdiExtension Thread[helidon-6,5,server]: Internal server error
 java.lang.RuntimeException
@@ -1649,7 +1649,7 @@ java.lang.RuntimeException
 
 SEVERE LRAMain : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d compensated 🚒
 SEVERE LRAService1 : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d compensated 🚒
-SEVERE LRAService1 : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d compensated 🚒
+SEVERE LRAService2 : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d compensated 🚒
 INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d ended with status "Cancelled"
 ```
 
@@ -1679,18 +1679,17 @@ INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-4
 INFO LRAService1 : Done.
 INFO LRAMain : http://localhost:8080/lra-service1/serv -> 200 OK
 INFO LRAMain : http://localhost:8080/lra-service2/serv-slow <- calling
-INFO LRAService1 : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 joined
+INFO LRAService2 : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 joined
 SEVERE LRAMain : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 compensated 🚒
 SEVERE LRAService1 : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 compensated 🚒
-SEVERE LRAService1 : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 compensated 🚒
+SEVERE LRAService2 : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 compensated 🚒
 INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908 ended with status "Cancelled"
-INFO LRAService1 : Done.
+INFO LRAService2 : Done.
 INFO LRAMain : http://localhost:8080/lra-service2/serv-slow -> 200 OK
 ```
-LRAMain の処理自体は正常終了して、クライアントにも 200 OK が返っていますが、タイムアウトによりトランザクションはキャンセルされ、補償トランザクションが呼び出されています。  
+LRAMain の処理自体は正常終了して、クライアントにも 200 OK が返っていますが、タイムアウトによりトランザクションはキャンセルされ、補償トランザクションが呼び出されています。LRAMain は実際には 同期的に呼び出した LRAService2 のリターンを待っている間に LRA トランザクションコーディネータからタイムアウトをきっかけにした補償トランザクションの呼び出しを受けています。LRAMain がクライアントにレスポンスを返す前に、補償トランザクションの呼び出しを受けたかどうか確認してもいいかもしれません。  
 
-イニシエータのメソッドの中では最終的なトランザクションのステータスは確認しようがありません。イニシエータが正常にリターンしたとしても、トランザクションとしてはタイムアウトが発生していて補償トランザクションが走る可能性があります。
-上記にあるとおり、LRA トランザクションのイニシエータとなっている `/lra-main/monitor` のレスポンスには `Long-Running-Action` というヘッダにトランザクションIDがセットされています。この ID を使って、LRA トランザクションコーディネータからコールバックされる最終的なステータスを同期的に待ち受けてみましょう（本質的にはこんなことをやったら LRA が台無しですが...）。
+上記にあるとおり、LRA トランザクションのイニシエータとなっている `/lra-main/monitor` のレスポンスには `Long-Running-Action` というヘッダにトランザクションIDがセットされています。　LRA では全体のトランザクションを調停するためにこの ID を使っています。ではこの ID を使って、LRA トランザクションコーディネータからコールバックされる最終的なステータスを同期的に待ち受けてみましょう（本質的にはこんなことをやったら LRA が台無しかもしれませんが...）。
 
 ```bash
 cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lra-main/monitor -d @- 
