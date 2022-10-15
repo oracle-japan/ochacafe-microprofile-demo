@@ -23,7 +23,7 @@ import static org.eclipse.microprofile.lra.annotation.ws.rs.LRA.LRA_HTTP_CONTEXT
 @ApplicationScoped
 public class LRAService2 {
 
-    private static final Logger logger = Logger.getLogger(LRAService1.class.getName());
+    private static final Logger logger = Logger.getLogger(LRAService2.class.getName());
 
     @GET
     @LRA(value = LRA.Type.REQUIRED, end=false)
