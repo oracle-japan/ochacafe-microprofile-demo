@@ -3,6 +3,7 @@ package oracle.demo.lra;
 import java.net.URI;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -19,6 +20,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -91,7 +94,7 @@ public class LRAMain {
     @Path("after")
     public Response notifyLRAFinished(@HeaderParam(LRA_HTTP_CONTEXT_HEADER) URI lraId, LRAStatus status) {
         logger.log(Level.INFO, "LRA id: {0} ended with status \"{1}\"", new Object[]{lraId, status});
-        statusMonitor.setStauts(lraId, status);
+        statusMonitor.setStatus(lraId, status);
         return Response.ok().build();
     }
 
@@ -101,48 +104,50 @@ public class LRAMain {
     @POST
     @Path("monitor")
     @Produces(MediaType.TEXT_PLAIN)
-    public String monitor(String[] urls, @QueryParam("raise-error") boolean raiseError, @Context UriInfo uriInfo){
+    public void monitor(String[] urls, @QueryParam("raise-error") boolean raiseError, @Context UriInfo uriInfo, @Suspended AsyncResponse asyncResponse){
 
-        URI target = uriInfo.getBaseUriBuilder().path("lra-main/start").queryParam("raise-error", raiseError).build();
-        logger.info("Calling LRA initiator: " + target);
+        new Thread(() -> {
+            URI target = uriInfo.getBaseUriBuilder().path("lra-main/start").queryParam("raise-error", raiseError).build();
+            logger.info("Calling LRA initiator: " + target);
+    
+            Response response = client.target(target).request().post(Entity.json(urls));
+            logger.info("LRA initiator returned with status " + response.getStatus());
+    
+            String lraId = response.getHeaderString(LRA_HTTP_CONTEXT_HEADER);
+            String status = statusMonitor.getStatus(URI.create(lraId), 10*1000);
+            logger.log(Level.INFO, "LRA id: {0} final status \"{1}\"", new Object[]{lraId, status});
+    
+            asyncResponse.resume(status);
+        }).start();
 
-        Response response = client.target(target).request().post(Entity.json(urls));
-        logger.info("LRA initiator returned with status " + response.getStatus());
-
-        String lraId = response.getHeaderString(LRA_HTTP_CONTEXT_HEADER);
-        String status = statusMonitor.getStatus(URI.create(lraId), 10*1000);
-        logger.log(Level.INFO, "LRA id: {0} final status \"{1}\"", new Object[]{lraId, status});
-
-        return status;
     }
 
     public static class StatusMonitor{
 
-        private final ConcurrentHashMap<URI, LRAStatus> trans = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<URI, Optional<LRAStatus>> trans = new ConcurrentHashMap<>();
 
         public synchronized String getStatus(URI lraId, long timeout){
-            //logger.info("getStatus()");
             final long startTime = System.currentTimeMillis();
             while(true){
-                LRAStatus lraStatus = trans.get(lraId);
-                logger.info("Status: " + lraStatus);
-                if(Objects.nonNull(lraStatus)){
+                Optional<LRAStatus> lraStatus = trans.get(lraId);
+                if(lraStatus.isPresent()){
                     trans.remove(lraId);
-                    return lraStatus.name();
+                    return lraStatus.get().name();
                 }else{
+                    trans.put(lraId, Optional.empty());
                     try{
-                        //logger.info("Sleeping");
                         wait(timeout);
                     }catch(InterruptedException ignore){}
                 }
-                final long currentTime = System.currentTimeMillis(); 
-                if(currentTime - startTime > timeout) return "Unknown";
+                if(System.currentTimeMillis() - startTime > timeout){
+                    trans.remove(lraId);
+                    return "Unknown";
+                } 
             }
         }
 
-        public synchronized void setStauts(URI lraId, LRAStatus lraStatus){
-            //logger.info("setStatus()");
-            trans.put(lraId, lraStatus);
+        public synchronized void setStatus(URI lraId, LRAStatus lraStatus){
+            trans.put(lraId, Optional.of(lraStatus));
             notifyAll();
         } 
 
