@@ -1300,6 +1300,9 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 ```
 </details>
 
+クエリを実行する UI も提供しています。ブラウザから `http://localhost:8080/web/graphql/ui/` にアクセスして下さい。
+
+
 ### データベースへのアクセスパターン
 
 結果、JDBC/JPAを使ったデータベースへのアクセスは、以下のバリエーションを実装しています。
