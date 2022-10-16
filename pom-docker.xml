@@ -36,8 +36,10 @@
                                 <argument>build</argument>
                                 <argument>-t</argument>
                                 <argument>${docker.repo.prefix}${docker.image}:${docker.image.version}</argument>
+                                <!--
                                 <argument>-t</argument>
                                 <argument>${docker.repo.prefix}${docker.image}:latest</argument>
+                                -->
                                 <argument>-f</argument>
                                 <argument>${docker.file}</argument>
                                 <argument>.</argument>
@@ -75,6 +77,7 @@
                         </configuration>
                     </execution>
                     <!-- docker push to remote repo -->
+                    <!--
                     <execution>
                         <id>docker-push-latest</id>
                         <goals>
@@ -88,8 +91,9 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    -->
                     <execution>
-                        <id>docker-push-version</id>
+                        <id>docker-push</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>

@@ -182,7 +182,7 @@ export REMOTE_REPO_PREFIX=iad.ocir.io/some-tenant/some-path/
 mvn -f pom-docker.xml exec:exec@docker-build [-Ddocker.file=<任意のDockerfileを指定したい場合>]
 
 # iad.ocir.io/some-tenant/some-path/helidon-mp-demo への image push
-mvn -f pom-docker.xml exec:exec@docker-push-latest exec:exec@docker-push-version
+mvn -f pom-docker.xml exec:exec@docker-push
 
 # ローカル・イメージの作成だけ行いたい場合
 # イメージの名前は helidon-mp-demo:{version} となる
