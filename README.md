@@ -1689,7 +1689,7 @@ INFO LRAMain : http://localhost:8080/lra-service2/serv-slow -> 200 OK
 ```
 LRAMain の `/lra-main/start` リクエスト自体は正常終了して、クライアントにも 200 OK が返っていますが、タイムアウトによりトランザクションはキャンセルされ、補償トランザクションが呼び出されています。LRAMain は同期的に呼び出した LRAService2 のリターンを待っている間に LRA トランザクションコーディネータからタイムアウトをきっかけにした補償トランザクションの呼び出しを受け、更に最終的な "Cancelled" のステータスの通知を受けています。この非同期のイベントは `/lra-main/start` リクエスト処理を完了した後に受信される可能性もあります。
 
-上記にあるとおり、 `/lra-main/start` を呼び出したレスポンスには `Long-Running-Action` というヘッダにトランザクションIDがセットされています。ではこの ID を使って、LRA トランザクションコーディネータからコールバックされる最終的なステータスを同期的に待ち受けてみましょう（本質的にはこんなことをやったら LRA が台無しかもしれませんが...）。 `/lra-main/monitor` は LRAService2 のメソッドを呼び出した後に LRA コーディネータからのトランザクションステータスの通知イベントを待って、そのステータスをレスポンスとして返します。
+上記にあるとおり、 `/lra-main/start` を呼び出したレスポンスには `Long-Running-Action` というヘッダにトランザクションIDがセットされています。ではこの ID を使って、LRA トランザクションコーディネータからコールバックされる最終的なステータスを同期的に待ち受けてみましょう。 `/lra-main/monitor` は 間接的に `/lra-main/start` を呼び出した後に LRA コーディネータからのトランザクションステータスの通知イベントを待って、その LRA トランザクションの最終的なステータスをレスポンスの文字列として返します。クライアントへのレスポンスコードは、トランザクションが "Closed" の時だけ 200 を返します。
 
 ```bash
 cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lra-main/monitor -d @- 
@@ -1698,10 +1698,31 @@ cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lr
   "http://localhost:8080/lra-service2/serv-slow"
 ]
 EOF
-< HTTP/1.1 200 OK
+< HTTP/1.1 500 Internal Server Error
 Cancelled
 ```
 
+サーバログ
+
+```txt
+INFO LRAMain : LRA id: http://localhost:8070/lra-coordinator/791c52e5-7ebf-4266-93b3-d6c5b8d0eaa3 started
+INFO  LRAMain : http://localhost:8080/lra-service1/serv <- calling
+INFO  LRAService1 : LRA id: http://localhost:8070/lra-coordinator/791c52e5-7ebf-4266-93b3-d6c5b8d0eaa3 joined
+INFO  LRAService1 : Done.
+INFO  LRAMain : http://localhost:8080/lra-service1/serv -> 200 OK
+INFO  LRAMain : http://localhost:8080/lra-service2/serv-slow <- calling
+INFO  LRAService2 : LRA id: http://localhost:8070/lra-coordinator/791c52e5-7ebf-4266-93b3-d6c5b8d0eaa3 joined
+SEVERE LRAMain : LRA id: http://localhost:8070/lra-coordinator/791c52e5-7ebf-4266-93b3-d6c5b8d0eaa3 compensated 🚒
+SEVERE LRAService1 : LRA id: http://localhost:8070/lra-coordinator/791c52e5-7ebf-4266-93b3-d6c5b8d0eaa3 compensated 🚒
+SEVERE LRAService2 : LRA id: http://localhost:8070/lra-coordinator/791c52e5-7ebf-4266-93b3-d6c5b8d0eaa3 compensated 🚒
+INFO  LRAMain : LRA id: http://localhost:8070/lra-coordinator/791c52e5-7ebf-4266-93b3-d6c5b8d0eaa3 ended with status "Cancelled"
+INFO  LRAService2 : Done.
+INFO  LRAMain : http://localhost:8080/lra-service2/serv-slow -> 200 OK
+INFO  LRAMain : LRA initiator returned with status 200
+INFO  LRAMain : LRA id: http://localhost:8070/lra-coordinator/791c52e5-7ebf-4266-93b3-d6c5b8d0eaa3 final status "Cancelled"
+```
+
+LRA トランザクションは非同期に行われ、クライアントの同期呼び出しにリアルタイムでトランザクション結果を返すことが適切でないケースが多いと考えられます。この場合クライアントからのリクエスト受付処理（トランザクションIDを返す）とクライアントからのリクエスト結果確認処理を分けて実装するのが望ましいです。
 
 [目次に戻る](#目次)
 <br>

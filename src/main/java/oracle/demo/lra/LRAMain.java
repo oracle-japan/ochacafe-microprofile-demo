@@ -26,6 +26,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.lra.LRAResponse;
@@ -117,7 +118,11 @@ public class LRAMain {
             String status = statusMonitor.getStatus(URI.create(lraId), 10*1000);
             logger.log(Level.INFO, "LRA id: {0} final status \"{1}\"", new Object[]{lraId, status});
     
-            asyncResponse.resume(status);
+            Response acyncRes = status.equals(LRAStatus.Closed.name()) ?
+                Response.ok(status).build() :
+                Response.status(Status.INTERNAL_SERVER_ERROR).entity(status).build();
+
+            asyncResponse.resume(acyncRes);
         }).start();
 
     }
