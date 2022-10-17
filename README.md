@@ -1595,6 +1595,8 @@ cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lr
 EOF
 < HTTP/1.1 200 OK
 < Long-Running-Action: http://localhost:8070/lra-coordinator/daa70c14-4963-4775-b1e6-0b0e97f4bc65
+
+OK
 ```
 
 サーバーログ
@@ -1631,6 +1633,8 @@ cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lr
 EOF
 < HTTP/1.1 500 Internal Server Error
 < Long-Running-Action: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42
+
+Error by request
 ```
 
 サーバーログ
@@ -1671,6 +1675,8 @@ cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lr
 EOF
 < HTTP/1.1 200 OK
 < Long-Running-Action: http://localhost:8070/lra-coordinator/012167b9-8d1f-464d-8de7-1bd73aa9d908
+
+OK
 ```
 
 サーバーログ
@@ -1702,6 +1708,7 @@ cat <<EOF | curl -v -H "Content-Type: application/json" http://localhost:8080/lr
 ]
 EOF
 < HTTP/1.1 500 Internal Server Error
+
 Cancelled
 ```
 

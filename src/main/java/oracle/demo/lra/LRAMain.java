@@ -1,6 +1,7 @@
 package oracle.demo.lra;
 
 import java.net.URI;
+import java.security.DrbgParameters.Reseed;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,12 +67,16 @@ public class LRAMain {
             logger.info(url + " <- calling");
             Response response = client.target(url).request().get();
             logger.info(url + " -> " + response.getStatus() + " " + response.getStatusInfo());
+            if(2 != response.getStatus() / 100){
+                String message = String.format("Request failed: (%d) %s", response.getStatus(), url);
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity(message).build();
+            }
         }
 
         if(raiseError)
-            throw new RuntimeException();        
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error by request").build();
             
-        return Response.ok().build();
+        return Response.ok("OK").build();
     }
 
     @PUT
