@@ -5,17 +5,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
-import io.helidon.config.Config;
 import oracle.demo.grpc.protobuf.helloworld.GreeterGrpc;
 import oracle.demo.grpc.protobuf.helloworld.Helloworld.HelloReply;
 import oracle.demo.grpc.protobuf.helloworld.Helloworld.HelloRequest;
@@ -26,12 +28,14 @@ public class GrpcResource {
 
     private final Logger logger = Logger.getLogger(GrpcResource.class.getName());
 
+    @Inject @ConfigProperty(name = "grpc.port", defaultValue = "50051")
+    private int port;
+
     @GET
     @Path("/client")
     @Produces(MediaType.TEXT_PLAIN)
     public String invoke(@QueryParam("name") String name) {
 
-        final int port = Config.create().get("grpc.port").asInt().get();
         final ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build();
         final GreeterGrpc.GreeterBlockingStub blockingStub = GreeterGrpc.newBlockingStub(channel);
 

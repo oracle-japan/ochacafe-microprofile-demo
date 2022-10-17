@@ -1,8 +1,8 @@
 package oracle.demo.restclient;
 
-import javax.inject.Inject;
-import javax.json.JsonArray;
-import javax.ws.rs.client.WebTarget;
+import jakarta.inject.Inject;
+import jakarta.json.JsonArray;
+import jakarta.ws.rs.client.WebTarget;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

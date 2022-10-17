@@ -5,8 +5,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.ext.Provider;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.ext.Provider;
 
 /**
  * server implementation of MovieReviewService interface 

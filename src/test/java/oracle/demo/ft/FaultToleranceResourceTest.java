@@ -4,9 +4,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

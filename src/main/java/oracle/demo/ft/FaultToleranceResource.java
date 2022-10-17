@@ -3,11 +3,11 @@ package oracle.demo.ft;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
@@ -32,7 +32,8 @@ public class FaultToleranceResource {
         } catch (InterruptedException ignore) {}
     }
 
-    @Bulkhead(1024) // - will be changed with Config property
+    // 1024 is overwited to 3 by config file: oracle.demo.ft.FaultToleranceResource/bulkhead/Bulkhead/value=3
+    @Bulkhead(1024) 
     @GET @Path("/bulkhead")
     @Produces(MediaType.TEXT_PLAIN)
     public String bulkhead() {

@@ -1,6 +1,6 @@
 package oracle.demo.grpc.protobuf;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import io.helidon.microprofile.grpc.core.Grpc;
 import io.helidon.microprofile.grpc.core.Unary;

@@ -1,13 +1,19 @@
 package oracle.demo.jpa;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
-import io.helidon.config.Config;
+import io.helidon.config.mp.MpConfigSources;
+import io.helidon.config.yaml.mp.YamlConfigSourceProvider;
+import io.helidon.config.yaml.mp.YamlMpConfigSource;
 
 /**
  * Dynamically configure "DemoDataSource" from "DEMO_DATASOURCE"
@@ -19,20 +25,34 @@ public class DSConfigSource implements ConfigSource {
     private final Map<String, String> p = new HashMap<>();
 
     public DSConfigSource(){
-        final Config config = Config.create();
-        final String dsName = config.get("DEMO_DATASOURCE").asString().orElse("H2DataSource");
+
+        final Map<String, String> tempMap = new HashMap<>();
+
+        YamlConfigSourceProvider providor = new YamlConfigSourceProvider();
+        Iterable<ConfigSource> i = providor.getConfigSources(DSConfigSource.class.getClassLoader());
+        i.forEach(s -> {
+            //logger.info("source: " + s.getName());
+            //s.getProperties().forEach((k,v) -> logger.info(k + ": " + v));
+            s.getProperties().forEach((k,v) -> tempMap.put(k, v));
+        });
+
+
+        final String dsName = tempMap.get("DEMO_DATASOURCE");
+        Objects.requireNonNull(dsName);
         logger.info("Configuring DemoDataSource by copying '" + dsName + "'");
 
-        config.get("javax.sql.DataSource." + dsName).traverse()
-            .filter(node -> node.isLeaf())
-            .forEach(node -> {
-                final String key = node.key().toString().replace("javax.sql.DataSource." + dsName, "javax.sql.DataSource.DemoDataSource");
-                node.asString().ifPresent(value -> p.put(key, value));
-            });
+        tempMap.entrySet().forEach((e -> {
+            final String key = e.getKey();
+            if(key.startsWith("javax.sql.DataSource." + dsName)){
+                final String newKey = key.replace(dsName, "DemoDataSource");
+                p.put(newKey, e.getValue());
+            } 
+        }));
 
         final StringBuilder sb = new StringBuilder("DataSource properties:\n");
         p.keySet().stream().sorted().forEach(x -> sb.append(String.format("%s: %s%n", x, p.get(x))));
         logger.fine(sb.toString());
+
     }
 
     @Override

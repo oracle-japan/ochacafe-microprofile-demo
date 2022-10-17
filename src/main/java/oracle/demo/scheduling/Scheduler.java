@@ -3,7 +3,7 @@ package oracle.demo.scheduling;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import io.helidon.microprofile.scheduling.FixedRate;
 import io.helidon.microprofile.scheduling.Scheduled;

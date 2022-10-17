@@ -1,20 +1,20 @@
 package oracle.demo.jpa;
 
 import java.util.List;
+import java.util.logging.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * JPA version of "Country", supports CRUD
@@ -25,6 +25,8 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class CountryResource {
 
+    private final Logger logger = Logger.getLogger(CountryResource.class.getName());
+
     private final CountryDAO dao;
 
     @Inject
@@ -34,8 +36,8 @@ public class CountryResource {
 
     @GET
     @Path("/")
-    public Country[] getCountries(@QueryParam("error") boolean error) throws Exception {
-        List<Country> countries = error ? dao.getCountriesWithError() : dao.getCountries();
+    public Country[] getCountries() throws Exception {
+        List<Country> countries = dao.getCountries();
         return countries.toArray(new Country[countries.size()]);
     }
 
@@ -55,14 +57,18 @@ public class CountryResource {
     @POST
     @Path("/{countryId}")
     public void insertCountry(@PathParam("countryId") int countryId, @FormParam("name")String countryName) {
+        logger.info(String.format("insertCountry - id=%d, name=%s", countryId, countryName));
         dao.insertCountry(countryId, countryName);
     }
+    // curl -v -X POST localhost:8080/jpa/country/9 -H "Content-Type: application/x-www-form-urlencoded" -d "name=ABC" 
 
     @PUT
     @Path("/{countryId}")
     public void updateCountry(@PathParam("countryId") int countryId, @FormParam("name") String countryName) {
+        logger.info(String.format("updateCountry - id=%d, name=%s", countryId, countryName));
         dao.updateCountry(countryId, countryName);
     }
+    // curl -v -X PUT localhost:8080/jpa/country/1 -H "Content-Type: application/x-www-form-urlencoded" -d "name=XXX" 
 
     @DELETE
     @Path("/{countryId}")

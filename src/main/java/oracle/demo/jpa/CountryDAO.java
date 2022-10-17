@@ -3,19 +3,25 @@ package oracle.demo.jpa;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.enterprise.context.Dependent;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Default;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+
 
 import org.eclipse.microprofile.opentracing.Traced;
-
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import oracle.demo.country.CountryNotFoundException;
-import oracle.demo.tracing.interceptor.Trace;
-import oracle.demo.tracing.interceptor.TraceTag;
 
-@Dependent
+@ApplicationScoped
 public class CountryDAO {
+
+    @Inject
+    private Tracer tracer;
 
     @PersistenceContext(unitName = "Demo")
     private EntityManager em;
@@ -27,16 +33,7 @@ public class CountryDAO {
         return countries;
     }
 
-    // This is my original annotations for tracing
-    @Trace("JPA") 
-    @TraceTag(key = "JPQL", value = "select c from Countries c")
-    @TraceTag(key = "comment", value = "An error is expected by the wrong jpql statement.")
-    public List<Country> getCountriesWithError(){ // will intentionally cause an error
-        final List<Country> countries = em.createQuery("select c from Countries c", Country.class).getResultList();
-        return countries;
-    }
-
-    @Trace(value = "JPA", stackTrace = true)
+    @Traced
     public Country getCountry(int countryId) {
         final Country country = em.find(Country.class, countryId);
         if(null == country) 
@@ -44,35 +41,52 @@ public class CountryDAO {
         return country;
     }
 
-    @Trace("JPA")
+    @Traced
     @Transactional
     public void insertCountries(Country[] countries) {
         Arrays.stream(countries).forEach(em::persist);
     }
 
-    @Trace("JPA")
+    @Traced
     @Transactional
     public void insertCountries(List<Country> countries) {
         countries.stream().forEach(em::persist);
     }
 
-    @Trace("JPA")
+    @Traced
     @Transactional
     public void insertCountry(int countryId, String countryName) {
         em.persist(new Country(countryId, countryName));
     }
 
-    @Trace("JPA")
+    @Traced
     @Transactional
     public void updateCountry(int countryId, String countryName) {
-        final Country country = em.find(Country.class, countryId);
-        if(null == country) 
-            throw new CountryNotFoundException(String.format("Couldn't find country, id=%d", countryId));
-        country.setCountryName(countryName);
-        em.persist(country);
+        final Span span = tracer.buildSpan("updateCountry").asChildOf(tracer.activeSpan()).start();
+        span.setTag("countryId", countryId);
+        span.setTag("countryName", countryName);
+
+        try{
+            final Country country = em.find(Country.class, countryId);
+            if(null == country) 
+                throw new CountryNotFoundException(String.format("Couldn't find country, id=%d", countryId));
+            country.setCountryName(countryName);
+            em.persist(country);
+            span.setTag("error", false);
+        }catch(Exception e){
+            span.log(e.getMessage());
+            span.setTag("error", true); 
+            if(e instanceof CountryNotFoundException){
+                throw e;
+            }else{
+                throw new RuntimeException("Failed to update - " + e.getMessage(), e);
+            }
+        }finally{
+            span.finish();
+        }
     }
 
-    @Trace("JPA")
+    @Traced
     @Transactional
     public void deleteCountry(int countryId) {
         final Country country = em.find(Country.class, countryId);

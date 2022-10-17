@@ -1,7 +1,7 @@
 package oracle.demo.metrics;
 
-import javax.inject.Inject;
-import javax.ws.rs.client.WebTarget;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.WebTarget;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

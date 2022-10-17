@@ -3,12 +3,12 @@ package oracle.demo.filter;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import javax.inject.Inject;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.Provider;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.ext.Provider;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -17,14 +17,14 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @CORS
 public class CORSFilter implements ContainerResponseFilter {
 
-    @Inject @ConfigProperty(name="demo.cors.serverName", defaultValue="")
+    @Inject @ConfigProperty(name="demo.cors.serverName", defaultValue="__UNDIFINED__")
     private String serverName;
     private static final String X_SERVER_NAME = "X-SERVER-NAME";
     private static final String HOSTNAME = "HOSTNAME";
 
     public CORSFilter(){
 
-        if(null == serverName || serverName.equals("")) {
+        if(null == serverName || serverName.equals("__UNDIFINED__")) {
             serverName = System.getenv(HOSTNAME);
             if(null == serverName) {
                 try {

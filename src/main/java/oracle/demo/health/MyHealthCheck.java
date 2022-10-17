@@ -2,9 +2,9 @@ package oracle.demo.health;
 
 import java.util.logging.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.health.HealthCheck;
@@ -50,7 +50,7 @@ public class MyHealthCheck {
                 .named(nameLiveness)
                 .withData("uptime", uptime)
                 .withData("time-to-fail", timeToFail)
-                .state(0 == timeToFail ? true : timeToFail > uptime)
+                .status(0 == timeToFail ? true : timeToFail > uptime)
                 .build();
         };
     }

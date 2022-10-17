@@ -2,10 +2,10 @@ package oracle.demo.security;
 
 import java.util.Base64;
 
-import javax.inject.Inject;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,12 +20,13 @@ public class SecurityResourceTest{
     private Base64.Encoder encoder = Base64.getEncoder();
 
     @Test
-    public void testReviews(){
+    public void testSecurity(){
 
         Response response = webTarget.path("/security/basic/public")
                 .request()
                 .header(HttpHeaders.AUTHORIZATION, getBasicAuthHeaderVal("hoge", "bar"))
                 .get();
+        System.out.println(response.getEntity());
         Assertions.assertEquals(200, response.getStatus());
 
         response = webTarget.path("/security/basic/guest")

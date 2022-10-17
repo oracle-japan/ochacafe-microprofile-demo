@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 import io.helidon.common.configurable.ThreadPoolSupplier;
 

@@ -1,8 +1,8 @@
 package oracle.demo;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
@@ -12,7 +12,7 @@ import org.eclipse.microprofile.openapi.annotations.info.Info;
  */
 @ApplicationScoped
 @ApplicationPath("/")
-@OpenAPIDefinition(info = @Info(title = "Helidon MP Demo", version = "2.4.1.0"))
+@OpenAPIDefinition(info = @Info(title = "Helidon MP Demo", version = "3.x"))
 public class App extends Application {
 
 }

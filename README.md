@@ -14,7 +14,6 @@
   - [Kubernetes で Health Check を試してみる](#Kubernetes-で-Health-Check-を試してみる)
 + [Open Tracing デモ](#-open-tracing-デモ-oracledemotracing-パッケージ)
   - [OCI Application Performance Monitoring (APM) の Tracer を使う](#OCI-Application-Performance-Monitoring-APM-の-Tracer-を使う)
-+ [Open Tracing 拡張](#-opentracing-span定義のためのアノテーション-oracledemotracinginterceptor-パッケージ)
 + [Metrics デモ](#-metrics-デモ-oracledemometrics-パッケージ)
 + [Fault Tolerance デモ](#-fault-tolerance-デモ-oracledemoft-パッケージ)
 + [Open API デモ](#-open-api-oracledemocountry-パッケージ)
@@ -24,7 +23,6 @@
   - [接続先を H2 Databse から Oracle Database に変更するには？](#接続先を-H2-Databse-から-Oracle-Database-に変更するには)
 + [gRPC デモ](#-grpc-デモ-oracledemogrpc-パッケージ)
 + [Reactive Messaging デモ](#-microprofile-reactive-messaging-デモ-oracledemoreactive-パッケージ)
-  - [JMS Connector](#JMS-Connector)
 + [GraphQL デモ](#-microprofile-graphql-デモ-oracledemographql-パッケージ)
 + [Mapped Diagnostic Context (Mdc) デモ](#-Mapped-Diagnostic-Context-Mdc-デモ-oracledemologging-パッケージ)
 + [Scheduling デモ](#-Scheduling-デモ-oracledemoscheduling-パッケージ)
@@ -42,7 +40,6 @@ src/main
 │   └── oracle
 │       └── demo
 │           ├── package-info.java
-│           ├── Main.java [起動クラス]
 │           ├── App.java [JAX-RS Application]
 │           ├── greeting [Helidon MP付属のサンプルコード]
 │           │   ├── GreetingProvider.java
@@ -50,27 +47,28 @@ src/main
 │           ├── echo [JAX-RS, CDI, JAX-P, JAX-B の基本]
 │           │   └── EchoResource.java
 │           ├── country [OpenAPI]
+│           │   ├── CountryNotFoundException.java
 │           │   ├── CountryNotFoundExceptionMapper.java
 │           │   └── CountryResource.java
 │           ├── filter [JAX-RSのフィルター]
 │           │   ├── Auth.java
 │           │   ├── BasicAuthFilter.java
-│           │   ├── CORSFilter.java
 │           │   ├── CORS.java
+│           │   ├── CORSFilter.java
+│           │   ├── Debug.java
 │           │   ├── DebugFilter.java
-│           │   └── Debug.java
+│           │   └── FilterResource.java
 │           ├── ft [フォルトトレランス]
 │           │   ├── FaultToleranceResource.java
 │           │   └── FaultToleranceTester.java
 │           ├── graphql [GraphQL]
-│           │   ├── Country.java
 │           │   └── CountryGraphQLApi.java
 │           ├── grpc [拡張機能 gRPC]
 │           │   └── protobuf
 │           │       ├── GreeterSimpleService.java
 │           │       ├── GreeterService.java
 │           │       ├── GrpcResource.java
-│           │       └── helloworld
+│           │       └── helloworld [ビルド時に生成される]
 │           │           ├── GreeterGrpc.java
 │           │           └── Helloworld.java
 │           ├── health [ヘルスチェック]
@@ -82,12 +80,7 @@ src/main
 │           │   ├── Country.java
 │           │   ├── CountryResource.java
 │           │   ├── Greeting.java
-│           │   ├── JPAExampleResource.java
-│           │   └── ecid [ECID Database連携]
-│           │       ├── EcidAware.java
-│           │       ├── EcidExampleResource.java
-│           │       ├── EcidInterceptor.java
-│           │       └── Ecid.java
+│           │   └── JPAExampleResource.java
 │           ├── logging [拡張機能 Mdc]
 │           │   ├── MdcInterceptor.java
 │           │   ├── Mdc.java
@@ -105,7 +98,6 @@ src/main
 │           ├── reactive [Reactive Messaging & Connecter]
 │           │   ├── DaoEvent.java
 │           │   ├── ExecutorServiceHelper.java
-│           │   ├── ReactiveJmsResource.java
 │           │   └── ReactiveResource.java
 │           ├── restclient [RESTクライアント]
 │           │   ├── Movie.java
@@ -119,12 +111,7 @@ src/main
 │           │   ├── IdcsResource.java
 │           │   └── SecurityResource.java
 │           ├── tracing [トレーシング]
-│           │   ├── TracingResource.java
-│           │   └── interceptor [SPAN定義 Interceptor & アノテーション]
-│           │       ├── TraceInterceptor.java
-│           │       ├── Trace.java
-│           │       ├── TraceTagHolder.java
-│           │       └── TraceTag.java
+│           │   └── TracingResource.java
 │           └── cowweb [おまけ]
 │               └── CowwebResource.java
 ├── proto
@@ -143,10 +130,13 @@ src/main
     │       ├── io.helidon.microprofile.grpc.server.spi.GrpcMpExtension  [gRPC Extension設定ファイル]
     │       └── org.eclipse.microprofile.config.spi.ConfigSource [JDBC関連Config設定ファイル]
     └── WEB [静的コンテンツのフォルダー]
+        ├── graphql
+        │   └── ui
+        │       └── index.html [GraphQL UI]
         ├── apm.html
         ├── apm.js
         ├── apmrum.js.example
-        └── index.html
+        └── index.html [テストページ]
 ```
 </details>
 <br>
@@ -401,47 +391,6 @@ mvn -P tracing-oci-apm,db-h2 package # OCI APM の場合
 
 </details>
 
-
-[目次に戻る](#目次)
-<br>
-
-## § OpenTracing SPAN定義のためのアノテーション (oracle.demo.tracing.interceptor パッケージ)
-
-MicroProfileのOpenTracingの実装の多くはSPANの定義を暗黙的に行っているケースが多く、コーディングしなくてもそれなりのトレース情報が出力されるので便利です。また、明示的にSPANを定義したい場合は@Tracedアノテーション(org.eclipse.microprofile.opentracing.Traced)を使って、メソッドにトレース出力をつけることができます。しかしながら、標準機能では必ずしも欲しい情報を出力してくれるとは限りません。そこで、ここではSPANの定義処理をCDI Interceptorとして実装して、Trace出力の内容をアノテーションである程度コントロールできるようにしてみました。
-
-実装はoracle.demo.tracing.interceptor パッケージにあります。使用例はoracle.demo.jpa.CountryDAOを見て下さい。  
-`/jpa/country?error=true` をGETすると以下のメソッドが呼ばれます。
-
-```text
-$ curl localhost:8080/jpa/country?error=true
-```
-
-```java
-@Trace("JPA") 
-@TraceTag(key = "JPQL", value = "select c from Countries c")
-@TraceTag(key = "comment", value = "An error is expected by the wrong jpql statement.")
-public List<Country> getCountriesWithError(){
-    List<Country> countries = em.createQuery("select c from Countries c", Country.class).getResultList();
-    return countries;
-}
-```
-
-[Jaegerのトレーシング](doc/images/jaeger-tracing-custom.png)  でも付加情報が追加されていることが分かります。  
-
-* アノテーション  
-2つのアノテーションが利用可能です。
-
-| annotation   | 説明 |
-|--------------|------|
-| @Trace       | 必須 ; SPANを定義するInterceptorを示す |
-| @TraceTag    | オプション、key = キー, value = 値 ; SPAN内に定義するTagを追加する、複数使用可 |
-
-@Trace の パラメータ
-
-| parameter  | 説明 |
-|------------|------|
-| value      | defaul = "" ; SPAN名の接頭辞をつける、指定した場合 "<接頭辞>:<メソッド名>" となる|
-| stackTrace | default = false ; Exception発生時にtrace logにstack traceを出力するか否か |
 
 [目次に戻る](#目次)
 <br>
@@ -1072,172 +1021,6 @@ curl -X DELETE http://localhost:8080/reactive/country/86
 curl -v http://localhost:8080/jpa/country/86 # 404 Not Found
 ```
 
-### JMS Connector
-
-更に、Helidonが提供している JMS Connectorを使って WebLogic Server の JMSキューを経由したデータベースの非同期更新(Event Sourcing)処理を実装しています。このデモの実行には WebLogic Server のクライアント・ライブラリが必要なので、デフォルトで無効にしています。
-
-```bash
-# insert
-curl -X POST -H "Content-Type: application/json" http://localhost:8080/reactive/jms/country \
-   -d '[{"countryId":61,"countryName":"Australia"}]'
-curl http://localhost:8080/jpa/country/61 # {"countryId":61,"countryName":"Australia"}
-
-# update
-curl -X PUT -H "Content-Type: application/x-www-form-urlencoded" http://localhost:8080/reactive/jms/country/61 \
-  -d "name=Commonwealth of Australia"
-curl http://localhost:8080/jpa/country/61 # {"countryId":61,"countryName":"Commonwealth of Australia"}
-
-# delete
-curl -X DELETE http://localhost:8080/reactive/jms/country/61
-curl -v http://localhost:8080/jpa/country/61 # 404 Not Found
-```
-
-### JMS Connector デモを有効化するには？
-
-<details>
-<summary>1. WebLogic Server をインストールし、JMSリソースを構成する</summary>
-
-適当なキューを定義して下さい。  
-後述する「テスト用の WebLogic Server Docker インスタンスの作成」の項の手順に従えば、
-このデモ用の設定がされた Dockerコンテナ・ベースの WebLogic Server を準備することができます。
-</details>
-
-<details>
-<summary>2. Mavenのローカル・リポジトリを作成して、WebLogic Server のクライアント・ライブラリ(wlthint3client.jar)をデプロイする</summary>
-
-クライアント・ライブラリはパブリックMavenリポジトリからは入手できませんので、ローカル・リポジトリをマニュアルで作成します。
-`create-local-repo.sh` を編集してこのシェルを実行してください。`m2repo`フォルダにjarファイルがデプロイされます。  
-wlthint3client.jar は後述する WebLogic Server のコンテナ・イメージから入手するのが簡単かもしれません。
-
-```bash
-WL_HOME=${HOME}/opt/wls1411
-WL_T3CLIENT_JAR=${WL_HOME}/wlserver/server/lib/wlthint3client.jar # これを正しいパスに
-
-mkdir -p m2repo
-
-mvn deploy:deploy-file \
- -Dfile=$WL_T3CLIENT_JAR \
- -Durl=file:./m2repo \
- -DgroupId=oracle.weblogic \
- -DartifactId=wlthint3client \
- -Dversion=14.1.1.0.0 \
- -Dpackaging=jar \
- -DgeneratePom=true
-```
-</details>
-
-<details>
-<summary>3. Javaソースのコメントアウトを外す</summary>
-  
- - src/main/java/oracle/demo/reactive/ReactiveJmsResource.java
-```java
-    //@Outgoing("to-jms")
-    public Publisher<Message<String>> preparePublisher() {
-        return ReactiveStreams.fromPublisher(FlowAdapters.toPublisher(publisher)).buildRs();
-    }
-
-    //@Incoming("from-jms")
-    @Acknowledgment(Acknowledgment.Strategy.MANUAL)
-    public CompletionStage<?> consume(Message<String> message) {
-```
-
- - src/test/java/oracle/demo/reactive/ReactiveJmsResourceTest.java
-```java
-//@HelidonTest
-public class ReactiveJmsResourceTest{
-
-    @Inject private WebTarget webTarget;
-
-    //@Test
-    public void testCRUDCountry(){
-```
-</details>
-
-<details>
-<summary>4. src/main/resources/application.yaml を編集して、WebLogic Server の接続設定を行う</summary>
-
-```yaml
-# Reactive Messaging
-mp.messaging:
-
-  incoming.from-jms:
-    connector: helidon-jms
-    destination: ./SystemModule-0!Queue-0 # 確認
-    type: queue
-
-  outgoing.to-jms:
-    connector: helidon-jms
-    destination: ./SystemModule-0!Queue-0 # 確認
-    type: queue
-
-  connector:
-    helidon-jms:
-      user: weblogic # 確認
-      password: OCHaCafe6834 # 確認
-      jndi:
-        jms-factory: weblogic.jms.ConnectionFactory
-        env-properties:
-          java.naming:
-            factory.initial: weblogic.jndi.WLInitialContextFactory
-            provider.url: t3://localhost:7001 # 確認
-```
-</details>
-
-<details>
-<summary>5. weblogic プロファイルを指定して Maven ビルドする</summary>
-
-WebLogic クライアントライブラリを依存関係に含めます。Maven の仕様(プロファイルを指定するとデフォルト設定が効かなくなる)上、JPA のデモで使用するデータベースのプロファイルも同時に指定する必要があります。
-
-```bash
-$ mvn package -P db-h2,weblogic -DskipTests=true
-# or 
-$ mvn package -P db-oracale,weblogic -DskipTests=true
-```
-</details>
-<br>
-
-### WebLogic Server のテスト用 Docker インスタンスを作成するには？ 
-
-JMS Connector のデモに使うための設定済み WebLogic Server インスタンスを Docker コンテナで実行するためのスクリプトを用意しています。
-
-<details>
-<summary>0. (必要に応じて) Oracle コンテナ・レジストリへのログイン</summary>
-  
-事前に `docker login container-registry.oracle.com` を済ませておいて下さい。  
-[ポータル](https://container-registry.oracle.com/) にてソフトウェア利用許諾契約 (Oracle Standard Terms and Restrictions) の確認が必要です。
-</details>
-
-<details>
-<summary>1. demo/weblogic/start-weblogic.sh の実行</summary>
-  
-WebLogic Server の公式コンテナ・イメージを取得して起動します。  
- `docker logs`を確認してサーバーが起動するまで待機して下さい。`<Server state changed to RUNNING.>` が表示されたらOKです。
-
-```
-$ docker logs -f wls1411
-...
-...
-<Jan 6, 2021, 3:29:24,496 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000331> <Started the WebLogic Server Administration Server "AdminServer" for domain "base_domain" running in development mode.> 
-<Jan 6, 2021, 3:29:24,611 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000360> <The server started in RUNNING mode.> 
-<Jan 6, 2021, 3:29:24,651 PM Greenwich Mean Time> <Notice> <WebLogicServer> <BEA-000365> <Server state changed to RUNNING.> 
-```
-</details>
-
-<details>
-<summary>2. demo/weblogic/config-jms.sh の実行</summary>
-  
-WebLogic Server Deploy Tooling を使ってJMSリソースを追加し、サーバーを再起動します。
-
-尚、デモの実行に必要な wlthint3client.jar は、以下のようにコンテナから取得することが可能です。
-
-```bash
-docker cp wls1411:/u01/oracle/wlserver/server/lib/wlthint3client.jar wlthint3client.jar
-```
-</details>
-
-[目次に戻る](#目次)
-<br>
-
 ## § MicroProfile GraphQL デモ (oracle.demo.graphql パッケージ)
 
 JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをMicroProfile GraphQL仕様にしたものを追加しました。  
@@ -1338,7 +1121,7 @@ logging.properties では HelidonConsoleHandler を使い、%X{<キー>} で Mdc
 
 ```conf
 handlers=io.helidon.logging.jul.HelidonConsoleHandler
-java.util.logging.SimpleFormatter.format=!thread! ECID\{%X{ECID}\} %5$s%6$s%n
+java.util.logging.SimpleFormatter.format=!thread! ECID\{%X{ECID}\}: %5$s%6$s%n
 ```
 
 2つのエンドポイントに GET してみます。

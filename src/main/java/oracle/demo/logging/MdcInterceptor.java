@@ -6,14 +6,15 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import javax.annotation.Priority;
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InvocationContext;
+import jakarta.annotation.Priority;
+import jakarta.inject.Inject;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InvocationContext;
 
 import io.helidon.logging.common.HelidonMdc;
 import io.opentracing.Span;
+import io.opentracing.noop.NoopSpan;
 
 /**
  * Set/unset Mdc value during invocation of target method 
@@ -33,7 +34,7 @@ public class MdcInterceptor {
     @AroundInvoke
     public Object obj(InvocationContext ic) throws Exception{
 
-        //System.out.println(" ===== MdcInterceptor =====");
+        System.out.println(" ===== MdcInterceptor =====");
         final Method method = ic.getMethod();
         final Mdc mdc = method.getAnnotation(Mdc.class);
         final String key = mdc.key();
@@ -45,7 +46,7 @@ public class MdcInterceptor {
         if(value.isEmpty()){
             // get open tracing id if available
             final Span span = tracer.activeSpan();
-            final String id = Objects.nonNull(span) ? span.context().toTraceId() : UUID.randomUUID().toString();
+            final String id = Objects.nonNull(span) && !(span instanceof NoopSpan) ? span.context().toTraceId() : UUID.randomUUID().toString();
             HelidonMdc.set(key, id);
             logger.fine(String.format("Set Mdc: %s=%s", key, uuid));
         }
