@@ -143,6 +143,8 @@ src/main
 
 ## § ビルド方法
 
+Java SE 17 が必要です。
+
 ```bash
 # for the first time, generate java source files for gRPC by compiling proto file, then package
 mvn clean -P protoc initialize && mvn package -DskipTests=true
