@@ -1,9 +1,11 @@
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/oracle-japan/ochacafe-microprofile-demo)
 
-# [Helidon](https://helidon.io/) を使って [Eclipse MicroProfile](https://microprofile.io/) の仕様や拡張機能を確認するデモ
+# [Eclipse MicroProfile](https://microprofile.io/) の仕様や [Helidon](https://helidon.io/) の拡張機能を確認するデモ
 
 [OCHaCafe 2 - #4 Cloud Native時代のモダンJavaの世界](https://ochacafe.connpass.com/event/155389/) のために作成したデモですが、随時実装を追加しています。  
 [**セッション・スライドはこちら**](http://tiny.cc/ochacafe-cn-java-slides)
+
+**※ ベースを 3.x 系にアップグレードしました。2.x系は `helidon-2.x` ブランチでメンテナンスしていきます。**
 
 ## 目次
 
@@ -1557,7 +1559,7 @@ $ curl "localhost:8080/cowsay/think?message=Hello%21&cowfile=moose"
 <br>
 
 ---
-_Copyright © 2019-2021, Oracle and/or its affiliates. All rights reserved._
+_Copyright © 2019-202, Oracle and/or its affiliates. All rights reserved._
 
 
 
