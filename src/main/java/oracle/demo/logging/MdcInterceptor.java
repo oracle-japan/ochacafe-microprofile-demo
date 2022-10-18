@@ -5,13 +5,14 @@ import java.security.SecureRandom;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
-import jakarta.xml.bind.DatatypeConverter;
 import io.helidon.logging.common.HelidonMdc;
 import io.opentracing.Span;
 import io.opentracing.noop.NoopSpan;
@@ -67,9 +68,16 @@ public class MdcInterceptor {
          public static String getHex(int len){
             byte[] bytes = new byte[len];
             random.nextBytes(bytes);
-            return DatatypeConverter.printHexBinary(bytes);
+
+            return IntStream.range(0, bytes.length)
+                    .mapToObj(i -> String.format("%02X", Byte.toUnsignedInt(bytes[i])).toLowerCase())
+                    .collect(Collectors.joining(""));
         }
     }
+
+    //public static void main(String[] args){
+    //    IntStream.range(0, 10).mapToObj(i -> RandomString.getHex(8)).forEach(System.out::println);;
+    //}
 
 
 }
