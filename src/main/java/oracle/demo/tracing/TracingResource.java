@@ -15,6 +15,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * tracing demo
@@ -38,7 +39,6 @@ public class TracingResource{
             values.forEach(val -> logger.info(String.format("Header: %s=%s", key, val)));
         });
 
-        boolean failed = false;
         for(TraceOrder order : orders){
 
             // first handle calls
@@ -51,6 +51,8 @@ public class TracingResource{
                     }else if(call.method.equalsIgnoreCase("POST")){
                         response = client.target(call.endpoint).request()
                         .post(Entity.entity(call.body, MediaType.APPLICATION_JSON));
+                    }else{
+                        return Response.status(Status.BAD_REQUEST).entity("Unsupported method: " + call.method).build();
                     }
                     logger.info("Response: " + response.toString());
                     String responseBody = response.readEntity(String.class);
