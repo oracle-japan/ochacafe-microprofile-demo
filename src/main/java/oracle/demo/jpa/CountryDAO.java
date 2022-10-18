@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

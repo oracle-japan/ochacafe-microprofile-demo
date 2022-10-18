@@ -1,19 +1,14 @@
 package oracle.demo.jpa;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
-import io.helidon.config.mp.MpConfigSources;
 import io.helidon.config.yaml.mp.YamlConfigSourceProvider;
-import io.helidon.config.yaml.mp.YamlMpConfigSource;
 
 /**
  * Dynamically configure "DemoDataSource" from "DEMO_DATASOURCE"
