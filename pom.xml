@@ -195,10 +195,14 @@
             <version>${grpc.version}</version>
         </dependency>
 
-        <!-- support Reactive Messaging / Kafka Connector -->
+        <!-- support Reactive Messaging / Mock Connector -->
         <dependency>
             <groupId>io.helidon.microprofile.messaging</groupId>
             <artifactId>helidon-microprofile-messaging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.helidon.messaging.mock</groupId>
+            <artifactId>helidon-messaging-mock</artifactId>
         </dependency>
 
         <!-- support Mapped Diagnostic Context -->
@@ -430,6 +434,18 @@
                     <url>https://objectstorage.us-ashburn-1.oraclecloud.com/n/idhph4hmky92/b/prod-agent-binaries/o</url>
                 </repository>
             </repositories>
+        </profile>
+
+        <!-- Connectors -->
+        <profile>
+            <!-- Kafka Connector -->
+            <id>kafka</id>
+            <dependencies>
+                <dependency>
+                    <groupId>io.helidon.messaging.kafka</groupId>
+                    <artifactId>helidon-messaging-kafka</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
     </profiles>

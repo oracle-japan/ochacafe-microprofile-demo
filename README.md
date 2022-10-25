@@ -100,7 +100,8 @@ src/main
 │           ├── reactive [Reactive Messaging & Connecter]
 │           │   ├── DaoEvent.java
 │           │   ├── ExecutorServiceHelper.java
-│           │   └── ReactiveResource.java
+│           │   ├── ReactiveResource.java
+│           │   └── ConnectorResource.java
 │           ├── restclient [RESTクライアント]
 │           │   ├── Movie.java
 │           │   ├── MovieReviewService.java
@@ -1006,8 +1007,8 @@ pom.xml の通常ビルドフェーズとは独立してprotoファイルのコ�
 
 ## § MicroProfile Reactive Messaging デモ (oracle.demo.reactive パッケージ)
 
-JPA/JDBC経由でデータベースにアクセスするデモ(oracle.demo.jpaパッケージ)のバリエーションとして、MicroProfile Reactive Messaging を使ったデータベースの非同期更新(Event Sourcing)処理を実装しています。RESTでリクエストを受け付けた後、非同期更新イベントを発行します。  
-[データベースへのアクセスパターン](#データベースへのアクセスパターン) を参照してください。
+JPA/JDBC経由でデータベースにアクセスするデモ(oracle.demo.jpaパッケージ)のバリエーションとして、[MicroProfile Reactive Messaging](https://download.eclipse.org/microprofile/microprofile-reactive-messaging-2.0/microprofile-reactive-messaging-spec-2.0.html) を使ったデータベースの非同期更新(Event Sourcing)処理を実装しています。RESTでリクエストを受け付けた後、非同期更新イベントを発行します。  
+
 
 ```bash
 # insert
@@ -1024,6 +1025,73 @@ curl http://localhost:8080/jpa/country/86 # {"countryId":86,"countryName":"Peopl
 curl -X DELETE http://localhost:8080/reactive/country/86
 curl -v http://localhost:8080/jpa/country/86 # 404 Not Found
 ```
+
+ReactiveResource.Java が上記の実装ですが、 @Outgoing("dao-event") アノテーションがついたメソッド（メッセージを作成する役割）と @Incoming("dao-event") アノテーションがついたメソッド（メッセージを消費する役割）が "dao-event" チャネルを介してメッセージ (DaoEvent) を非同期に送受信しています。
+
+```
+┌────────────────────────┐                              ┌────────────────────────┐
+│ @Outgoing("dao-event") │                              │ @Incoming("dao-event") │
+│ preparePublisher()     │ --- (Reactive Messaging) --- │ consume()              │
+└────────────────────────┘                              └────────────────────────┘
+```
+
+
+### Kafka Connector を使った非同期メッセージング
+
+MicroProfile Reactive Messaging には Connector という仕様があります。既に出来上がった Connector を使って様々な外部システムと簡単に連携できますし、また自分で新しい Connector を開発して提供することも可能です。Helidon では Apache Kafka、Java Messaging Service (JMS)、Oracle Database Advanced Queueing (AQ) に対応した Connector を提供しています。
+ここでは、Kafka Connector を使って OCI Streaming の Kafak 互換API を介したメッセージの送受信を行ってみます。
+前述のデモでは非同期更新イベントを JVM 内で受け渡ししていましたが、このデモでは更新イベントの送受信は外部のメッセージ・ブローカーで行われます。送信側と受信側は異なる JVM 上に存在して構いません。
+
+
+```
+┌────────────────────────────┐               ┌───────┐               ┌───────────────────────────┐
+│ @Outgoing("connector-out") │     Kafka     │ Kafka │     Kafka     │ @Incoming("connector-in") │
+│ preparePublisher()         │ - Connector - │       │ - Connector - │ consume()                 │
+└────────────────────────────┘               └───────┘               └───────────────────────────┘
+```
+
+
+まず、application.yaml を更新します。デフォルトの状態では、Mock Connector を使う設定になっていますが、これを Kafka Connector に変更し、OCI Streaming の [Kafka 互換 API](https://docs.oracle.com/ja-jp/iaas/Content/Streaming/Tasks/kafkacompatibility.htm) に接続できるようにパラメータを設定します。
+
+```yaml
+# Reactive Messaging - Kafka connector
+mp.messaging:
+  incoming.connector-in:
+    #connector: helidon-mock
+    connector: helidon-kafka
+    topic: stream01 # same as connector-out
+outgoing.connector-out:
+    #connector: helidon-mock
+    connector: helidon-kafka
+    topic: stream01 # same as connector-in
+  connector:
+    helidon-kafka:
+      bootstrap.servers: "streaming.us-phoenix-1.oci.oraclecloud.com:9092" # change endpoint as required
+      sasl.jaas.config: ${SASL_JAAS_CONFIG}
+```
+
+ビルドする際は、Kafka Connector 関連のライブラリが含まれるように pom.xml 内の `kafka` プロファイルを追加して下さい。
+
+```
+mvn package -Pdb-h2,kafka -DskipTests=true
+```
+
+```bash
+# insert
+curl -X POST -H "Content-Type: application/json" http://localhost:8080/connector/country \
+   -d '[{"countryId":86,"countryName":"China"}]'
+curl http://localhost:8080/jpa/country/86 # {"countryId":86,"countryName":"China"}
+
+# update
+curl -X PUT -H "Content-Type: application/x-www-form-urlencoded" http://localhost:8080/connector/country/86 \
+  -d "name=People's Republic of China"
+curl http://localhost:8080/jpa/country/86 # {"countryId":86,"countryName":"People's Republic of China"}
+
+# delete
+curl -X DELETE http://localhost:8080/connector/country/86
+curl -v http://localhost:8080/jpa/country/86 # 404 Not Found
+```
+
 
 ## § MicroProfile GraphQL デモ (oracle.demo.graphql パッケージ)
 
@@ -1089,15 +1157,6 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 
 クエリを実行する UI も提供しています。ブラウザから `http://localhost:8080/web/graphql/ui/` にアクセスして下さい。
 
-
-### データベースへのアクセスパターン
-
-結果、JDBC/JPAを使ったデータベースへのアクセスは、以下のバリエーションを実装しています。
-+ REST経由の同期参照＆更新処理
-+ REST経由 MicroProfile Reactive Messaging を使った非同期更新(Event Sourcing)処理
-+ MicroProfile GraphQL を使った Query & Mutation 処理 
-
-![データベースへのアクセス・パターン](doc/images/microprofile-demo-crud.png)
 
 [目次に戻る](#目次)
 <br>

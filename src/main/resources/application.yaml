@@ -65,3 +65,31 @@ mp.lra:
   #participant.url: http://localhost:8080
   propagation.active: true
   coordinator.headers-propagation.prefix: ["x-b3-", "oracle-tmm-", "authorization", "refresh-"]
+
+# Reactive Messaging - Kafka connector
+mp.messaging:
+  incoming.connector-in:
+    connector: helidon-mock
+    #connector: helidon-kafka
+    topic: stream01
+    auto.offset.reset: latest
+    enable.auto.commit: true
+    group.id: GROUP_01
+  outgoing.connector-out:
+    connector: helidon-mock
+    #connector: helidon-kafka
+    topic: stream01
+    #backpressure.size: 9223372036854775807
+
+  connector:
+    helidon-kafka:
+      bootstrap.servers: "streaming.us-phoenix-1.oci.oraclecloud.com:9092" # change endpoint as appropriate
+      sasl.mechanism: PLAIN
+      security.protocol: SASL_SSL
+      sasl.jaas.config: ${SASL_JAAS_CONFIG}
+      key.serializer: org.apache.kafka.common.serialization.StringSerializer
+      value.serializer: org.apache.kafka.common.serialization.StringSerializer
+      key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+SASL_JAAS_CONFIG: "This can be overwritten by an environment variable"
