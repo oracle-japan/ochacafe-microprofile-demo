@@ -376,7 +376,7 @@
         <profile>
             <id>db-oracle</id>
             <properties>
-                <oracle.jdbc.version>21.6.0.0.1</oracle.jdbc.version>
+                <oracle.jdbc.version>21.7.0.0</oracle.jdbc.version>
             </properties>
             <dependencies>
                 <dependency>
