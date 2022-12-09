@@ -4,7 +4,7 @@ server:
   static.classpath:
     location: "/WEB"
     # this is optional, defaults to "/"
-    context: "/web"
+    #context: "/"
     welcome: "index.html"
 
 grpc:

@@ -1155,7 +1155,7 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 ```
 </details>
 
-クエリを実行する UI も提供しています。ブラウザから `http://localhost:8080/web/graphql/ui/` にアクセスして下さい。
+クエリを実行する UI も提供しています。ブラウザから `http://localhost:8080/graphql/ui/` にアクセスして下さい。
 
 
 [目次に戻る](#目次)
