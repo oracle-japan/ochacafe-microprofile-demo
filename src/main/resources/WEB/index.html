@@ -17,7 +17,7 @@
 
     <!-- OCI APM -->
     <script src="apmrum.js?ver=1.0.0"></script>
-    <script async crossorigin="anonymous" src="https://<xxxxxx>.apm-agt.<region>.oci.oraclecloud.com/static/jslib/apmrum.min.js"></script>
+    <script async crossorigin="anonymous" src="https://aaaac6k7z5qgeaaaaaaaaaagfu.apm-agt.us-ashburn-1.oci.oraclecloud.com/static/jslib/apmrum.min.js"></script>
     <script src="apm.js?ver=1.0.0"></script>
   
     <title>Helidon MicroProfile Demo</title>
@@ -37,6 +37,9 @@
             <div class="navbar-nav ms-auto">
               <a class="nav-link" href="./graphql/ui">GraphQL UI</a>
             </div>
+            <div class="navbar-nav">
+              <a class="nav-link" href="./openapi-ui/index.html">OpenAPI UI</a>
+            </div>
           </div>
 
         </div>
@@ -45,7 +48,6 @@
       <div class="row">
         <p></p>
       </div>
-
 
       <div class="row">
         <div class="col">
@@ -61,9 +63,11 @@
               </button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 <li><a class="dropdown-item" href="#" id="button_health" >/health</a></li>
+                <li><a class="dropdown-item" href="#" id="button_metrics" >/metrics</a></li>
                 <li><a class="dropdown-item" href="#" id="button_openapi">/openapi</a></li>
                 <li><a class="dropdown-item" href="#" id="button_jpa_error">/jpa/country</a></li>
                 <li><a class="dropdown-item" href="#" id="button_tracing">/tracing/invoke</a></li>
+                <li><a class="dropdown-item" href="#" id="button_lra_start">/lra/start</a></li>
               </ul>
             </div>
 

@@ -14,7 +14,7 @@
 
     <properties>
         <grpc.version>1.45.1</grpc.version>
-        <apm.tracer.version>[1.5.2118,)</apm.tracer.version>
+        <apm.tracer.version>[1.8.3326,)</apm.tracer.version>
     </properties>
 
     <dependencies>
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>io.helidon.microprofile</groupId>
             <artifactId>helidon-microprofile-security</artifactId>
-          </dependency>
+        </dependency>
 
         <dependency>
             <groupId>jakarta.json.bind</groupId>
@@ -171,6 +171,10 @@
 
         <!-- support tracing, see profiles for tracing options -->
         <dependency>
+            <groupId>io.helidon.tracing</groupId>
+            <artifactId>helidon-tracing-opentracing</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.helidon.microprofile.tracing</groupId>
             <artifactId>helidon-microprofile-tracing</artifactId>
         </dependency>
@@ -232,8 +236,8 @@
         <dependency>
             <groupId>io.helidon.lra</groupId>
             <artifactId>helidon-lra-coordinator-narayana-client</artifactId>
-        </dependency>        
-        
+        </dependency>
+
         <!-- cowweb -->
         <dependency>
             <groupId>com.github.ricksbrown</groupId>
@@ -416,14 +420,16 @@
             <!-- OCI Application Performance Monitoring -->
             <id>tracing-oci-apm</id>
             <dependencies>
+                <!--
                 <dependency>
                     <groupId>com.oracle.apm.agent.java</groupId>
                     <artifactId>apm-java-agent-tracer</artifactId>
                     <version>${apm.tracer.version}</version>
                 </dependency>
+                -->
                 <dependency>
                     <groupId>com.oracle.apm.agent.java</groupId>
-                    <artifactId>apm-java-agent-helidon</artifactId>
+                    <artifactId>apm-java-agent-helidon3</artifactId>
                     <version>${apm.tracer.version}</version>
                 </dependency>
             </dependencies>
@@ -444,6 +450,18 @@
                 <dependency>
                     <groupId>io.helidon.messaging.kafka</groupId>
                     <artifactId>helidon-messaging-kafka</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- OpenAPI Swagger UI -->
+        <profile>
+            <id>openapi-ui</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.microprofile-ext.openapi-ext</groupId>
+                    <artifactId>openapi-ui</artifactId>
+                    <version>2.0.0</version>
                 </dependency>
             </dependencies>
         </profile>
