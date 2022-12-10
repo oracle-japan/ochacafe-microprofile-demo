@@ -9,7 +9,7 @@
     </parent>
     <groupId>me.opc-helidon</groupId>
     <artifactId>helidon-demo-mp</artifactId>
-    <version>3.0.2.1</version>
+    <version>3.0.2.2</version>
     <name>${project.artifactId}</name>
 
     <properties>
