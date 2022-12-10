@@ -1,5 +1,0 @@
-window.apmrum = (window.apmrum || {});
-window.apmrum.serviceName='helidon demo browser';
-window.apmrum.webApplication='HelidonWebapp';
-window.apmrum.ociDataUploadEndpoint='<please set value here>';
-window.apmrum.OracleAPMPublicDataKey='<please set value here>';
