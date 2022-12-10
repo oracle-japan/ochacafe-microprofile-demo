@@ -13,10 +13,12 @@ import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import io.helidon.microprofile.tests.junit5.AddConfig;
 import io.helidon.microprofile.tests.junit5.HelidonTest;
 import oracle.demo.jpa.Country;
 
 @HelidonTest
+@AddConfig(key = "tracing.enabled", value = "false")
 public class ReactiveResourceTest{
 
     @Inject private WebTarget webTarget;

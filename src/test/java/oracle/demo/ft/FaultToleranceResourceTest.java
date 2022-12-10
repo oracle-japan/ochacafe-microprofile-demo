@@ -11,9 +11,11 @@ import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import io.helidon.microprofile.tests.junit5.AddConfig;
 import io.helidon.microprofile.tests.junit5.HelidonTest;
 
 @HelidonTest
+@AddConfig(key = "tracing.enabled", value = "false")
 public class FaultToleranceResourceTest{
 
     @Inject private WebTarget webTarget;

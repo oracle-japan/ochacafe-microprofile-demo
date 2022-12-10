@@ -14,6 +14,7 @@ import io.helidon.microprofile.tests.junit5.AddConfig;
 import io.helidon.microprofile.tests.junit5.HelidonTest;
 
 @HelidonTest
+@AddConfig(key = "tracing.enabled", value = "false")
 @AddConfig(key = "demo.healthcheck.time-to-fail", value = "60") // seconds, need to keep enough time to start-up
 public class HealthCheckResourceTest{
 
