@@ -46,24 +46,16 @@ $(function () {
     $('#pre1').text('');
   });
 
+
+  $('.dropdown-item').click(function () {
+    console.log(this);
+    $('#path').val($(this).text());
+  });
+
+/*
   $('#button_health').click(function () {
     $('#path').val($('#button_health').text());
   });
-
-  $('#button_openapi').click(function () {
-    $('#path').val($('#button_openapi').text());
-  });
-
-  $('#button_jpa').click(function () {
-    $('#path').val($('#button_jpa').text());
-  });
-
-  $('#button_jpa_error').click(function () {
-    $('#path').val($('#button_jpa_error').text());
-  });
-
-  $('#button_tracing').click(function () {
-    $('#path').val($('#button_tracing').text());
-  });
+*/
 
 });
