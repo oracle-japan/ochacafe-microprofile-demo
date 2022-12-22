@@ -115,9 +115,12 @@ public class LRAMain {
             URI target = uriInfo.getBaseUriBuilder().path("lra-main/start").queryParam("raise-error", raiseError).build();
             logger.info("Calling LRA initiator: " + target);
     
+            // TODO: forward header values "x-b3-", "oracle-tmm-", "authorization", "refresh-"
             Response response = client.target(target).request().post(Entity.json(urls));
             logger.info("LRA initiator returned with status " + response.getStatus());
     
+            // TODO: handle error case
+
             String lraId = response.getHeaderString(LRA_HTTP_CONTEXT_HEADER);
             String status = statusMonitor.getStatus(URI.create(lraId), 10*1000);
             logger.log(Level.INFO, "LRA id: {0} final status \"{1}\"", new Object[]{lraId, status});
