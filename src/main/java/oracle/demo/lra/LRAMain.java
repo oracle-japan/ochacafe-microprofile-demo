@@ -19,9 +19,11 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
@@ -108,28 +110,45 @@ public class LRAMain {
     @POST
     @Path("monitor")
     @Produces(MediaType.TEXT_PLAIN)
-    public void monitor(String[] urls, @QueryParam("raise-error") boolean raiseError, @Context UriInfo uriInfo, @Suspended AsyncResponse asyncResponse){
+    public void monitor(String[] urls, 
+        @QueryParam("raise-error") boolean raiseError, 
+        @Context UriInfo uriInfo, 
+        @Context HttpHeaders httpHeaders,
+        @Suspended AsyncResponse asyncResponse){
         
 
         new Thread(() -> {
             URI target = uriInfo.getBaseUriBuilder().path("lra-main/start").queryParam("raise-error", raiseError).build();
             logger.info("Calling LRA initiator: " + target);
     
-            // TODO: forward header values "x-b3-", "oracle-tmm-", "authorization", "refresh-"
-            Response response = client.target(target).request().post(Entity.json(urls));
+            // forward header values "x-b3-", "oracle-tmm-", "authorization", "refresh-"
+            //Response response = client.target(target).request().post(Entity.json(urls));
+            Builder builder = client.target(target).request();
+            httpHeaders.getRequestHeaders().entrySet().stream().forEach(h -> {
+                final String key = h.getKey().toLowerCase();
+                if(key.startsWith("x-b3-") || key.startsWith("oracle-tmm-")
+                     || key.startsWith("authorization") || key.startsWith("refresh-")){
+                        builder.header(h.getKey(), h.getValue());
+                }
+            });
+            builder.header(LRA_HTTP_CONTEXT_HEADER, asyncResponse);
+            Response response = builder.post(Entity.json(urls));
             logger.info("LRA initiator returned with status " + response.getStatus());
     
-            // TODO: handle error case
+            // handle error case
+            if(response.getStatus() / 100 != 2){
+                Response acyncRes = Response.status(Status.INTERNAL_SERVER_ERROR).entity("Failed to forward request: " + response.getStatus()).build();
+                asyncResponse.resume(acyncRes);
+            }else{
+                String lraId = response.getHeaderString(LRA_HTTP_CONTEXT_HEADER);
+                String status = statusMonitor.getStatus(URI.create(lraId), 10*1000);
+                logger.log(Level.INFO, "LRA id: {0} final status \"{1}\"", new Object[]{lraId, status});
+                Response acyncRes = status.equals(LRAStatus.Closed.name()) ?
+                    Response.ok(status).build() :
+                    Response.status(Status.INTERNAL_SERVER_ERROR).entity(status).build();
+                asyncResponse.resume(acyncRes);
+            }
 
-            String lraId = response.getHeaderString(LRA_HTTP_CONTEXT_HEADER);
-            String status = statusMonitor.getStatus(URI.create(lraId), 10*1000);
-            logger.log(Level.INFO, "LRA id: {0} final status \"{1}\"", new Object[]{lraId, status});
-    
-            Response acyncRes = status.equals(LRAStatus.Closed.name()) ?
-                Response.ok(status).build() :
-                Response.status(Status.INTERNAL_SERVER_ERROR).entity(status).build();
-
-            asyncResponse.resume(acyncRes);
         }).start();
 
     }
