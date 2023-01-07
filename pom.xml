@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.helidon.applications</groupId>
@@ -7,9 +9,10 @@
         <version>3.1.0</version>
         <relativePath />
     </parent>
+
     <groupId>me.opc-helidon</groupId>
     <artifactId>helidon-demo-mp</artifactId>
-    <version>3.1.0.0</version>
+    <version>3.1.0.1</version>
     <name>${project.artifactId}</name>
 
     <properties>
@@ -346,7 +349,9 @@
                                 <configuration>
                                     <target>
                                         <echo message="copy protobuf generated files to src" />
-                                        <delete dir="src/main/java/oracle/demo/grpc/protobuf/helloworld" verbose="true" />
+                                        <delete
+                                            dir="src/main/java/oracle/demo/grpc/protobuf/helloworld"
+                                            verbose="true" />
                                         <copy todir="src/main/java" overwrite="no">
                                             <fileset dir="target/generated-sources/protobuf/java" />
                                             <fileset dir="target/generated-sources/protobuf/grpc-java" />
@@ -423,8 +428,8 @@
                 <!--
                 <dependency>
                     <groupId>com.oracle.apm.agent.java</groupId>
-                    <artifactId>apm-java-agent-tracer</artifactId>
-                    <version>${apm.tracer.version}</version>
+                <artifactId>apm-java-agent-tracer</artifactId>
+                <version>${apm.tracer.version}</version>
                 </dependency>
                 -->
                 <dependency>
@@ -454,14 +459,13 @@
             </dependencies>
         </profile>
 
-        <!-- OpenAPI Swagger UI -->
+        <!-- OpenAPI UI -->
         <profile>
             <id>openapi-ui</id>
             <dependencies>
                 <dependency>
-                    <groupId>org.microprofile-ext.openapi-ext</groupId>
-                    <artifactId>openapi-ui</artifactId>
-                    <version>2.0.0</version>
+                    <groupId>io.helidon.integrations.openapi-ui</groupId>
+                    <artifactId>helidon-integrations-openapi-ui</artifactId>
                 </dependency>
             </dependencies>
         </profile>
