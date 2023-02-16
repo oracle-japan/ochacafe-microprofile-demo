@@ -12,7 +12,7 @@
 
     <groupId>me.opc-helidon</groupId>
     <artifactId>helidon-mp-demo</artifactId>
-    <version>3.1.0.1</version>
+    <version>3.1.0.2</version>
     <name>${project.artifactId}</name>
 
     <properties>
