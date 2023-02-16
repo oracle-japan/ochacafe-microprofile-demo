@@ -53,6 +53,6 @@ public class FaultToleranceResource {
         log("[END   /ft/circuit-breaker]");
         return "OK";
     }
-    // java -cp ./target/helidon-demo-mp.jar oracle.demo.ft.FaultToleranceTester <n>
+    // java -cp ./target/helidon-mp-demo.jar oracle.demo.ft.FaultToleranceTester <n>
 }
 

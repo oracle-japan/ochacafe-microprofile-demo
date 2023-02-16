@@ -1,9 +1,9 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: helidon-demo-mp-lb
+  name: helidon-mp-demo-lb
   labels:
-    app: helidon-demo-mp
+    app: helidon-mp-demo
   annotations:
     service.beta.kubernetes.io/oci-load-balancer-shape: 100Mbps # 100Mbps, 400Mbps, 8000Mbps
   namespace: demo
@@ -14,14 +14,14 @@ spec:
     port: 80
     targetPort: 8080
   selector:
-    app: helidon-demo-mp
+    app: helidon-mp-demo
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: helidon-demo-mp-np
+  name: helidon-mp-demo-np
   labels:
-    app: helidon-demo-mp
+    app: helidon-mp-demo
   namespace: demo
 spec:
   type: NodePort
@@ -31,5 +31,5 @@ spec:
     targetPort: 8080
     nodePort: 30880
   selector:
-    app: helidon-demo-mp
+    app: helidon-mp-demo
 ---

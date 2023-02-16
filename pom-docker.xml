@@ -4,12 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>oracle.demo</groupId>
-    <artifactId>helidon-demo-mp-docker-build</artifactId>
+    <artifactId>helidon-mp-demo-docker-build</artifactId>
     <version>3.1.0.1</version>
-    <name>helidon-demo-mp-docker-build</name>
+    <name>helidon-mp-demo-docker-build</name>
 
     <properties>
-        <docker.image>helidon-demo-mp</docker.image>
+        <docker.image>helidon-mp-demo</docker.image>
         <docker.image.version>${project.version}</docker.image.version>
         <docker.repo.prefix></docker.repo.prefix>
         <docker.repo.remote.prefix>${env.REMOTE_REPO_PREFIX}</docker.repo.remote.prefix>

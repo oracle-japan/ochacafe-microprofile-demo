@@ -3,18 +3,18 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: helidon-demo-mp-0
+  name: helidon-mp-demo-0
   labels:
-    app: helidon-demo-mp-0
+    app: helidon-mp-demo-0
   namespace: demo
 spec:
   containers:
   - name: api-helidon-container
-    image: ${REMOTE_REPO_PREFIX}helidon-demo-mp:latest
+    image: ${REMOTE_REPO_PREFIX}helidon-mp-demo:latest
     imagePullPolicy: Always
     env:
     - name: tracing.service
-      value: helidon-demo-mp-0
+      value: helidon-mp-demo-0
     - name: mp.config.profile
       value: k8s
     ports:
@@ -25,19 +25,19 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: helidon-demo-mp-1
+  name: helidon-mp-demo-1
   labels:
-    app: helidon-demo-mp-1
+    app: helidon-mp-demo-1
   namespace: demo
 spec:
   dnsPolicy: ClusterFirst
   containers:
   - name: api-helidon-container
-    image: ${REMOTE_REPO_PREFIX}helidon-demo-mp:latest
+    image: ${REMOTE_REPO_PREFIX}helidon-mp-demo:latest
     imagePullPolicy: Always
     env:
     - name: tracing.service
-      value: helidon-demo-mp-1
+      value: helidon-mp-demo-1
     - name: mp.config.profile
       value: k8s
     ports:
@@ -48,19 +48,19 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: helidon-demo-mp-2
+  name: helidon-mp-demo-2
   labels:
-    app: helidon-demo-mp-2
+    app: helidon-mp-demo-2
   namespace: demo
 spec:
   dnsPolicy: ClusterFirst
   containers:
   - name: api-helidon-container
-    image: ${REMOTE_REPO_PREFIX}helidon-demo-mp:latest
+    image: ${REMOTE_REPO_PREFIX}helidon-mp-demo:latest
     imagePullPolicy: Always
     env:
     - name: tracing.service
-      value: helidon-demo-mp-2
+      value: helidon-mp-demo-2
     - name: mp.config.profile
       value: k8s
     ports:
@@ -71,19 +71,19 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: helidon-demo-mp-3
+  name: helidon-mp-demo-3
   labels:
-    app: helidon-demo-mp-3
+    app: helidon-mp-demo-3
   namespace: demo
 spec:
   dnsPolicy: ClusterFirst
   containers:
   - name: api-helidon-container
-    image: ${REMOTE_REPO_PREFIX}helidon-demo-mp:latest
+    image: ${REMOTE_REPO_PREFIX}helidon-mp-demo:latest
     imagePullPolicy: Always
     env:
     - name: tracing.service
-      value: helidon-demo-mp-3
+      value: helidon-mp-demo-3
     - name: mp.config.profile
       value: k8s
     ports:
@@ -124,9 +124,9 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: helidon-demo-mp-0
+  name: helidon-mp-demo-0
   labels:
-    app: helidon-demo-mp-0
+    app: helidon-mp-demo-0
   namespace: demo
 spec:
   ports:
@@ -134,14 +134,14 @@ spec:
     port: 8080
     targetPort: 8080
   selector:
-    app: helidon-demo-mp-0
+    app: helidon-mp-demo-0
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: helidon-demo-mp-1
+  name: helidon-mp-demo-1
   labels:
-    app: helidon-demo-mp-1
+    app: helidon-mp-demo-1
   namespace: demo
 spec:
   ports:
@@ -149,14 +149,14 @@ spec:
     port: 8080
     targetPort: 8080
   selector:
-    app: helidon-demo-mp-1
+    app: helidon-mp-demo-1
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: helidon-demo-mp-2
+  name: helidon-mp-demo-2
   labels:
-    app: helidon-demo-mp-2
+    app: helidon-mp-demo-2
   namespace: demo
 spec:
   ports:
@@ -164,14 +164,14 @@ spec:
     port: 8080
     targetPort: 8080
   selector:
-    app: helidon-demo-mp-2
+    app: helidon-mp-demo-2
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: helidon-demo-mp-3
+  name: helidon-mp-demo-3
   labels:
-    app: helidon-demo-mp-3
+    app: helidon-mp-demo-3
   namespace: demo
 spec:
   ports:
@@ -179,7 +179,7 @@ spec:
     port: 8080
     targetPort: 8080
   selector:
-    app: helidon-demo-mp-3
+    app: helidon-mp-demo-3
 ---
 kind: Service
 apiVersion: v1
@@ -226,9 +226,9 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: helidon-demo-mp-np
+  name: helidon-mp-demo-np
   labels:
-    app: helidon-demo-mp
+    app: helidon-mp-demo
   namespace: demo
 spec:
   type: NodePort
@@ -238,7 +238,7 @@ spec:
     targetPort: 8080
     nodePort: 30080
   selector:
-    app: helidon-demo-mp-0
+    app: helidon-mp-demo-0
 ---
 kind: Service
 apiVersion: v1

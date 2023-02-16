@@ -158,7 +158,7 @@ mvn clean -P protoc initialize && mvn package -DskipTests=true
 ## § アプリケーションの起動
 
 ```bash
-java -jar target/helidon-demo-mp.jar
+java -jar target/helidon-mp-demo.jar
 ```
 
 [目次に戻る](#目次)
@@ -187,10 +187,10 @@ mvn -f pom-docker.xml exec:exec@docker-local-build [-Ddocker.file=<任意のDock
 ```bash
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-helidon-demo-mp                                     2.2.2               80612d9f5ee0        4 seconds ago       299MB
-helidon-demo-mp                                     latest              80612d9f5ee0        4 seconds ago       299MB
-iad.ocir.io/some-tenant/some-path/helidon-demo-mp   2.2.2               80612d9f5ee0        4 seconds ago       299MB
-iad.ocir.io/some-tenant/some-path/helidon-demo-mp   latest              80612d9f5ee0        4 seconds ago       299MB
+helidon-mp-demo                                     2.2.2               80612d9f5ee0        4 seconds ago       299MB
+helidon-mp-demo                                     latest              80612d9f5ee0        4 seconds ago       299MB
+iad.ocir.io/some-tenant/some-path/helidon-mp-demo   2.2.2               80612d9f5ee0        4 seconds ago       299MB
+iad.ocir.io/some-tenant/some-path/helidon-mp-demo   latest              80612d9f5ee0        4 seconds ago       299MB
 ```
 
 [目次に戻る](#目次)
@@ -268,7 +268,7 @@ kubectl create secret docker-registry docker-registry-secret -n demo \
  --docker-password='access-token-or-something' \
  --docker-email='some-mail-address'
 
-# replace "${REMOTE_REPO_PREFIX}/helidon-demo-mp:latest" in liveness-check.yaml and apply
+# replace "${REMOTE_REPO_PREFIX}/helidon-mp-demo:latest" in liveness-check.yaml and apply
 envsubst < demo/k8s/liveness-check.yaml | kubectl apply -f -
 ```
 
@@ -277,13 +277,13 @@ envsubst < demo/k8s/liveness-check.yaml | kubectl apply -f -
 ```bash
 $ kubectl get pod -n demo -w
 NAME                     READY   STATUS    RESTARTS   AGE
-helidon-demo-mp-health   1/1     Running   0          12s
-helidon-demo-mp-health   1/1     Running   1          52s
-helidon-demo-mp-health   1/1     Running   2          103s
-helidon-demo-mp-health   1/1     Running   3          2m33s
+helidon-mp-demo-health   1/1     Running   0          12s
+helidon-mp-demo-health   1/1     Running   1          52s
+helidon-mp-demo-health   1/1     Running   2          103s
+helidon-mp-demo-health   1/1     Running   3          2m33s
 ```
 ```
-$ kubectl describe pod helidon-demo-mp-health -n demo
+$ kubectl describe pod helidon-mp-demo-health -n demo
 (中略...)
 Events:
   Type     Reason     Age                    From                 Message
@@ -305,7 +305,7 @@ Kubernetes に デモのPodを4つと、jaegerのPodをデプロイします。
 # export environment variable as appropriate
 export REMOTE_REPO_PREFIX=iad.ocir.io/some-tenant/some-additional-path/
 
-# replace "${REMOTE_REPO_PREFIX}/helidon-demo-mp:latest" in open-tracing.yaml and apply
+# replace "${REMOTE_REPO_PREFIX}/helidon-mp-demo:latest" in open-tracing.yaml and apply
 envsubst < demo/k8s/open-tracing.yaml | kubectl apply -f -
 ```
 
@@ -314,18 +314,18 @@ envsubst < demo/k8s/open-tracing.yaml | kubectl apply -f -
 ```bash
 $ kubectl get all -n demo
 NAME                    READY   STATUS    RESTARTS   AGE
-pod/helidon-demo-mp-0   1/1     Running   0          5m37s
-pod/helidon-demo-mp-1   1/1     Running   0          25s
-pod/helidon-demo-mp-2   1/1     Running   0          24s
-pod/helidon-demo-mp-3   1/1     Running   0          24s
+pod/helidon-mp-demo-0   1/1     Running   0          5m37s
+pod/helidon-mp-demo-1   1/1     Running   0          25s
+pod/helidon-mp-demo-2   1/1     Running   0          24s
+pod/helidon-mp-demo-3   1/1     Running   0          24s
 pod/jaeger              1/1     Running   0          24s
 
 NAME                         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                                            AGE
-service/helidon-demo-mp-0    ClusterIP   10.96.108.118   <none>        8080/TCP                                                           23s
-service/helidon-demo-mp-1    ClusterIP   10.96.50.135    <none>        8080/TCP                                                           23s
-service/helidon-demo-mp-2    ClusterIP   10.96.98.247    <none>        8080/TCP                                                           23s
-service/helidon-demo-mp-3    ClusterIP   10.96.85.112    <none>        8080/TCP                                                           23s
-service/helidon-demo-mp-np   NodePort    10.96.49.26     <none>        8080:30080/TCP                                                     23s
+service/helidon-mp-demo-0    ClusterIP   10.96.108.118   <none>        8080/TCP                                                           23s
+service/helidon-mp-demo-1    ClusterIP   10.96.50.135    <none>        8080/TCP                                                           23s
+service/helidon-mp-demo-2    ClusterIP   10.96.98.247    <none>        8080/TCP                                                           23s
+service/helidon-mp-demo-3    ClusterIP   10.96.85.112    <none>        8080/TCP                                                           23s
+service/helidon-mp-demo-np   NodePort    10.96.49.26     <none>        8080:30080/TCP                                                     23s
 service/jaeger               ClusterIP   10.96.42.231    <none>        5775/UDP,6831/UDP,6832/UDP,5778/TCP,16686/TCP,14268/TCP,9411/TCP   23s
 service/jaeger-np            NodePort    10.96.147.52    <none>        16686:30086/TCP                                                    23s
 ```
@@ -372,7 +372,7 @@ OCI APM の場合の設定は、以下のようになります。
 ```yaml
 tracing:
   enabled: true
-  service: helidon-demo-mp
+  service: helidon-mp-demo
   name: "Helidon APM Tracer"
   data-upload-endpoint: <data upload endpoint of your OCI domain>
   private-data-key: <private data key of your OCI domain>
@@ -502,8 +502,8 @@ $ curl localhost:8080/mpmetrics/count-total
 
 ```bash
 # usage: oracle.demo.ft.FaultToleranceTester -e <GETするURL> <同時呼び出し数>
-$ java -cp ./target/helidon-demo-mp.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/ft/bulkhead 4
-$ java -cp ./target/helidon-demo-mp.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/ft/circuit-breaker 6
+$ java -cp ./target/helidon-mp-demo.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/ft/bulkhead 4
+$ java -cp ./target/helidon-mp-demo.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/ft/circuit-breaker 6
 ```
 
 Fault Tolerance のメトリクスも取得できます。
@@ -823,7 +823,7 @@ $ mvn -P db-oracle package -DskipTests=true
 ```
 2. システムプロパティ `DEMO_DATASOURCE=OracleDataSource` を指定して Java を実行します (環境変数でも可)。
 ```bash
-$ java -jar -DDEMO_DATASOURCE=OracleDataSource target/helidon-demo-mp.jar
+$ java -jar -DDEMO_DATASOURCE=OracleDataSource target/helidon-mp-demo.jar
 ```
 
 application.yaml でデータソースを設定してビルドすることもできます(システムプロパティや環境変数は実行時にこの設定を上書きする)。  
@@ -1219,7 +1219,7 @@ ECID は 並行処理される実行ログの中から、リクエスト単位�
 
 ```
 # Fault Tolerance のデモで使った「複数リクエスト同時発射装置」で試してみる
-java -cp ./target/helidon-demo-mp.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/logging/mdc 3
+java -cp ./target/helidon-mp-demo.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/logging/mdc 3
 // ログ出力
 Thread[helidon-4,5,server]{699595b3c0a746ff}: Invoking Sub#get()
 Thread[helidon-4,5,server]{699595b3c0a746ff}: Sub#get() called

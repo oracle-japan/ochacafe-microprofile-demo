@@ -1,23 +1,23 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: helidon-demo-mp-deployment
+  name: helidon-mp-demo-deployment
   labels:
-    app: helidon-demo-mp
+    app: helidon-mp-demo
   namespace: demo
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: helidon-demo-mp
+      app: helidon-mp-demo
   template:
     metadata:
       labels:
-        app: helidon-demo-mp
+        app: helidon-mp-demo
     spec:
       containers:
-      - name: helidon-demo-mp-container
-        image: ${REMOTE_REPO_PREFIX}helidon-demo-mp:latest
+      - name: helidon-mp-demo-container
+        image: ${REMOTE_REPO_PREFIX}helidon-mp-demo:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

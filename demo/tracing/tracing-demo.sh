@@ -2,7 +2,7 @@
 
 
 status() {
-  docker ps | grep helidon-demo-mp 
+  docker ps | grep helidon-mp-demo 
 }
 
 start() {
@@ -21,17 +21,17 @@ start() {
   --network helidon-demo-nw \
   jaegertracing/all-in-one:1.13
   
-  docker run --rm -d --name helidon-demo-mp-0 --hostname helidon-demo-mp-0 --network helidon-demo-nw -e tracing.service=helidon-demo-mp-0 -p 8080:8080 helidon-demo-mp
-  docker run --rm -d --name helidon-demo-mp-1 --hostname helidon-demo-mp-1 --network helidon-demo-nw -e tracing.service=helidon-demo-mp-1 helidon-demo-mp
-  docker run --rm -d --name helidon-demo-mp-2 --hostname helidon-demo-mp-2 --network helidon-demo-nw -e tracing.service=helidon-demo-mp-2 helidon-demo-mp
-  docker run --rm -d --name helidon-demo-mp-3 --hostname helidon-demo-mp-3 --network helidon-demo-nw -e tracing.service=helidon-demo-mp-3 helidon-demo-mp
+  docker run --rm -d --name helidon-mp-demo-0 --hostname helidon-mp-demo-0 --network helidon-demo-nw -e tracing.service=helidon-mp-demo-0 -p 8080:8080 helidon-mp-demo
+  docker run --rm -d --name helidon-mp-demo-1 --hostname helidon-mp-demo-1 --network helidon-demo-nw -e tracing.service=helidon-mp-demo-1 helidon-mp-demo
+  docker run --rm -d --name helidon-mp-demo-2 --hostname helidon-mp-demo-2 --network helidon-demo-nw -e tracing.service=helidon-mp-demo-2 helidon-mp-demo
+  docker run --rm -d --name helidon-mp-demo-3 --hostname helidon-mp-demo-3 --network helidon-demo-nw -e tracing.service=helidon-mp-demo-3 helidon-mp-demo
 }
 
 stop() {
-  docker stop helidon-demo-mp-0
-  docker stop helidon-demo-mp-1
-  docker stop helidon-demo-mp-2
-  docker stop helidon-demo-mp-3
+  docker stop helidon-mp-demo-0
+  docker stop helidon-mp-demo-1
+  docker stop helidon-mp-demo-2
+  docker stop helidon-mp-demo-3
   docker stop jaeger
   docker network rm helidon-demo-nw
 }
