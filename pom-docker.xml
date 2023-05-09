@@ -5,7 +5,7 @@
 
     <groupId>oracle.demo</groupId>
     <artifactId>helidon-mp-demo-docker-build</artifactId>
-    <version>3.1.0.2</version>
+    <version>3.2.1.0</version>
     <name>helidon-mp-demo-docker-build</name>
 
     <properties>
