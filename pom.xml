@@ -6,13 +6,13 @@
     <parent>
         <groupId>io.helidon.applications</groupId>
         <artifactId>helidon-mp</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.1</version>
         <relativePath />
     </parent>
 
     <groupId>me.opc-helidon</groupId>
     <artifactId>helidon-mp-demo</artifactId>
-    <version>3.1.0.2</version>
+    <version>3.2.1.0</version>
     <name>${project.artifactId}</name>
 
     <properties>
