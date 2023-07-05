@@ -16,7 +16,7 @@
     <name>${project.artifactId}</name>
 
     <properties>
-        <grpc.version>1.45.1</grpc.version>
+        <grpc.version>1.53.0</grpc.version>
         <apm.tracer.version>[1.8.3326,)</apm.tracer.version>
     </properties>
 
