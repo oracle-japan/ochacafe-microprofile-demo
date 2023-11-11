@@ -8,14 +8,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.56.1)",
+    value = "by gRPC proto compiler (version 1.57.1)",
     comments = "Source: helloworld.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class GreeterGrpc {
 
   private GreeterGrpc() {}
 
-  public static final String SERVICE_NAME = "helloworld.Greeter";
+  public static final java.lang.String SERVICE_NAME = "helloworld.Greeter";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<oracle.demo.grpc.protobuf.helloworld.Helloworld.HelloRequest,
@@ -291,9 +291,9 @@ public final class GreeterGrpc {
   private static final class GreeterMethodDescriptorSupplier
       extends GreeterBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    GreeterMethodDescriptorSupplier(String methodName) {
+    GreeterMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 
