@@ -12,7 +12,7 @@ import org.eclipse.microprofile.openapi.annotations.info.Info;
  */
 @ApplicationScoped
 @ApplicationPath("/")
-@OpenAPIDefinition(info = @Info(title = "Helidon MP Demo", version = "3.x"))
+@OpenAPIDefinition(info = @Info(title = "Helidon MP Demo", version = "4.x"))
 public class App extends Application {
 
 }

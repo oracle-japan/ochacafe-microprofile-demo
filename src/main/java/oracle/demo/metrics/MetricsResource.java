@@ -27,9 +27,9 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.metrics.Counter;
 import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.annotation.Metered;
+import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.annotation.Metric;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
+//import org.eclipse.microprofile.metrics.annotation.RegistryScope;
 
 /**
  * implement application scope metrics
@@ -39,20 +39,20 @@ import org.eclipse.microprofile.metrics.annotation.RegistryType;
 public class MetricsResource{
 
     private final Logger logger = Logger.getLogger(MetricsResource.class.getName());
-    
+
+    @Inject
+    //@RegistryScope(scope = MetricRegistry.APPLICATION_SCOPE)
+    private MetricRegistry metricRegistry;
+
     @Inject
     @Metric(name="total")
     private Counter total;
-
-    @Inject
-    @RegistryType(type=MetricRegistry.Type.APPLICATION)
-    private MetricRegistry metricRegistry;
 
     private synchronized void countup(){
         total.inc();
     }
 
-    @Metered
+    @Counted(name = "apple")
     @GET @Path("/apple")
     @Produces(MediaType.TEXT_PLAIN)
     public String apple(){
@@ -61,7 +61,7 @@ public class MetricsResource{
         return "APPLE\n";
     }   
 
-    @Metered
+    @Counted(name = "orange")
     @GET @Path("/orange")
     @Produces(MediaType.TEXT_PLAIN)
     public String orange(){
@@ -84,7 +84,6 @@ public class MetricsResource{
             }).findFirst().get().getValue();
         return Long.toString(counter.getCount());
     }   
-
 
 }
 
