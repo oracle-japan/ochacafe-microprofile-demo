@@ -325,6 +325,10 @@ Events:
     ```
     Jaeger から `/jpa/country` というスパンとネストされた `oracle.demo.jpa.CountryDAO.getCountries` というスパンが確認されます。
 
+OpenTelemetry を使って OCI Application Performance Monitoring (APM) に連携したい場合は、こちらの記事 - 
+[**Helidon 4.x で 分散トレーシング (OpenTelemetry Java Agent は使わない編)**](https://qiita.com/tkote/items/85dcebe897eaaaa123ec) 
+に詳細な手順が書いてありますので参考にして下さい。
+
 
 ## 4.x より前のバージョンの Tracing デモ
 
@@ -375,7 +379,7 @@ cat demo/tracing/request.json | curl -v -X POST -H "Content-Type:application/jso
 $ demo/tracing/tracing-demo.sh [start | stop]
 ```
 
-### OCI Application Performance Monitoring (APM) の Tracer を使う
+### OCI Application Performance Monitoring (APM) の Tracer を使う (3.x)
 
 上記のデモは、Jaeger を前提にしていますが、その他にも複数の Tracer を設定することができます。 Maven のプロファイルを使って Tracer を切り替えます。
 
