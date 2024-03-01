@@ -5,7 +5,7 @@
 
     <groupId>oracle.demo</groupId>
     <artifactId>helidon-mp-demo-docker-build</artifactId>
-    <version>4.0.1.0</version>
+    <version>4.0.5.0</version>
     <name>helidon-mp-demo-docker-build</name>
 
     <properties>
@@ -36,10 +36,8 @@
                                 <argument>build</argument>
                                 <argument>-t</argument>
                                 <argument>${docker.repo.prefix}${docker.image}:${docker.image.version}</argument>
-                                <!--
                                 <argument>-t</argument>
                                 <argument>${docker.repo.prefix}${docker.image}:latest</argument>
-                                -->
                                 <argument>-f</argument>
                                 <argument>${docker.file}</argument>
                                 <argument>.</argument>
@@ -59,16 +57,12 @@
                                 <argument>build</argument>
                                 <argument>-t</argument>
                                 <argument>${docker.repo.prefix}${docker.image}:${docker.image.version}</argument>
-                                <!--
                                 <argument>-t</argument>
                                 <argument>${docker.repo.prefix}${docker.image}:latest</argument>
-                                -->
                                 <argument>-t</argument>
                                 <argument>${docker.repo.remote.prefix}${docker.image}:${docker.image.version}</argument>
-                                <!--
                                 <argument>-t</argument>
                                 <argument>${docker.repo.remote.prefix}${docker.image}:latest</argument>
-                                -->
                                 <argument>-f</argument>
                                 <argument>${docker.file}</argument>
                                 <argument>.</argument>

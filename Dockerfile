@@ -1,5 +1,5 @@
 # 1st stage, build the app
-FROM maven:3.8.4-openjdk-17-slim as build
+FROM maven:3.9.6-eclipse-temurin-21-jammy as build
 
 WORKDIR /helidon
 #RUN mkdir -p /helidon/target/classes # for weaving
@@ -13,12 +13,15 @@ RUN mvn package -Dmaven.test.skip -Declipselink.weave.skip
 # Do the Maven build!
 # Incremental docker builds will resume here when you change sources
 ADD src src
-RUN mvn -P protoc initialize
-RUN mvn package -DskipTests
+
+# RUN mvn package -DskipTests
+# Switch mvn command above when you'd like to enable jaeger 
+RUN mvn package -P db-h2,tracing-jaeger -DskipTests
+
 RUN echo "done!"
 
 # 2nd stage, build the runtime image
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 WORKDIR /helidon
 
 # Copy the binary built in the 1st stage
@@ -28,5 +31,5 @@ COPY --from=build /helidon/target/libs ./libs
 CMD ["java", "-jar", "helidon-mp-demo.jar"]
 
 EXPOSE 8080
-EXPOSE 50051
+#EXPOSE 50051
 
