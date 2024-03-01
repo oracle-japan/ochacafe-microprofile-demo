@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
@@ -49,6 +50,7 @@ public class CountryResource {
 
     @POST
     @Path("/")
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response insertCountries(Country[] countries) {
         dao.insertCountries(countries);
         return Response.ok().build();

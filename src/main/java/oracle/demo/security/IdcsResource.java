@@ -78,7 +78,15 @@ public class IdcsResource {
     @Path("/logout")
     @Authenticated
     public Response logout(){
-        final NewCookie newCookie = new NewCookie(cookieName, "", cookiePath, cookieDomain, "invalidated", 0, false);
+        //final NewCookie newCookie = new NewCookie(cookieName, "", cookiePath, cookieDomain, "invalidated", 0, false);
+        final NewCookie newCookie = new NewCookie.Builder(cookieName)
+                                        .path(cookiePath)
+                                        .domain(cookieDomain)
+                                        .comment("invalidated")
+                                        .maxAge(0)
+                                        .secure(false)
+                                        .build();
+
         return Response
             .ok("Logged out.", MediaType.TEXT_PLAIN)
             .cookie(newCookie)

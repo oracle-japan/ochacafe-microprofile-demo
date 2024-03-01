@@ -5,7 +5,9 @@
 [OCHaCafe 2 - #4 Cloud Native時代のモダンJavaの世界](https://ochacafe.connpass.com/event/155389/) のために作成したデモですが、随時実装を追加しています。  
 [**セッション・スライドはこちら**](http://tiny.cc/ochacafe-cn-java-slides)
 
-**※ ベースを 3.x 系にアップグレードしました。2.x系は `helidon-2.x` ブランチでメンテナンスしていきます。**
+**※ ベースを 4.x 系にアップグレードしました。3.x系は `helidon-3.x` ブランチ、2.x系は `helidon-2.x` ブランチで各々メンテナンスしていきます。**
+
+Helidon 4 は MicroProfile 6 と Jakarta EE 10 Core Profile をサポートしたため、デモの実装が従来と異なる箇所があります。
 
 ## 目次
 
@@ -14,7 +16,7 @@
 + [Docker イメージの作成](#-docker-イメージの作成)
 + [Health デモ](#-microprofile-health-デモ-oracledemohealth-パッケージ)
   - [Kubernetes で Health Check を試してみる](#Kubernetes-で-Health-Check-を試してみる)
-+ [Open Tracing デモ](#-open-tracing-デモ-oracledemotracing-パッケージ)
++ [Tracing デモ](#-tracing-デモ-oracledemotracing-パッケージ)
   - [OCI Application Performance Monitoring (APM) の Tracer を使う](#OCI-Application-Performance-Monitoring-APM-の-Tracer-を使う)
 + [Metrics デモ](#-metrics-デモ-oracledemometrics-パッケージ)
 + [Fault Tolerance デモ](#-fault-tolerance-デモ-oracledemoft-パッケージ)
@@ -65,7 +67,7 @@ src/main
 │           │   └── FaultToleranceTester.java
 │           ├── graphql [GraphQL]
 │           │   └── CountryGraphQLApi.java
-│           ├── grpc [拡張機能 gRPC]
+│           ├── grpc [拡張機能 gRPC - 4.x には無し]
 │           │   └── protobuf
 │           │       ├── GreeterSimpleService.java
 │           │       ├── GreeterService.java
@@ -83,7 +85,7 @@ src/main
 │           │   ├── CountryResource.java
 │           │   ├── Greeting.java
 │           │   └── JPAExampleResource.java
-│           ├── logging [拡張機能 Mdc]
+│           ├── logging [拡張機能 Mdc - 4.x には無し]
 │           │   ├── MdcInterceptor.java
 │           │   ├── Mdc.java
 │           │   ├── MdcResource.java
@@ -93,8 +95,6 @@ src/main
 │           │   ├── LRAMain.java
 │           │   ├── LRAService1.java
 │           │   └── LRAService2.java
-│           ├── mapper [JAX-RSの例外マッパー]
-│           │   └── CountryNotFoundExceptionMapper.java
 │           ├── metrics [メトリクス]
 │           │   └── MetricsResource.java
 │           ├── reactive [Reactive Messaging & Connecter]
@@ -146,11 +146,10 @@ src/main
 
 ## § ビルド方法
 
-Java SE 17 が必要です。
+Java SE 21 が必要です。
 
 ```bash
-# for the first time, generate java source files for gRPC by compiling proto file, then package
-mvn clean -P protoc initialize && mvn package -DskipTests=true
+mvn clean package -DskipTests=true
 ```
 
 <br>
@@ -297,7 +296,37 @@ Events:
 [目次に戻る](#目次)
 <br>
 
-## § Open Tracing デモ (oracle.demo.tracing パッケージ)
+## § Tracing デモ (oracle.demo.tracing パッケージ)
+
+**注意！ 4.x と、それ以前では実装が異なります**
+
+## 4.x の Tracing デモ
+
+[MicroProfile Telemetry 1.0](https://download.eclipse.org/microprofile/microprofile-telemetry-1.0/tracing/microprofile-telemetry-tracing-spec-1.0.html) ベースの実装に変更されています。
+この仕様は、CNCFで策定された [OpenTelemetry](https://opentelemetry.io/) をMicroProfileアプリケーションで利用可能にするためのものです。
+
+ローカルに Jaeger サーバを立てて、トレーシングを試します。
+
+1. Jaeger の関連ライブラリを含めてアプリケーションをビルドして起動します。
+    ```
+    mvn -Pdb-h2,tracing-jaeger -DskipTests package
+    java -Dotel.sdk.disabled=false -Dotel.traces.exporter=jaeger -jar target/helidon-mp-demo.jar
+    ``` 
+
+2. Jaeger を Docker コンテナとして起動します。
+    ```
+    demo/tracing/jaeger.sh
+    ```
+    UI は http://localhost:16686/ になります。
+
+3. トレーシングができているか確認します。
+    ```
+    curl http://localhost:8080/jpa/country
+    ```
+    Jaeger から `/jpa/country` というスパンとネストされた `oracle.demo.jpa.CountryDAO.getCountries` というスパンが確認されます。
+
+
+## 4.x より前のバージョンの Tracing デモ
 
 Kubernetes に デモのPodを4つと、jaegerのPodをデプロイします。
 
@@ -911,6 +940,8 @@ $ docker rm oracledb
 
 ## § gRPC デモ (oracle.demo.grpc パッケージ)
 
+**注意！ 4.x には実装がありません**
+
 Helidon MP はアノテーションを使って簡単に gRPC サーバーを実装することができます。  
 gRPCの転送データのフォーマットである protobuf を用意する必要がありますが、このデモでは、ビルド時の `mvn -P protoc initialize` で必要な Java ソースファイルを生成しています。
 
@@ -1162,6 +1193,8 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 <br>
 
 ## § Mapped Diagnostic Context (Mdc) デモ (oracle.demo.logging パッケージ)
+
+**注意！ 4.x には実装がありません**
 
 Mapped Diagnostic Context (Mdc) は、並列処理で実行されるログ出力をトレースするために使うことができます。サーバーが複数のクライアントからのリクエストをマルチスレッドで処理する（=同じクラス＆メソッドのログ出力が入り乱れる）場合などに便利です。ログに実行スレッド名を出力することもできますが、単一のリクエストの処理が複数のスレッドにまたがって行われるようなケースでは、スレッドをまたがったトレースが困難になります。  
 
@@ -1616,9 +1649,8 @@ $ curl "localhost:8080/cowsay/think?message=Hello%21&cowfile=moose"
 
 [目次に戻る](#目次)
 <br>
-
 ---
-_Copyright © 2019-202, Oracle and/or its affiliates. All rights reserved._
+
 
 
 

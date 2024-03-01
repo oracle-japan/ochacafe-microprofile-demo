@@ -40,11 +40,11 @@ function rest(type, url, data) {
 }
 
 document.getElementById('button_get').addEventListener("click", function (event) {
-  rest('get', path.getAttribute('value'), null);
+  rest('get', path.value, null);
 });
 
 document.getElementById('button_post').addEventListener("click", function (event) {
-  rest('post', path.getAttribute('value'), body.value);
+  rest('post', path.value, body.value);
 });
 
 document.getElementById('button_clear').addEventListener("click", function (event) {
@@ -55,6 +55,6 @@ document.getElementById('button_clear').addEventListener("click", function (even
 var ddItems = document.getElementsByClassName("dropdown-item");
 for (var i=0, len=ddItems.length|0; i<len; i=i+1|0) {
   ddItems[i].addEventListener("click", function (event) {
-    path.setAttribute('value', event.target.innerText);
+    path.value = event.target.innerText;
   });
 }

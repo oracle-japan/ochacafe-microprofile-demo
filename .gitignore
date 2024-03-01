@@ -1,5 +1,6 @@
 .*
 !.gitignore
+*.jar
 
 /m2repo
 

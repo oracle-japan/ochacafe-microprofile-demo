@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -16,6 +17,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
+import java.util.NoSuchElementException;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
@@ -26,6 +34,7 @@ public class EchoResource{
     private String reply;
 
     @POST @Path("/")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response echo(Message message, @Context UriInfo uriInfo) {
 
@@ -58,6 +67,27 @@ public class EchoResource{
             .add("headers", jsonHeaders)
             .build();
         return Response.ok(response.toString()).build();
+    }
+
+    @GET @Path("/config")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response dumpConfig() {
+
+        final StringBuilder sb = new StringBuilder();
+        
+        final Config config = ConfigProvider.getConfig();
+        StreamSupport
+            .stream(Spliterators.spliteratorUnknownSize(config.getPropertyNames().iterator(), 0), false)
+            .sorted().forEach(name -> {
+                try{
+                    String value = config.getValue(name, String.class);
+                    sb.append(name + "=" + value + "\n");
+                }catch(NoSuchElementException nsee){
+                    sb.append(name + " (no value)\n");
+                }
+            });
+        System.out.println(sb.toString());
+        return Response.ok(sb.toString()).build();
     }
 
 

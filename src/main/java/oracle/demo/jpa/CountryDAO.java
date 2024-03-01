@@ -8,11 +8,11 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.context.Context;
 
-
-import org.eclipse.microprofile.opentracing.Traced;
-import io.opentracing.Span;
-import io.opentracing.Tracer;
 import oracle.demo.country.CountryNotFoundException;
 
 @ApplicationScoped
@@ -25,13 +25,13 @@ public class CountryDAO {
     private EntityManager em;
 
     // This is a standard MicroProfile annotation
-    @Traced
+    @WithSpan
     public List<Country> getCountries(){
         final List<Country> countries = em.createQuery("select c from Country c", Country.class).getResultList();
         return countries;
     }
 
-    @Traced
+    @WithSpan
     public Country getCountry(int countryId) {
         final Country country = em.find(Country.class, countryId);
         if(null == country) 
@@ -39,30 +39,34 @@ public class CountryDAO {
         return country;
     }
 
-    @Traced
+    @WithSpan
     @Transactional
     public void insertCountries(Country[] countries) {
         Arrays.stream(countries).forEach(em::persist);
     }
 
-    @Traced
+    @WithSpan
     @Transactional
     public void insertCountries(List<Country> countries) {
         countries.stream().forEach(em::persist);
     }
 
-    @Traced
+    @WithSpan
     @Transactional
     public void insertCountry(int countryId, String countryName) {
         em.persist(new Country(countryId, countryName));
     }
 
-    @Traced
+    @WithSpan
     @Transactional
     public void updateCountry(int countryId, String countryName) {
-        final Span span = tracer.buildSpan("updateCountry").asChildOf(tracer.activeSpan()).start();
-        span.setTag("countryId", countryId);
-        span.setTag("countryName", countryName);
+
+        final Span span = tracer
+                            .spanBuilder("updateCountry")
+                            .setParent(Context.current())
+                            .setAttribute("countryId", countryId)
+                            .setAttribute("countryName", countryName)
+                            .startSpan();
 
         try{
             final Country country = em.find(Country.class, countryId);
@@ -70,21 +74,21 @@ public class CountryDAO {
                 throw new CountryNotFoundException(String.format("Couldn't find country, id=%d", countryId));
             country.setCountryName(countryName);
             em.persist(country);
-            span.setTag("error", false);
+            span.setAttribute("error", false);
         }catch(Exception e){
-            span.log(e.getMessage());
-            span.setTag("error", true); 
+            span.addEvent(e.getMessage());
+            span.setAttribute("error", true);
             if(e instanceof CountryNotFoundException){
                 throw e;
             }else{
                 throw new RuntimeException("Failed to update - " + e.getMessage(), e);
             }
         }finally{
-            span.finish();
+            span.end();
         }
     }
 
-    @Traced
+    @WithSpan
     @Transactional
     public void deleteCountry(int countryId) {
         final Country country = em.find(Country.class, countryId);
