@@ -945,7 +945,7 @@ Helidon MP はアノテーションを使って簡単に gRPC サーバー&ク�
 
 ### proto ファイルから必要な Java ソースファイルの生成
 
-gRPC で扱う Protocol Buffers の定義ファイルは src/main/proto/helloworld.proto にあります。grpc.io が提供する Java example とのインターオペラビリティを確認するために、[同じ定義ファイル](https://github.com/grpc/grpc/blob/master/examples/protos/helloworld.proto)を使っています。
+gRPC で扱う Protocol Buffers の定義ファイルは src/main/proto/helloworld.proto にあります。grpc.io が提供する Java example とのインターオペラビリティを確認するために、[同じ定義ファイル](https://raw.githubusercontent.com/grpc/grpc/refs/heads/master/examples/protos/helloworld.proto)を使っています。
 
 ```proto
 syntax = "proto3";
