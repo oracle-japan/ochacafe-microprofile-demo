@@ -431,7 +431,7 @@ mvn -P tracing-oci-apm,db-h2 package # OCI APM の場合
 
 ## § Metrics デモ (com.example.metrics パッケージ)
 
-Mwtrics には以下の3種類のスコープが存在します。
+Metrics には以下の3種類のスコープが存在します。
 
 | スコープ      | 説明 |
 |--------------|-------------------------------------------------------|
