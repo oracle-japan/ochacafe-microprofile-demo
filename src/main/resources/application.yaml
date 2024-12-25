@@ -1,5 +1,7 @@
 server:
-  # port: 8080
+  port: 8080
+  tls:
+    enabled: false
   # location on classpath (e.g. src/main/resources/WEB in maven)
   static:
     classpath:
@@ -8,12 +10,14 @@ server:
       #context: "/"
       welcome: "index.html"
 
-#grpc:
-#  port: 50051
-#  channels:                
-#    myserver:           
-#      host: localhost      
-#      port: 50051
+grpc:
+  client:
+    channels:
+    - name: "helloworld-channel"
+      host: localhost
+      port: 8080
+      tls:
+        enabled: false
 
 ##### security settings - simple basic auth #####
 # can work with oracle.demo.SecurityResource

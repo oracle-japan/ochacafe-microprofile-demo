@@ -6,16 +6,17 @@
     <parent>
         <groupId>io.helidon.applications</groupId>
         <artifactId>helidon-mp</artifactId>
-        <version>4.0.11</version>
+        <version>4.1.6</version>
         <relativePath />
     </parent>
 
     <groupId>me.opc-helidon</groupId>
     <artifactId>helidon-mp-demo</artifactId>
-    <version>4.0.11.0</version>
+    <version>4.1.6.0</version>
     <name>${project.artifactId}</name>
 
     <properties>
+        <!-- version.plugin.os>1.7.1</version.plugin.os -->
     </properties>
 
     <dependencies>
@@ -185,10 +186,20 @@
             <artifactId>helidon-microprofile-rest-client</artifactId>
         </dependency>
 
-        <!-- suport Open Api-->
+        <!-- support Open Api-->
         <dependency>
             <groupId>io.helidon.microprofile.openapi</groupId>
             <artifactId>helidon-microprofile-openapi</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.helidon.integrations.openapi-ui</groupId>
+            <artifactId>helidon-integrations-openapi-ui</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye</groupId>
+            <artifactId>smallrye-open-api-ui</artifactId>
             <scope>runtime</scope>
         </dependency>
 
@@ -196,6 +207,24 @@
         <dependency>
             <groupId>io.helidon.microprofile.telemetry</groupId>
             <artifactId>helidon-microprofile-telemetry</artifactId>
+        </dependency>
+
+        <!-- support for gRPC -->
+        <dependency>
+            <groupId>io.helidon.grpc</groupId>
+            <artifactId>helidon-grpc-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.helidon.microprofile.grpc</groupId>
+            <artifactId>helidon-microprofile-grpc-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.helidon.microprofile.grpc</groupId>
+            <artifactId>helidon-microprofile-grpc-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.helidon.microprofile.grpc</groupId>
+            <artifactId>helidon-microprofile-grpc-client</artifactId>
         </dependency>
 
         <!-- support Reactive Messaging / Mock Connector -->
@@ -232,6 +261,8 @@
             <artifactId>helidon-lra-coordinator-narayana-client</artifactId>
         </dependency>
 
+
+
         <!-- cowweb -->
         <dependency>
             <groupId>com.github.ricksbrown</groupId>
@@ -266,6 +297,15 @@
     </dependencies>
 
     <build>
+        <!-- extension for GRPC (for protobuf-maven-plugin) -->
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>${version.plugin.os}</version>
+            </extension>
+        </extensions>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -282,6 +322,20 @@
                 <executions>
                     <execution>
                         <id>make-index</id>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--  for GRPC (source generation from protobuf) -->
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>test-compile</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -354,7 +408,6 @@
             </dependencies>
         </profile>
 
-
         <!-- Connectors -->
         <profile>
             <!-- Kafka Connector -->
@@ -363,23 +416,6 @@
                 <dependency>
                     <groupId>io.helidon.messaging.kafka</groupId>
                     <artifactId>helidon-messaging-kafka</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <!-- OpenAPI UI -->
-        <profile>
-            <id>openapi-ui</id>
-            <dependencies>
-                <dependency>
-                    <groupId>io.helidon.integrations.openapi-ui</groupId>
-                    <artifactId>helidon-integrations-openapi-ui</artifactId>
-                    <scope>runtime</scope>
-                </dependency>
-                <dependency>
-                    <groupId>io.smallrye</groupId>
-                    <artifactId>smallrye-open-api-ui</artifactId>
-                    <scope>runtime</scope>
                 </dependency>
             </dependencies>
         </profile>

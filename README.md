@@ -67,14 +67,10 @@ src/main
 │           │   └── FaultToleranceTester.java
 │           ├── graphql [GraphQL]
 │           │   └── CountryGraphQLApi.java
-│           ├── grpc [拡張機能 gRPC - 4.x には無し]
-│           │   └── protobuf
-│           │       ├── GreeterSimpleService.java
-│           │       ├── GreeterService.java
-│           │       ├── GrpcResource.java
-│           │       └── helloworld [ビルド時に生成される]
-│           │           ├── GreeterGrpc.java
-│           │           └── Helloworld.java
+│           ├── grpc [拡張機能 gRPC]
+│           │   ├── HelloWorldResource.java
+│           │   ├── HelloWorldServiceClient.java
+│           │   └── HelloWorldService.java
 │           ├── health [ヘルスチェック]
 │           │   ├── HealthCheckHelper.java
 │           │   ├── HealthCheckResource.java
@@ -944,98 +940,166 @@ $ docker rm oracledb
 
 ## § gRPC デモ (oracle.demo.grpc パッケージ)
 
-**注意！ 4.x には実装がありません**
+Helidon MP はアノテーションを使って簡単に gRPC サーバー&クライアントを実装することができます。  
+4.1 から Virtual Thread を使った新しい実装となりました。また、これに伴い 3.x では別だったポートが REST と同じポートになりました。
 
-Helidon MP はアノテーションを使って簡単に gRPC サーバーを実装することができます。  
-gRPCの転送データのフォーマットである protobuf を用意する必要がありますが、このデモでは、ビルド時の `mvn -P protoc initialize` で必要な Java ソースファイルを生成しています。
+### proto ファイルから必要な Java ソースファイルの生成
+
+gRPC で扱う Protocol Buffers の定義ファイルは src/main/proto/helloworld.proto にあります。grpc.io が提供する Java example とのインターオペラビリティを確認するために、[同じ定義ファイル](https://github.com/grpc/grpc/blob/master/examples/protos/helloworld.proto)を使っています。
+
+```proto
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.helloworld";
+option java_outer_classname = "HelloWorldProto";
+option objc_class_prefix = "HLW";
+
+package helloworld;
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+
+  rpc SayHelloStreamReply (HelloRequest) returns (stream HelloReply) {}
+
+  rpc SayHelloBidiStream (stream HelloRequest) returns (stream HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+}
+```
+
+この proto ファイルから Java での実装に必要なソースファイルを生成するために、pom.xml では以下の設定を行なっています。
+
+```xml
+    <build>
+        <!-- extension for gRPC (for protobuf-maven-plugin) -->
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>${version.plugin.os}</version>
+            </extension>
+        </extensions>
+        <plugins>
+            <!--  for gRPC (source generation from protobuf) -->
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+```
+
+これにより compile フェーズで proto ファイルがプリコンパイルされ、target/generated-sources に必要なソースファイルが生成されます。
+
+
+### gRPC サーバーの実装
+
+サーバーのメソッドの書き方は、[Helidon 3 のドキュメンテーション](https://helidon.io/docs/v3/mp/grpc/server#_defining_service_methods)に解説がありますので、Unary, ServerStreaming, ClientStreaming, Bidirectional 各々に適した引数と返り値を指定して下さい。 ストリーミングを扱う場合、java.util.stream.Stream、io.grpc.stub.StreamObserver、java.util.concurrent.CompletableFuture などの選択肢があります。
+
+```java
+@Grpc.GrpcService("helloworld.Greeter")
+@ApplicationScoped
+public class HelloWorldService {
+
+    @Grpc.Unary("SayHello")
+    public HelloReply sayHello(HelloRequest request) {
+        // ここに実装を書く
+    }
+
+    @Grpc.ServerStreaming("SayHelloStreamReply")
+    public Stream<HelloReply> sayHelloStreamReply(HelloRequest request) {
+        // ここに実装を書く
+    }
+
+    @Grpc.Bidirectional("SayHelloBidiStream")
+    public StreamObserver<HelloRequest> sayHelloBidiStream(StreamObserver<HelloReply> observer) {
+        // ここに実装を書く - Bidirectionalの場合は、この引数/返り値のパターンのみ指定可能
+    }   
+```
+
+### gRPC クライアントの実装
+
+クライアントは、以下のようにインターフェースにアノテーションを付けてあげれば 
+Helidon が動的に Proxy を作ってくれます。
+
+```java
+@Grpc.GrpcService("helloworld.Greeter")
+@Grpc.GrpcChannel("helloworld-channel")
+public interface HelloWorldServiceClient {
+
+    @Grpc.Unary("SayHello")
+    HelloReply sayHello(HelloRequest request);
+
+    @Grpc.ServerStreaming("SayHelloStreamReply")
+    Stream<HelloReply> sayHelloStreamReply(HelloRequest request);
+
+    @Grpc.Bidirectional("SayHelloBidiStream")
+    public StreamObserver<HelloRequest> sayHelloBidiStream(StreamObserver<HelloReply> observer);
+    
+}
+```
+クライアントの実装は、テストのソースを確認して下さい。
+
+### application.yaml の書き方
+
+クライアントは、channel を使って呼び出し先のサーバーを指定します。インターフェースのアノテーションで指定している channel 名に対する設定を行なって下さい。
+
+```yaml
+grpc:
+  client:
+    channels:
+    - name: "helloworld-channel"
+      host: localhost
+      port: 8080
+      tls:
+        enabled: false
+```
+tls.enabled を明示的に false にしないと TLS 接続をしようとするので注意して下さい。
+
+### 実行
+
+Unary のメソッドだけ、REST 経由で呼びだせるようにしています。
 
 ```bash
 # REST -> gRPC Client -> gRPC Server と呼び出される
 
-$ curl localhost:8080/grpc-protobuf/client
+$ curl localhost:8080/grpc/sayHello
 Hello world
 
 ```
 
-注: 2.3.0 から Java シリアライゼーションを用いた方法は depricated になりました。
+[gRPC Java Quickstart](https://grpc.io/docs/languages/java/quickstart/) で作成したサーバー/クライアントから Helidon の gRPC サーバーを呼び出すことができます。
 
+Quickstart のサーバーと Helidon を起動して以下のコマンドを実行する
 
-### protobuf版 (oracle.demo.grpc.protobuf パッケージ) に関する補足
-
-[gRPC Java Quickstart](https://grpc.io/docs/languages/java/quickstart/) と同じprotoファイルを用いて、互換性のある実装を行っていますので、Quickstart で作成したクライアントから Helidon の gRPC サーバーを呼び出すことができます。  
-
-protobuf ペイロードを使ったサーバー実装は更に POJO + Annotaion を使った方法と、GrpcMpExtension を使って従来型のサービス実装クラスをデプロイする方法の、2種類を提供しています。おすすめは POJO + Annotaion です。
-
-1. POJO + Annotaion を使った方法（デフォルト 有効）  
-Helidonが提供するアノテーションを使って、シンプルなコーディングができます。
-```java
-@Grpc(name = "helloworld.Greeter")
-@ApplicationScoped
-public class GreeterSimpleService{
-
-    @Unary(name = "SayHello")
-    public HelloReply sayHello(HelloRequest req) {
-        System.out.println("gRPC GreeterSimpleService called - name: " + req.getName());
-        return HelloReply.newBuilder().setMessage("Hello " + req.getName()).build();
-    }
-}
 ```
- * 関連するファイル
-```text
-oracle.demo.grpc.protobuf.GreeterSimpleService
+curl http://localhost:8080/grpc/sayHello?port=50051
 ```
 
-2. GrpcMpExtensionを使って従来型のサービス実装クラスをデプロイする方法（デフォルト 無効）  
-protobufコンパイラで生成されたJavaクラスを直接使用する方式です。
-```java
-class GreeterService extends GreeterGrpc.GreeterImplBase { 
-    @Override
-    public void sayHello(HelloRequest req, StreamObserver<HelloReply> observer) {
-        System.out.println("gRPC GreeterService called - name: " + req.getName());
-        HelloReply reply = HelloReply.newBuilder().setMessage("Hello " + req.getName()).build();
-        observer.onNext(reply);
-        observer.onCompleted();        
-    }
-}
+Helidon を以下のオプションで起動して、Quickstart のクライアントを実行する
+
 ```
- * 関連するファイル
-```text
-oracle.demo.grpc.protobuf.GreeterService
-oracle.demo.grpc.protobuf.GrpcExtension
-META-INF/services/io.helidon.microprofile.grpc.server.spi.GrpcMpExtension
+java -Dserver.port=50051 -jar target/helidon-mp-demo.jar
 ```
-
-<details>
-<summary>実装の切り替え方 ( POJO + Annotaion 方式 → GrpcMpExtension 方式 )</summary>
-
-1. META-INF/services/io.helidon.microprofile.grpc.server.spi.GrpcMpExtension を編集する
-```text
-# コメントアウトを外す
-# oracle.demo.grpc.protobuf.GrpcExtension
-oracle.demo.grpc.protobuf.GrpcExtension
-```
-
-2. oracle.demo.grpc.protobuf.GreeterSimpleService を編集する
-```java
-// @Grpc アノテーションをコメントアウトする
-// @Grpc(name = "helloworld.Greeter")
-@ApplicationScoped
-public class GreeterSimpleService{
-
-    @Unary(name = "SayHello")
-    public HelloReply sayHello(HelloRequest req) {
-        System.out.println("gRPC GreeterSimpleService called - name: " + req.getName());
-        return HelloReply.newBuilder().setMessage("Hello " + req.getName()).build();
-    }
-}
-```
-</details>
-<br>
-
-### gRPC - protoファイルのコンパイルについて
-
-pom.xml の通常ビルドフェーズとは独立してprotoファイルのコンパイルを行うプロファイルを定義しています。
-[ビルド方法](#ビルド方法) にあるとおり、protoc を使ってまず最初に proto ファイルから Java ソースを生成して、srcディレクトリにコピーをします。詳細は、pom.xml の内容を確認して下さい。
 
 [目次に戻る](#目次)
 <br>
