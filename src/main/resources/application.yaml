@@ -20,7 +20,7 @@ grpc:
         enabled: false
 
 ##### security settings - simple basic auth #####
-# can work with oracle.demo.SecurityResource
+# can work with com.example.SecurityResource
 security:
   enabled: true
   providers:

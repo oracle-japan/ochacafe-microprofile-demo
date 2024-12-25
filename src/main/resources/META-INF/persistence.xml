@@ -8,8 +8,8 @@
     <persistence-unit name="Demo" transaction-type="JTA">
         <description>A persistence unit for the helidon MP example.</description>
         <jta-data-source>DemoDataSource</jta-data-source>
-        <class>oracle.demo.jpa.Greeting</class>
-        <class>oracle.demo.jpa.Country</class>
+        <class>com.example.jpa.Greeting</class>
+        <class>com.example.jpa.Country</class>
         <properties>
             <property name="eclipselink.deploy-on-startup" value="true" />
             <property name="eclipselink.jdbc.native-sql" value="true" />

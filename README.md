@@ -191,7 +191,7 @@ iad.ocir.io/some-tenant/some-path/helidon-mp-demo   latest              80612d9f
 [目次に戻る](#目次)
 <br>
 
-## § MicroProfile Health デモ (oracle.demo.health パッケージ)
+## § MicroProfile Health デモ (com.example.health パッケージ)
 
 `/health/live` (Liveness)、`/health/ready` (Readiness) 及び `/health` (複合パターン) のエンドポイントを使ってヘルスチェックができます。 
 
@@ -292,7 +292,7 @@ Events:
 [目次に戻る](#目次)
 <br>
 
-## § Tracing デモ (oracle.demo.tracing パッケージ)
+## § Tracing デモ (com.example.tracing パッケージ)
 
 **注意！ 4.x と、それ以前では実装が異なります**
 
@@ -319,7 +319,7 @@ Events:
     ```
     curl http://localhost:8080/jpa/country
     ```
-    Jaeger から `/jpa/country` というスパンとネストされた `oracle.demo.jpa.CountryDAO.getCountries` というスパンが確認されます。
+    Jaeger から `/jpa/country` というスパンとネストされた `com.example.jpa.CountryDAO.getCountries` というスパンが確認されます。
 
 OpenTelemetry を使って OCI Application Performance Monitoring (APM) に連携したい場合は、こちらの記事 - 
 [**Helidon 4.x で 分散トレーシング (OpenTelemetry Java Agent は使わない編)**](https://qiita.com/tkote/items/85dcebe897eaaaa123ec) 
@@ -429,7 +429,7 @@ mvn -P tracing-oci-apm,db-h2 package # OCI APM の場合
 [目次に戻る](#目次)
 <br>
 
-## § Metrics デモ (oracle.demo.metrics パッケージ)
+## § Metrics デモ (com.example.metrics パッケージ)
 
 Mwtrics には以下の3種類のスコープが存在します。
 
@@ -480,7 +480,7 @@ $ curl localhost:8080/mpmetrics/count-total
 [目次に戻る](#目次)
 <br>
 
-## § Fault Tolerance デモ (oracle.demo.ft パッケージ)
+## § Fault Tolerance デモ (com.example.ft パッケージ)
 
 メソッドやクラスにアノテーションを付与して、障害発生時の振る舞いを設定することができます。
 
@@ -498,7 +498,7 @@ $ curl localhost:8080/mpmetrics/count-total
 ```java
     /*
      * micoroprofile-config.properties ファイル内で
-     * oracle.demo.ft.FaultToleranceResource/bulkhead/Bulkhead/value=3
+     * com.example.ft.FaultToleranceResource/bulkhead/Bulkhead/value=3
      * としているので、実際に許容される多重度は 3
      * フォーマット: <クラス名>/<メソッド名>/Bulkhead/value=<値>
      */
@@ -530,9 +530,9 @@ $ curl localhost:8080/mpmetrics/count-total
 テスト用のクライアントも用意しています。
 
 ```bash
-# usage: oracle.demo.ft.FaultToleranceTester -e <GETするURL> <同時呼び出し数>
-$ java -cp ./target/helidon-mp-demo.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/ft/bulkhead 4
-$ java -cp ./target/helidon-mp-demo.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/ft/circuit-breaker 6
+# usage: com.example.ft.FaultToleranceTester -e <GETするURL> <同時呼び出し数>
+$ java -cp ./target/helidon-mp-demo.jar com.example.ft.FaultToleranceTester -e http://localhost:8080/ft/bulkhead 4
+$ java -cp ./target/helidon-mp-demo.jar com.example.ft.FaultToleranceTester -e http://localhost:8080/ft/circuit-breaker 6
 ```
 
 Fault Tolerance のメトリクスも取得できます。
@@ -551,11 +551,11 @@ application_ft_oracle_demo_ft_FaultToleranceResource_circuitBreaker_circuitbreak
 [目次に戻る](#目次)
 <br>
 
-## § Open API (oracle.demo.country パッケージ)
+## § Open API (com.example.country パッケージ)
 
 APIの仕様を定義する規約である Open API に基づいたRESTエンドポイントのメタデータを公開できます。
 特に何もしなくても最低限の仕様情報は自動的に生成できますが、アノテーションを使って付加的な情報を付加することができます。
-`oracle.demo.App`  や `oracle.demo.country.CountryResource` にアノテーションを付加しています。
+`com.example.App`  や `com.example.country.CountryResource` にアノテーションを付加しています。
 
 ```java
     @Operation(summary = "Find country by country code", description = "国コードから国情報を検索します")
@@ -634,7 +634,7 @@ Maven のプロファイル `openapi-ui` を指定してビルドすると OpenA
 [目次に戻る](#目次)
 <br>
 
-## § MicroProfile Rest Client (oracle.demo.restclient パッケージ)
+## § MicroProfile Rest Client (com.example.restclient パッケージ)
 
 MicroProfile では RESTコールを行う「タイプセーフ」なクライアントAPIを規定しています。つまりJavaのメソッドを呼び出すと内部でREST呼び出しを行ってくれます。呼び出しのパラメータも返り値も全てJavaオブジェクトとして扱うことができ、RESTコールに関する手間を省きコーディング・ミスを減らすことができます。
 
@@ -692,7 +692,7 @@ $ curl localhost:8080/restclient/1/reviews
 [目次に戻る](#目次)
 <br>
 
-## § Security (oracle.demo.security パッケージ)
+## § Security (com.example.security パッケージ)
 
 ユーザーに以下のロールがアサインされているとします。
 
@@ -721,7 +721,7 @@ security:
           password: "password3"
 ```
 
-`oracle.demo.security.SecurityResource` クラスでは、メソッドにアノテーションを付与することによってアクセスコントロールしています。
+`com.example.security.SecurityResource` クラスでは、メソッドにアノテーションを付与することによってアクセスコントロールしています。
 
 ```java
     @Authenticated(optional = true) // any one can access
@@ -796,7 +796,7 @@ $ curl -v -u john:password1 localhost:8080/security/basic/admin
 [目次に戻る](#目次)
 <br>
 
-## § JPA (Java Persistence API) デモ (oracle.demo.jpa パッケージ)
+## § JPA (Java Persistence API) デモ (com.example.jpa パッケージ)
 
 Helidon は拡張機能として Java Persistence API (JPA) と Java Transaction API (JTA) をサポートしています。   
 このデモでは
@@ -938,7 +938,7 @@ $ docker rm oracledb
 [目次に戻る](#目次)
 <br>
 
-## § gRPC デモ (oracle.demo.grpc パッケージ)
+## § gRPC デモ (com.example.grpc パッケージ)
 
 Helidon MP はアノテーションを使って簡単に gRPC サーバー&クライアントを実装することができます。  
 4.1 から Virtual Thread を使った新しい実装となりました。また、これに伴い 3.x では別だったポートが REST と同じポートになりました。
@@ -1104,9 +1104,9 @@ java -Dserver.port=50051 -jar target/helidon-mp-demo.jar
 [目次に戻る](#目次)
 <br>
 
-## § MicroProfile Reactive Messaging デモ (oracle.demo.reactive パッケージ)
+## § MicroProfile Reactive Messaging デモ (com.example.reactive パッケージ)
 
-JPA/JDBC経由でデータベースにアクセスするデモ(oracle.demo.jpaパッケージ)のバリエーションとして、[MicroProfile Reactive Messaging](https://download.eclipse.org/microprofile/microprofile-reactive-messaging-2.0/microprofile-reactive-messaging-spec-2.0.html) を使ったデータベースの非同期更新(Event Sourcing)処理を実装しています。RESTでリクエストを受け付けた後、非同期更新イベントを発行します。  
+JPA/JDBC経由でデータベースにアクセスするデモ(com.example.jpaパッケージ)のバリエーションとして、[MicroProfile Reactive Messaging](https://download.eclipse.org/microprofile/microprofile-reactive-messaging-2.0/microprofile-reactive-messaging-spec-2.0.html) を使ったデータベースの非同期更新(Event Sourcing)処理を実装しています。RESTでリクエストを受け付けた後、非同期更新イベントを発行します。  
 
 
 ```bash
@@ -1192,7 +1192,7 @@ curl -v http://localhost:8080/jpa/country/86 # 404 Not Found
 ```
 
 
-## § MicroProfile GraphQL デモ (oracle.demo.graphql パッケージ)
+## § MicroProfile GraphQL デモ (com.example.graphql パッケージ)
 
 JPA経由でデータベースのCRUD操作をRestで公開するコードは既に提供していましたが、これをMicroProfile GraphQL仕様にしたものを追加しました。  
 スキーマは `/graphql/schema.graphql` から取得できます。
@@ -1260,7 +1260,7 @@ curl -X POST -H "Content-Type: application/json" localhost:8080/graphql \
 [目次に戻る](#目次)
 <br>
 
-## § Mapped Diagnostic Context (Mdc) デモ (oracle.demo.logging パッケージ)
+## § Mapped Diagnostic Context (Mdc) デモ (com.example.logging パッケージ)
 
 **注意！ 4.x には実装がありません**
 
@@ -1320,7 +1320,7 @@ ECID は 並行処理される実行ログの中から、リクエスト単位�
 
 ```
 # Fault Tolerance のデモで使った「複数リクエスト同時発射装置」で試してみる
-java -cp ./target/helidon-mp-demo.jar oracle.demo.ft.FaultToleranceTester -e http://localhost:8080/logging/mdc 3
+java -cp ./target/helidon-mp-demo.jar com.example.ft.FaultToleranceTester -e http://localhost:8080/logging/mdc 3
 // ログ出力
 Thread[helidon-4,5,server]{699595b3c0a746ff}: Invoking Sub#get()
 Thread[helidon-4,5,server]{699595b3c0a746ff}: Sub#get() called
@@ -1339,7 +1339,7 @@ Thread[helidon-4,5,server]{699595b3c0a746ff}: Thread ended
 Thread[helidon-4,5,server]{699595b3c0a746ff}: Ended Sub#get()
 ```
 
-### (応用編) ECID による Oracle Database との連携 (oracle.demo.jpa.ecid パッケージ)
+### (応用編) ECID による Oracle Database との連携 (com.example.jpa.ecid パッケージ)
 
 Helidon で設定した Mdc を Oracle Database の Execution Context ID (ECID) として連携してみます。さらに、このデモでは ECID として Open Tracing の Trace ID が利用できる場合はそれを利用するように実装していますので、RESTの最初の入り口から Database の SQL まで end-to-end でトレーシングが可能になります。  
 Oracle Database の JDBCドライバは ECID を受け取るための標準的な方法を提供しています。JDBC クライアントは以下のような形で 実行中のセッションに ECID を設定できます。  
@@ -1381,7 +1381,7 @@ $ curl "http://localhost:8080/ecid/insert?id=9002&name=Test&delay=60"
 Helidon のログには Insert 処理の ECID {a32f6112b8ec0350} が出力されています。
 
 ```
-2021.01.24 03:42:31 INFO oracle.demo.jpa.ecid.EcidExampleResource Thread[helidon-1,5,server]{a32f6112b8ec0350}: Insert (id = 9002, name = Test, delay=60)
+2021.01.24 03:42:31 INFO com.example.jpa.ecid.EcidExampleResource Thread[helidon-1,5,server]{a32f6112b8ec0350}: Insert (id = 9002, name = Test, delay=60)
 ```
 
 では、このオペレーションが完了する前に、v$session で ECID が伝達されているか確認します。
@@ -1414,7 +1414,7 @@ BEGIN DEMO.INSERT_COUNTRY(:1 , :2 , :3 ); END;
 [目次に戻る](#目次)
 <br>
 
-## § Scheduling デモ (oracle.demo.scheduling パッケージ)
+## § Scheduling デモ (com.example.scheduling パッケージ)
 
 @Scheduled または @FixedRate アノテーションを使って、定期実行するタスクをスケジュールできます。
 
@@ -1439,21 +1439,21 @@ BEGIN DEMO.INSERT_COUNTRY(:1 , :2 , :3 ); END;
 
 ```
 ...
-10:00:45 INFO oracle.demo.scheduling.Scheduler Thread[scheduled-2,5,main]: at 15 and 45 seconds
-10:01:00 INFO oracle.demo.scheduling.Scheduler Thread[scheduled-6,5,main]: every 30 seconds
-10:01:11 INFO oracle.demo.scheduling.Scheduler Thread[scheduled-3,5,main]: every 3 minutes with initial delay 2 minutes
-10:01:15 INFO oracle.demo.scheduling.Scheduler Thread[scheduled-7,5,main]: at 15 and 45 seconds
-10:01:30 INFO oracle.demo.scheduling.Scheduler Thread[scheduled-4,5,main]: every 30 seconds
+10:00:45 INFO com.example.scheduling.Scheduler Thread[scheduled-2,5,main]: at 15 and 45 seconds
+10:01:00 INFO com.example.scheduling.Scheduler Thread[scheduled-6,5,main]: every 30 seconds
+10:01:11 INFO com.example.scheduling.Scheduler Thread[scheduled-3,5,main]: every 3 minutes with initial delay 2 minutes
+10:01:15 INFO com.example.scheduling.Scheduler Thread[scheduled-7,5,main]: at 15 and 45 seconds
+10:01:30 INFO com.example.scheduling.Scheduler Thread[scheduled-4,5,main]: every 30 seconds
 ...
 ```
 
-注: ログの出力がうるさいので、ソースのアノテーションをコメントアウトしています(=デフォルトではスケジューリングされていません)。デモする場合は、oracle.demo.scheduling.Scheduer.java のコメントアウトを外して下さい。
+注: ログの出力がうるさいので、ソースのアノテーションをコメントアウトしています(=デフォルトではスケジューリングされていません)。デモする場合は、com.example.scheduling.Scheduer.java のコメントアウトを外して下さい。
 
 
 [目次に戻る](#目次)
 <br>
 
-## § MicroProfile LRA デモ (oracle.demo.lra パッケージ)
+## § MicroProfile LRA デモ (com.example.lra パッケージ)
 
 [MicroProfile LRA (Long Running Actions)](https://projects.eclipse.org/projects/technology.microprofile/releases/lra-1.0) とは、分散環境での一貫性を保証するための手法の1つで、マイクロサービスにおける SAGA pattern（非同期通信、分散ロックなし、補償アクションを使ったリカバリ）を実現する仕様です。
 このデモでは、仕様ドキュメントに記載のある[補償トランザクションのパターン](https://download.eclipse.org/microprofile/microprofile-lra-1.0-M1/images/lra.png)を試します。
@@ -1598,7 +1598,7 @@ INFO LRAService2 : Done.
 INFO LRAMain : http://localhost:8080/lra-service2/serv -> 200 OK
 WARNING io.helidon.microprofile.server.JaxRsCdiExtension Thread[helidon-6,5,server]: Internal server error
 java.lang.RuntimeException
-        at oracle.demo.lra.LRAMain.start(LRAMain.java:66)
+        at com.example.lra.LRAMain.start(LRAMain.java:66)
         ...
 
 SEVERE LRAMain : LRA id: http://localhost:8070/lra-coordinator/2180a5a8-e39c-4123-a187-d5e62729b42d compensated 🚒
@@ -1685,7 +1685,7 @@ LRA トランザクションは非同期に行われ、クライアントの同�
 <br>
 
 
-## § （おまけ）Cowsay (oracle.demo.cowweb パッケージ)
+## § （おまけ）Cowsay (com.example.cowweb パッケージ)
 
 https://github.com/ricksbrown/cowsay
 
