@@ -10,7 +10,7 @@
         <relativePath />
     </parent>
 
-    <groupId>me.opc-helidon</groupId>
+    <groupId>com.example.helidon</groupId>
     <artifactId>helidon-mp-demo</artifactId>
     <version>4.1.6.0</version>
     <name>${project.artifactId}</name>
