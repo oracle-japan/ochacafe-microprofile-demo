@@ -44,16 +44,16 @@ public class HelloWorldService {
 
         private final Logger logger = Logger.getLogger(HelloRequestStreamObserver.class.getName());
 
-        private StreamObserver<HelloReply> reply;
+        private StreamObserver<HelloReply> replyObserver;
 
-        public HelloRequestStreamObserver(StreamObserver<HelloReply> reply){
-            this.reply = reply;
+        public HelloRequestStreamObserver(StreamObserver<HelloReply> replyObserver){
+            this.replyObserver = replyObserver;
         }
 
         @Override
         public void onNext(HelloRequest value) {
             logger.info("onNext(): " + value.getName());
-            reply.onNext(HelloReply.newBuilder().setMessage(value.getName()).build());
+            replyObserver.onNext(HelloReply.newBuilder().setMessage(value.getName()).build());
         }
 
         @Override
@@ -64,7 +64,7 @@ public class HelloWorldService {
         @Override
         public void onCompleted() {
             logger.info("onCompleted()");
-            reply.onCompleted();
+            replyObserver.onCompleted();
         }
         
     }

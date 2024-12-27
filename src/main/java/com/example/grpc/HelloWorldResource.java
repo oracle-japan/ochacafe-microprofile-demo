@@ -49,8 +49,8 @@ public class HelloWorldResource {
             return msg;
 
         }catch (StatusRuntimeException e) {
-            logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-            throw new RuntimeException(e.getMessage(), e); 
+            logger.log(Level.WARNING, "gRPC failed: {0}", e.getStatus());
+            throw new RuntimeException("gRPC failed: " + e.getMessage(), e); 
         }
     }
 
