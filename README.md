@@ -941,7 +941,7 @@ $ docker rm oracledb
 ## § gRPC デモ (com.example.grpc パッケージ)
 
 Helidon MP はアノテーションを使って簡単に gRPC サーバー&クライアントを実装することができます。  
-4.1 から Virtual Thread を使った新しい実装となりました。また、これに伴い 3.x では別だったポートが REST と同じポートになりました。
+4.1 から Virtual Threads を使った新しい実装となりました。また、これに伴い 3.x では別だったポートが REST と同じポートになりました。
 
 ### proto ファイルから必要な Java ソースファイルの生成
 
