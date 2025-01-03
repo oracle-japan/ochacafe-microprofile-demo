@@ -53,7 +53,9 @@ public class HelloWorldService {
         @Override
         public void onNext(HelloRequest value) {
             logger.info("onNext(): " + value.getName());
-            replyObserver.onNext(HelloReply.newBuilder().setMessage(value.getName()).build());
+            // Greeting メッセージにして返信
+            HelloReply reply = HelloReply.newBuilder().setMessage("Hello " + value.getName()).build();
+            replyObserver.onNext(reply);
         }
 
         @Override
@@ -64,6 +66,7 @@ public class HelloWorldService {
         @Override
         public void onCompleted() {
             logger.info("onCompleted()");
+            // クライアントから完了イベントを受け取ったら、サーバも完了イベントを返す
             replyObserver.onCompleted();
         }
         

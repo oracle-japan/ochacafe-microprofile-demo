@@ -65,7 +65,7 @@ class HelloWorldServiceTest {
         request.onNext(HelloRequest.newBuilder().setName("Felix").build());
         request.onCompleted();
 
-        assertArrayEquals(new String[]{"Bob", "Simon", "Felix"}, observer.getMessages());
+        assertArrayEquals(new String[]{"Hello Bob", "Hello Simon", "Hello Felix"}, observer.getMessages());
     }
 
     public class HelloReplyStreamObserver implements StreamObserver<HelloReply>{
